@@ -1,0 +1,155 @@
+{
+  "rules": [
+    {
+      "pattern": "core/.*",
+      "load_rules": [
+        "core/00-engineering-philosophy.md",
+        "core/01-thinking-and-planning.md",
+        "core/02-architecture-and-simplicity.md",
+        "core/05-universal-coding-standards.md",
+        "core/20-ai-agent-engineering-workflow-standard.md"
+      ]
+    },
+    {
+      "pattern": "environment/.*",
+      "load_rules": [
+        "environment/01-local-dev-standards.md",
+        "environment/02-dependency-hygiene.md",
+        "environment/03-ci-cd-pipelines.md",
+        "core/22-project-bootstrap-and-developer-onboarding-standard.md"
+      ]
+    },
+    {
+      "pattern": "legacy/.*",
+      "load_rules": [
+        "legacy/01-safe-refactoring.md",
+        "legacy/02-backward-compatibility.md",
+        "legacy/03-deployment-risk-reduction.md",
+        "core/16-legacy-modernization-and-refactoring-standard.md",
+        "core/17-refactoring-standards-and-safe-migration-workflow.md"
+      ]
+    },
+    {
+      "pattern": "security/.*",
+      "load_rules": [
+        "security/README.md",
+        "security/threat-modeling.md",
+        "core/08-security-engineering-standard.md",
+        "core/09-security-testing-and-threat-modeling.md"
+      ]
+    },
+    {
+      "pattern": "performance/.*",
+      "load_rules": [
+        "performance/README.md",
+        "core/10-performance-engineering-standard.md"
+      ]
+    },
+    {
+      "pattern": "app/Services/.*\\.php|app/Actions/.*\\.php|app/Http/Controllers/.*\\.php",
+      "load_rules": [
+        "core/01-thinking-and-planning.md",
+        "core/05-universal-coding-standards.md",
+        "stacks/php-laravel/php-conventions.md",
+        "stacks/php-laravel/laravel-logic.md",
+        "stacks/php-laravel/laravel-routing.md",
+        "stacks/php-laravel/laravel-engineering-standard.md"
+      ]
+    },
+    {
+      "pattern": "app/Models/.*\\.php|database/migrations/.*\\.php",
+      "load_rules": [
+        "core/03-data-and-api-modeling.md",
+        "core/06-database-engineering-standard.md",
+        "stacks/php-laravel/laravel-data.md"
+      ]
+    },
+    {
+      "pattern": "tests/.*\\.php",
+      "load_rules": [
+        "core/04-testing-philosophy.md",
+        "core/11-testing-engineering-standard.md",
+        "stacks/php-laravel/laravel-testing.md"
+      ]
+    },
+    {
+      "pattern": "lib/.*\\.dart",
+      "load_rules": [
+        "core/01-thinking-and-planning.md",
+        "core/05-universal-coding-standards.md",
+        "core/15-mobile-application-engineering-standard.md",
+        "stacks/dart-flutter/dart-conventions.md",
+        "stacks/dart-flutter/flutter-widgets.md",
+        "stacks/dart-flutter/flutter-dart-engineering-standard.md"
+      ]
+    },
+    {
+      "pattern": "lib/blocs/.*\\.dart|lib/providers/.*\\.dart|lib/state/.*\\.dart",
+      "load_rules": [
+        "stacks/dart-flutter/flutter-state.md",
+        "stacks/dart-flutter/flutter-architecture.md"
+      ]
+    },
+    {
+      "pattern": "test/.*_test\\.dart",
+      "load_rules": [
+        "core/04-testing-philosophy.md",
+        "core/11-testing-engineering-standard.md",
+        "stacks/dart-flutter/flutter-testing.md"
+      ]
+    },
+    {
+      "pattern": "resources/js/.*\\.vue|src/components/.*\\.vue",
+      "load_rules": [
+        "core/05-universal-coding-standards.md",
+        "stacks/js-ts-vue-nuxt/js-ts-conventions.md",
+        "stacks/js-ts-vue-nuxt/vue-components.md",
+        "stacks/js-ts-vue-nuxt/vue-ts-engineering-standard.md"
+      ]
+    },
+    {
+      "pattern": "pages/.*\\.vue|server/api/.*\\.ts",
+      "load_rules": [
+        "core/05-universal-coding-standards.md",
+        "stacks/js-ts-vue-nuxt/nuxt-ssr.md",
+        "stacks/js-ts-vue-nuxt/nuxt-ts-engineering-standard.md"
+      ]
+    },
+    {
+      "pattern": "resources/js/Pages/.*\\.vue",
+      "load_rules": [
+        "bridges/laravel-inertia-vue.md",
+        "bridges/laravel-inertia-vue-engineering-standard.md"
+      ]
+    },
+    {
+      "pattern": ".github/workflows/.*",
+      "load_rules": [
+        "core/13-cicd-and-deployment-standard.md",
+        "core/14-infrastructure-and-devops-standard.md"
+      ]
+    },
+    {
+      "pattern": ".*\\.(jsx|tsx|ts|js)",
+      "load_rules": [
+        "core/05-universal-coding-standards.md",
+        "stacks/react-next/react-conventions.md",
+        "stacks/react-next/react-components.md",
+        "stacks/react-next/react-state-management.md",
+        "stacks/react-next/nextjs-app-router.md",
+        "stacks/react-next/nextjs-api-routes.md",
+        "stacks/react-next/nextjs-performance.md",
+        "stacks/react-next/nextjs-security.md",
+        "stacks/react-next/react-testing.md",
+        "stacks/react-next/accessibility.md"
+      ]
+    },
+    {
+      "pattern": "architecture/.*",
+      "load_rules": [
+        "architecture/README.md",
+        "architecture/adr-guidelines.md"
+      ]
+    }
+  ]
+}

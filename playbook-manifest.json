@@ -1,0 +1,510 @@
+{
+  "manifest_version": "1.0.0",
+  "project_name": "ai-engineering-playbook",
+  "mappings": [
+    {
+      "path": "core/00-engineering-philosophy.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["philosophy", "values", "correctness", "reliability", "trade-offs"],
+      "keywords": ["engineering philosophy", "decision making", "observability", "reliability", "team dynamics"]
+    },
+    {
+      "path": "core/01-thinking-and-planning.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["mindset", "planning", "design", "pseudocode", "workflow"],
+      "keywords": ["thinking loop", "requirements analysis", "edge case matrix", "implementation plan"]
+    },
+    {
+      "path": "core/02-architecture-and-simplicity.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["architecture", "simplicity", "decoupling", "patterns"],
+      "keywords": ["overengineering", "dry pattern", "rule of three", "composition", "inheritance"]
+    },
+    {
+      "path": "core/03-data-and-api-modeling.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["data", "database", "api", "schemas"],
+      "keywords": ["database normalization", "openapi", "payload structure", "rest API design"]
+    },
+    {
+      "path": "core/04-testing-philosophy.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["testing", "tdd", "mocking"],
+      "keywords": ["test pyramid", "unit test", "integration test", "mocks", "stubs", "fakes"]
+    },
+    {
+      "path": "core/05-universal-coding-standards.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["standards", "conventions", "naming", "functions", "readability"],
+      "keywords": ["universal coding standard", "class design", "naming conventions", "defensive programming", "error handling"]
+    },
+    {
+      "path": "core/06-database-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["database", "sql", "modeling", "transactions", "security", "performance"],
+      "keywords": ["database schema design", "indexing strategy", "query optimization", "ACID transactions", "ledger design", "multi-tenancy isolation", "explain plans"]
+    },
+    {
+      "path": "core/07-api-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["api", "rest", "graphql", "webhooks", "security", "contracts"],
+      "keywords": ["api schema design", "rest endpoints", "authentication flow", "rate limiting", "circuit breaker", "webhook signature", "backward compatibility"]
+    },
+    {
+      "path": "core/08-security-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["security", "owasp", "csp", "ssdlc", "secrets", "cryptography"],
+      "keywords": ["security engineering", "threat modeling", "owasp top ten", "content security policy", "secrets management", "dependency scanning", "penetration testing"]
+    },
+    {
+      "path": "core/09-security-testing-and-threat-modeling.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["security", "testing", "threat-modeling", "stride", "penetration-testing", "cvss"],
+      "keywords": ["threat modeling workflow", "penetration testing methodology", "stride categories", "attack surface analysis", "vulnerability exploitation", "cvss risk rating"]
+    },
+    {
+      "path": "core/10-performance-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["performance", "profiling", "caching", "queues", "redis", "observability"],
+      "keywords": ["performance engineering", "profiling applications", "cache strategy", "redis integration", "asynchronous queues", "concurrency locks", "infrastructure scalability"]
+    },
+    {
+      "path": "core/11-testing-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["testing", "pest", "phpunit", "mocking", "ci", "reliability"],
+      "keywords": ["testing engineering", "test pyramid", "mocking strategy", "financial testing", "legacy code coverage", "ci pipeline run", "contract validation"]
+    },
+    {
+      "path": "core/12-git-and-collaboration-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["git", "collaboration", "branching", "commits", "reviews", "releases"],
+      "keywords": ["version control philosophy", "conventional commits", "trunk-based development", "pull request checklist", "code review correctness", "semantic versioning", "git secrets scanner"]
+    },
+    {
+      "path": "core/13-cicd-and-deployment-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["ci-cd", "deployment", "github-actions", "docker", "migrations", "rollbacks"],
+      "keywords": ["continuous integration", "github workflows", "dockerfile best practices", "deployment strategies", "zero downtime deployment", "database rollback", "post deploy monitoring"]
+    },
+    {
+      "path": "core/14-infrastructure-and-devops-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["infrastructure", "devops", "linux", "networking", "nginx", "scaling", "disaster-recovery"],
+      "keywords": ["server management", "linux hardening", "nginx configuration", "ssl tls certificates", "process managers", "container orchestration", "database backups", "observability monitoring"]
+    },
+    {
+      "path": "core/15-mobile-application-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["mobile", "android", "ios", "hybrid", "offline-first", "security"],
+      "keywords": ["app lifecycle states", "secure keychain", "network resilience", "offline synchronization", "in-app purchases validation", "obfuscation dynamic library"]
+    },
+    {
+      "path": "core/16-legacy-modernization-and-refactoring-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["legacy", "refactoring", "modernization", "migrations", "compatibility"],
+      "keywords": ["characterization testing", "staged migrations", "backward compatibility", "pure php modernization", "dependencies upgrade path", "refactoring workflow steps"]
+    },
+    {
+      "path": "core/17-refactoring-standards-and-safe-migration-workflow.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["refactoring", "clean-code", "architecture", "migration-strategies", "overengineering"],
+      "keywords": ["code smells identification", "strangler pattern", "branch by abstraction", "guard clauses nesting", "interfaces usage rules", "performance measurements refactor"]
+    },
+    {
+      "path": "core/18-code-review-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["code-review", "qa", "collaboration", "review-guidelines", "pull-requests"],
+      "keywords": ["reviewer responsibilities", "code quality review", "security review checklist", "performance review benchmarks", "review comment examples", "severity level categories"]
+    },
+    {
+      "path": "core/19-documentation-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["documentation", "developer-experience", "adr", "readme", "comments"],
+      "keywords": ["architecture decision records", "naming as documentation", "api schemas docs", "developer setup markdown", "docs folder structure", "documentation maintenance review"]
+    },
+    {
+      "path": "core/20-ai-agent-engineering-workflow-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["ai", "agents", "workflow", "prompting-standards", "developer-experience"],
+      "keywords": ["context management efficiency", "task classification features", "multi-agent pipelines", "code generation constraint", "obfuscation obfuscate options", "quality gate questions"]
+    },
+    {
+      "path": "core/21-reusable-ai-prompt-template-library.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["ai", "prompt-engineering", "templates-library", "developer-experience", "codex-claude-gemini"],
+      "keywords": ["reusable prompt categories", "prompt design elements", "context variables placeholders", "stack specific prompting", "self critique prompt", "prompt library usage"]
+    },
+    {
+      "path": "core/22-project-bootstrap-and-developer-onboarding-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["bootstrap", "onboarding", "initialization", "developer-experience", "architecture-setup"],
+      "keywords": ["project initialization guidelines", "stack selection grid", "development environment seeding", "onboarding checklists steps", "monorepo considerations mapping", "ai bootstrap rules"]
+    },
+    {
+      "path": "environment/01-local-dev-standards.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["environment", "docker", "setup", "tooling"],
+      "keywords": ["docker compose", "servbay", "runtime isolation", "environment variables"]
+    },
+    {
+      "path": "environment/02-dependency-hygiene.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["dependencies", "composer", "npm", "security"],
+      "keywords": ["version lock", "dependency ranges", "security audits", "package updates"]
+    },
+    {
+      "path": "environment/03-ci-cd-pipelines.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["ci-cd", "github-actions", "linting"],
+      "keywords": ["automated validation", "github workflows", "lint check runner"]
+    },
+    {
+      "path": "legacy/01-safe-refactoring.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["legacy", "refactoring", "modernization"],
+      "keywords": ["strangler pattern", "branch-by-abstraction", "adapter pattern", "spaghetti code"]
+    },
+    {
+      "path": "legacy/02-backward-compatibility.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["legacy", "migrations", "versioning"],
+      "keywords": ["expand and contract", "downtime prevention", "api deprecation"]
+    },
+    {
+      "path": "legacy/03-deployment-risk-reduction.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["deployment", "rollout", "risk"],
+      "keywords": ["rollback strategy", "feature flags", "canary releases", "verification logs"]
+    },
+    {
+      "path": "security/README.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["security", "owasp", "checklist"],
+      "keywords": ["input validation", "authorization", "xss", "csrf", "secrets"]
+    },
+    {
+      "path": "security/threat-modeling.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["security", "threat-modeling", "stride", "audit"],
+      "keywords": ["attacker mindset", "threat mapping", "trust boundaries stride", "abuse cases", "financial threats checklist", "ai threat queries"]
+    },
+    {
+      "path": "performance/README.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["performance", "optimization", "profiling"],
+      "keywords": ["latency", "caching", "db optimization", "queue performance"]
+    },
+    {
+      "path": "stacks/php-laravel/php-conventions.md",
+      "ecosystem": "php-laravel",
+      "tags": ["php", "conventions", "typing"],
+      "keywords": ["strict types", "modern PHP", "match expression", "exception handling"]
+    },
+    {
+      "path": "stacks/php-laravel/laravel-engineering-standard.md",
+      "ecosystem": "php-laravel",
+      "tags": ["laravel", "standards", "architecture", "playbook"],
+      "keywords": ["laravel architecture", "decision matrix", "controller actions", "eloquent optimization", "queues and jobs", "security guidelines"]
+    },
+    {
+      "path": "stacks/php-laravel/laravel-routing.md",
+      "ecosystem": "php-laravel",
+      "tags": ["laravel", "routing", "controller"],
+      "keywords": ["form request", "middleware route", "api controllers"]
+    },
+    {
+      "path": "stacks/php-laravel/laravel-data.md",
+      "ecosystem": "php-laravel",
+      "tags": ["laravel", "eloquent", "database"],
+      "keywords": ["eloquent model", "relation scopes", "database seeders"]
+    },
+    {
+      "path": "stacks/php-laravel/laravel-logic.md",
+      "ecosystem": "php-laravel",
+      "tags": ["laravel", "architecture", "logic"],
+      "keywords": ["service layers", "action class", "event listener", "job dispatch"]
+    },
+    {
+      "path": "stacks/php-laravel/laravel-testing.md",
+      "ecosystem": "php-laravel",
+      "tags": ["laravel", "testing", "pest"],
+      "keywords": ["feature testing", "pest phpunit", "database transactions"]
+    },
+    {
+      "path": "stacks/dart-flutter/dart-conventions.md",
+      "ecosystem": "dart-flutter",
+      "tags": ["dart", "conventions", "linter"],
+      "keywords": ["analysis options", "formatting style", "effective dart"]
+    },
+    {
+      "path": "stacks/dart-flutter/flutter-dart-engineering-standard.md",
+      "ecosystem": "dart-flutter",
+      "tags": ["flutter", "dart", "mobile", "standards", "playbook"],
+      "keywords": ["widget rebuilds", "riverpod bloc state", "go_router navigation", "dio http client", "flutter secure storage", "obfuscation app signing"]
+    },
+    {
+      "path": "stacks/dart-flutter/flutter-widgets.md",
+      "ecosystem": "dart-flutter",
+      "tags": ["flutter", "ui", "widgets"],
+      "keywords": ["build context", "avoid rebuilds", "widget lifecycle"]
+    },
+    {
+      "path": "stacks/dart-flutter/flutter-state.md",
+      "ecosystem": "dart-flutter",
+      "tags": ["flutter", "state-management", "bloc"],
+      "keywords": ["bloc provider", "riverpod providers", "provider state"]
+    },
+    {
+      "path": "stacks/dart-flutter/flutter-architecture.md",
+      "ecosystem": "dart-flutter",
+      "tags": ["flutter", "architecture", "routing"],
+      "keywords": ["clean architecture", "gorouter navigation", "native channels"]
+    },
+    {
+      "path": "stacks/dart-flutter/flutter-testing.md",
+      "ecosystem": "dart-flutter",
+      "tags": ["flutter", "testing", "goldens"],
+      "keywords": ["widget testing", "golden ui", "native mocks"]
+    },
+    {
+      "path": "stacks/js-ts-vue-nuxt/js-ts-conventions.md",
+      "ecosystem": "js-ts-vue-nuxt",
+      "tags": ["javascript", "typescript", "esm"],
+      "keywords": ["modules imports", "types interfaces", "async await boundaries"]
+    },
+    {
+      "path": "stacks/js-ts-vue-nuxt/vue-ts-engineering-standard.md",
+      "ecosystem": "js-ts-vue-nuxt",
+      "tags": ["vue", "typescript", "standards", "playbook"],
+      "keywords": ["vue 3 composition", "typescript strict", "composables state", "pinia store design", "accessibility aria", "frontend security xss"]
+    },
+    {
+      "path": "stacks/js-ts-vue-nuxt/vue-components.md",
+      "ecosystem": "js-ts-vue-nuxt",
+      "tags": ["vue", "conventions", "composition"],
+      "keywords": ["script setup", "reactivity ref", "pinia state stores"]
+    },
+    {
+      "path": "stacks/js-ts-vue-nuxt/nuxt-ssr.md",
+      "ecosystem": "js-ts-vue-nuxt",
+      "tags": ["nuxt", "ssr", "routing"],
+      "keywords": ["ssr hydration", "server routes", "auto imports"]
+    },
+    {
+      "path": "stacks/js-ts-vue-nuxt/nuxt-ts-engineering-standard.md",
+      "ecosystem": "js-ts-vue-nuxt",
+      "tags": ["nuxt", "ssr", "seo", "nitro", "hybrid-rendering"],
+      "keywords": ["nuxt 3 engineering", "ssr hydration mismatch", "data fetching usefetch", "nitro api routes", "seo head meta", "public private runtimeconfig"]
+    },
+    {
+      "path": "bridges/laravel-inertia-vue.md",
+      "ecosystem": "bridge",
+      "tags": ["laravel", "vue", "inertia"],
+      "keywords": ["inertia share", "partial reloads", "csrf token synchronization"]
+    },
+    {
+      "path": "bridges/laravel-inertia-vue-engineering-standard.md",
+      "ecosystem": "bridge",
+      "tags": ["laravel", "vue", "inertia", "standards", "playbook"],
+      "keywords": ["inertia routing", "laravel policies", "vue page props", "inertia forms validation", "partial reloads", "eager loading query"]
+    },
+    {
+      "path": "bridges/laravel-api-flutter.md",
+      "ecosystem": "bridge",
+      "tags": ["laravel", "flutter", "api"],
+      "keywords": ["jwt authentication", "api serializers", "payload mapping"]
+    },
+    {
+      "path": "bridges/cross-origin-sharing.md",
+      "ecosystem": "bridge",
+      "tags": ["security", "cors", "network"],
+      "keywords": ["cors policies", "header rules", "origin whitelist"]
+    },
+    {
+      "path": "design/00-ui-ux-philosophy.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "ux", "philosophy", "product", "human-centered"],
+      "keywords": ["ui ux philosophy", "user experience", "design thinking", "avoid generic ai ui", "user centered design", "information architecture", "interaction design", "honest ui", "content first"]
+    },
+    {
+      "path": "design/01-design-systems.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "tokens", "typography", "spacing", "dark-mode", "design-system"],
+      "keywords": ["design tokens", "css variables", "color tokens", "spacing scale", "typography scale", "dark mode", "design system evaluation", "open props", "material design", "shadcn"]
+    },
+    {
+      "path": "design/02-component-libraries.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "components", "libraries", "tailwind", "vue", "flutter", "bootstrap"],
+      "keywords": ["component library", "evaluate before building", "shadcn ui", "daisyui", "radix ui", "headless ui", "primevue", "vuetify", "naive ui", "element plus", "tailwind components", "custom component rules", "icon library"]
+    },
+    {
+      "path": "design/03-responsive-design.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "responsive", "mobile", "breakpoints", "layout", "touch"],
+      "keywords": ["responsive design", "mobile first", "breakpoints", "container queries", "touch targets", "fluid typography", "clamp", "responsive images", "srcset", "viewport", "media queries"]
+    },
+    {
+      "path": "design/04-accessibility.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "accessibility", "a11y", "wcag", "aria", "keyboard", "screen-reader"],
+      "keywords": ["accessibility", "wcag 2.2", "aria", "semantic html", "keyboard navigation", "focus ring", "color contrast", "screen reader", "alt text", "form labels", "prefers reduced motion", "axe", "nvda", "voiceover"]
+    },
+    {
+      "path": "design/05-visual-quality.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "visual", "typography", "color", "spacing", "animation", "states"],
+      "keywords": ["visual quality", "typography rules", "color palette", "component states", "loading state", "empty state", "error state", "disabled state", "animation quality", "icon sizing", "spacing alignment"]
+    },
+    {
+      "path": "design/06-ui-review-process.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "review", "checklist", "ux", "accessibility", "responsive"],
+      "keywords": ["ui review", "frontend review", "design system review", "accessibility review", "responsive review", "definition of done", "self review protocol", "peer review criteria", "ai agent ui review"]
+    },
+    {
+      "path": "design/07-design-resources.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "resources", "inspiration", "tools", "fonts", "icons", "colors"],
+      "keywords": ["design inspiration", "mobbin", "saasframe", "dribbble", "figma community", "every layout", "open props", "lucide icons", "heroicons", "phosphor icons", "google fonts", "inter font", "coolors", "webaim contrast", "axe devtools"]
+    },
+    {
+      "path": "checklists/04-ui-quality-review.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "checklist", "ui", "ux", "accessibility", "responsive", "performance", "review", "quality"],
+      "keywords": ["ui quality review", "frontend checklist", "ai ui pattern detection", "generic ai ui", "accessibility checklist", "responsive checklist", "component states", "loading state", "empty state", "error state", "design system compliance", "figma handoff", "ui testing tools", "ui definition of done", "frontend review gate", "axe lighthouse playwright storybook"]
+    },
+    {
+      "path": "design/08-product-thinking.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "product", "ux", "user-journey", "user-flow", "persona", "forms", "information-architecture"],
+      "keywords": ["product thinking", "user problem", "pre-implementation declaration", "user persona", "user journey", "entry point", "success path", "failure path", "information architecture", "progressive disclosure", "form design", "data display", "table vs card", "confirmation patterns", "trust patterns", "business logic awareness", "destructive action confirmation", "payment confirmation", "over-design prevention", "user flow mapping"]
+    },
+    {
+      "path": "design/09-design-system-governance.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["design", "governance", "components", "architecture", "tokens", "variants", "theming"],
+      "keywords": ["design system governance", "component hierarchy", "component ownership", "base components", "common components", "feature components", "layout components", "when to create component", "rule of three ui", "component api design", "variant management", "boolean prop explosion", "slots composition", "component documentation", "component promotion", "component deprecation", "component chaos", "parallel component proliferation", "wrapper component", "theming governance", "component decision tree"]
+    },
+    {
+      "path": "core/23-frontend-architecture-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["frontend", "architecture", "standards", "frameworks", "state-management", "data-fetching"],
+      "keywords": ["frontend architecture", "presentation layer", "application logic", "data layer", "shared utilities", "decoupling components", "file organization", "state management", "server state", "data fetching", "api communication", "performance rules", "routing authorization", "forms validation", "vue 3 nuxt", "react nextjs", "flutter dart", "pure javascript", "typescript boundaries", "error handling", "xss sanitization", "accessibility", "frontend review checklist"]
+    },
+    {
+      "path": "core/24-frontend-security-and-privacy-hardening-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["frontend", "security", "privacy", "xss", "csp", "csrf", "cookies", "browser"],
+      "keywords": ["frontend security", "cross site scripting", "xss prevention", "content security policy", "security headers", "csrf protection", "authentication security", "sensitive data handling", "url security", "open redirect", "file upload", "third party scripts", "dependency security", "dom security", "browser storage rules", "error safety", "privacy engineering", "payment security", "performance security", "security review checklist"]
+    },
+    {
+      "path": "core/25-frontend-testing-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["frontend", "testing", "standards", "vitest", "jest", "playwright", "cypress", "unit", "component", "integration", "e2e"],
+      "keywords": ["frontend testing", "test pyramid", "unit tests", "component tests", "integration tests", "end to end tests", "user flow testing", "mocking rules", "api testing", "error state testing", "accessibility testing", "responsive testing", "visual regression testing", "vitest vue", "jest react", "flutter testing", "brittle selectors", "test quality rules", "test review checklist"]
+    },
+    {
+      "path": "core/26-frontend-performance-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["frontend", "performance", "standards", "web-vitals", "lcp", "inp", "cls", "optimization", "loading"],
+      "keywords": ["frontend performance", "core web vitals", "largest contentful paint", "interaction to next paint", "cumulative layout shift", "javascript optimization", "component performance", "image compression", "srcset responsive", "lazy loading policy", "network performance", "caching strategy", "offline resilience", "css transition transform", "font performance", "mobile performance", "third party script performance", "performance review checklist"]
+    },
+    {
+      "path": "core/27-seo-engineering-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["frontend", "seo", "standards", "metadata", "sitemap", "robots", "structured-data", "rendering"],
+      "keywords": ["seo engineering", "search engine optimization", "semantic html layout", "meta title description", "indexing control", "noindex robots", "canonical urls", "sitemaps robots.txt", "structured data schema", "json-ld markup", "open graph metadata", "social card sharing", "javascript seo", "ssr ssg rendering", "nuxt head metadata", "next metadata config", "seo review checklist"]
+    },
+    {
+      "path": "core/28-internationalization-and-localization-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["frontend", "i18n", "l10n", "standards", "globalization", "localization", "formatting", "currencies"],
+      "keywords": ["internationalization", "localization", "translation keys", "right to left languages", "rtl logical properties", "locale formatting date number", "time zones utc", "multi-currency ledger rules", "localized address format", "international phone numbers", "utf8 encoding", "multilingual fonts cjk", "hreflang dynamic metadata", "framework i18n setup", "ai locale defaults", "i18n review checklist"]
+    },
+    {
+      "path": "core/29-observability-and-operational-excellence-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["sre", "observability", "standards", "logging", "monitoring", "tracing", "alerting"],
+      "keywords": ["observability pillars", "json structured logging", "log levels", "sensitive data redaction", "request correlation ids", "health checks liveness readiness", "operational telemetry bounds", "centralized exception reporting sentry", "feature flag lifecycles", "immutable audit logging", "alerting strategy fatigue", "background job monitoring dlq", "framework telemetry configuration", "operational security dashboard", "production readiness checklist"]
+    },
+    {
+      "path": "core/30-deployment-cicd-and-production-readiness-standard.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["devops", "deployment", "cicd", "infrastructure", "readiness", "security", "monitoring"],
+      "keywords": ["deployment philosophy", "ci cd validation checks", "supply chain security sbom", "infrastructure as code iac", "secrets management vault", "containerization user nonroot", "database schema migrations compatibility", "zero downtime rolling update", "rollback paths Feature flag", "backups disaster recovery", "tls https hsts secure cookies", "cache management view routing", "asset cache busting minification", "post deployment health validation", "resource allocation costs", "ai deployment questions", "production readiness checklist"]
+    },
+    {
+      "path": "stacks/react-next/react-conventions.md",
+      "ecosystem": "react-next",
+      "tags": ["react", "conventions", "architecture", "hooks"],
+      "keywords": ["react conventions", "component architecture", "functional components", "rules of hooks", "custom hooks", "folder layout"]
+    },
+    {
+      "path": "stacks/react-next/react-components.md",
+      "ecosystem": "react-next",
+      "tags": ["react", "components", "rendering", "suspense"],
+      "keywords": ["server components", "client components", "use client", "suspense", "html streaming", "layout composition"]
+    },
+    {
+      "path": "stacks/react-next/react-state-management.md",
+      "ecosystem": "react-next",
+      "tags": ["react", "state-management", "query", "zustand"],
+      "keywords": ["local state", "global state", "react context", "tanstack query", "zustand", "redux toolkit"]
+    },
+    {
+      "path": "stacks/react-next/nextjs-app-router.md",
+      "ecosystem": "react-next",
+      "tags": ["nextjs", "routing", "app-router"],
+      "keywords": ["app router", "file conventions", "dynamic routes", "parallel routes", "intercepting routes"]
+    },
+    {
+      "path": "stacks/react-next/nextjs-api-routes.md",
+      "ecosystem": "react-next",
+      "tags": ["nextjs", "api", "server-actions"],
+      "keywords": ["route handlers", "http methods", "server actions", "use server", "input validation"]
+    },
+    {
+      "path": "stacks/react-next/nextjs-performance.md",
+      "ecosystem": "react-next",
+      "tags": ["nextjs", "performance", "optimization"],
+      "keywords": ["nextjs caching", "memoization", "image optimization", "next image", "generateMetadata", "seo alternates"]
+    },
+    {
+      "path": "stacks/react-next/nextjs-security.md",
+      "ecosystem": "react-next",
+      "tags": ["nextjs", "security", "hardening"],
+      "keywords": ["xess dangerouslySetInnerHTML", "pii leakage", "server action validation", "csrf action security", "public env prefix"]
+    },
+    {
+      "path": "stacks/react-next/react-testing.md",
+      "ecosystem": "react-next",
+      "tags": ["react", "testing", "rtl"],
+      "keywords": ["react testing library", "user event simulation", "mock service worker", "renderHook async"]
+    },
+    {
+      "path": "stacks/react-next/accessibility.md",
+      "ecosystem": "react-next",
+      "tags": ["react", "accessibility", "a11y"],
+      "keywords": ["semantic html", "dynamic aria states", "focus trap management", "headless primitives radix"]
+    },
+    {
+      "path": "architecture/README.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["architecture", "adr", "decisions"],
+      "keywords": ["architecture decision records", "system design intent", "onboarding workflow"]
+    },
+    {
+      "path": "architecture/adr-template.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["architecture", "template", "adr"],
+      "keywords": ["adr template blueprint", "design trade-offs", "rollback path"]
+    },
+    {
+      "path": "architecture/adr-guidelines.md",
+      "ecosystem": "cross-cutting",
+      "tags": ["architecture", "rules", "adr"],
+      "keywords": ["adr creation guidelines", "design boundaries", "system configuration changes"]
+    }
+  ]
+}

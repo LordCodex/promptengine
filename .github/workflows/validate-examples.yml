@@ -1,0 +1,56 @@
+name: Validate Examples
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate-php:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Verify PHP Syntax
+        run: |
+          find examples/php-laravel-sandbox/app -name "*.php" -print0 | xargs -0 -n 1 -P 4 php -l
+
+  validate-javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Lint Vue Code
+        run: |
+          # Verify JS file layouts under example
+          npx -y eslint --ext .vue,.ts examples/js-vue-sandbox/src/ --no-eslintrc
+
+  validate-dart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Analyze Dart Code
+        run: |
+          cd examples/dart-flutter-sandbox
+          # Standard dart analyze run
+          dart analyze
