@@ -40,18 +40,15 @@ go install github.com/LordCodex/promptengine/cmd/promptengine@latest
 
 ---
 
-## 4. Homebrew (macOS / Linux)
+## Unsupported: Homebrew
 
-If you are using Homebrew, install via our tap:
+No Homebrew tap is included in the v1.0 release. Use the macOS/Linux installer script or `go install` instead.
 
-```bash
-brew tap LordCodex/promptengine
-brew install promptengine
-```
+The supported installation methods are listed above.
 
 ---
 
-## 5. Shell Autocompletions Setup
+## 4. Shell Autocompletions Setup
 
 To configure shell completion support, run the helper script:
 

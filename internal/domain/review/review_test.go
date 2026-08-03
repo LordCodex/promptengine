@@ -3,6 +3,7 @@ package review
 import (
 	"testing"
 
+	"github.com/LordCodex/promptengine/internal/domain/quality"
 	"github.com/LordCodex/promptengine/internal/filesystem"
 )
 
@@ -36,8 +37,8 @@ func TestRegistry_CleanProject_NoBlockFindings(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	for _, f := range session.Findings {
-		if f.Severity == "block" {
-			t.Errorf("unexpected block finding on clean project: %s", f.Message)
+		if f.Severity == quality.SeverityCritical {
+			t.Errorf("unexpected block finding on clean project: %s", f.Title)
 		}
 	}
 }
@@ -65,7 +66,7 @@ type alwaysFindingRule struct{ parent *pluginReviewer }
 func (r *alwaysFindingRule) Name() string { return "plugin-rule" }
 func (r *alwaysFindingRule) Evaluate(_ filesystem.FileSystem, _ string) ([]Finding, error) {
 	r.parent.fired = true
-	return []Finding{{Category: "custom", Severity: "suggestion", Message: "plugin finding"}}, nil
+	return []Finding{{Category: "custom", Severity: quality.SeveritySuggestion, Title: "plugin finding"}}, nil
 }
 
 func (p *pluginReviewer) Type() ReviewType    { return ReviewType("custom") }
@@ -92,14 +93,14 @@ func TestRegistry_PluginReviewer(t *testing.T) {
 
 func TestSession_CountBySeverity(t *testing.T) {
 	session := &ReviewSession{Summary: make(map[ReviewType]int)}
-	session.Add(Finding{Severity: "block"})
-	session.Add(Finding{Severity: "block"})
-	session.Add(Finding{Severity: "suggestion"})
+	session.Add(Finding{Severity: quality.SeverityCritical})
+	session.Add(Finding{Severity: quality.SeverityCritical})
+	session.Add(Finding{Severity: quality.SeveritySuggestion})
 
-	if session.CountBySeverity("block") != 2 {
-		t.Errorf("expected 2 block findings, got %d", session.CountBySeverity("block"))
+	if session.CountBySeverity(string(quality.SeverityCritical)) != 2 {
+		t.Errorf("expected 2 block findings, got %d", session.CountBySeverity(string(quality.SeverityCritical)))
 	}
-	if session.CountBySeverity("suggestion") != 1 {
-		t.Errorf("expected 1 suggestion finding, got %d", session.CountBySeverity("suggestion"))
+	if session.CountBySeverity(string(quality.SeveritySuggestion)) != 1 {
+		t.Errorf("expected 1 suggestion finding, got %d", session.CountBySeverity(string(quality.SeveritySuggestion)))
 	}
 }

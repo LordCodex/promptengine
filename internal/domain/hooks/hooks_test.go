@@ -1,9 +1,11 @@
 package hooks
 
 import (
+	"context"
 	"strings"
 	"testing"
 
+	"github.com/LordCodex/promptengine/internal/eventbus"
 	"github.com/LordCodex/promptengine/internal/filesystem"
 )
 
@@ -74,5 +76,44 @@ func TestRegistry_InstallAll(t *testing.T) {
 	}
 	if len(reg.ListHooks()) != 2 {
 		t.Errorf("expected 2 hooks registered, got %d", len(reg.ListHooks()))
+	}
+}
+
+type mockEventHook struct {
+	id     string
+	event  eventbus.EventType
+	called bool
+}
+
+func (m *mockEventHook) ID() string                { return m.id }
+func (m *mockEventHook) Event() eventbus.EventType { return m.event }
+func (m *mockEventHook) Handle(ctx context.Context, e eventbus.Event) error {
+	m.called = true
+	return nil
+}
+
+func TestRegistry_EventHookDispatchAndAttach(t *testing.T) {
+	fs := filesystem.NewMockFileSystem()
+	reg := NewRegistry(fs)
+	hook := &mockEventHook{id: "context-hook", event: eventbus.ContextBuilt}
+	reg.RegisterEventHook(hook)
+	if err := reg.Dispatch(context.Background(), eventbus.Event{Type: eventbus.ContextBuilt}); err != nil {
+		t.Fatalf("dispatch failed: %v", err)
+	}
+	if !hook.called {
+		t.Fatal("expected hook dispatch")
+	}
+	hook.called = false
+	bus := eventbus.NewEventBus()
+	reg.Attach(bus)
+	bus.Publish(eventbus.Event{Type: eventbus.ContextBuilt})
+	if !hook.called {
+		t.Fatal("expected attached hook to run")
+	}
+	lateHook := &mockEventHook{id: "late-hook", event: eventbus.PluginInstalled}
+	reg.RegisterEventHook(lateHook)
+	bus.Publish(eventbus.Event{Type: eventbus.PluginInstalled})
+	if !lateHook.called {
+		t.Fatal("expected hook registered after attach to run")
 	}
 }

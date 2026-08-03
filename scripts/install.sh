@@ -40,7 +40,7 @@ VERSION=${LATEST_TAG#v}
 echo "Installing $BINARY_NAME $LATEST_TAG for $OS-$ARCH..."
 
 # Build download url
-DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$LATEST_TAG/${BINARY_NAME}_${OS}_${ARCH}.tar.gz"
+DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$LATEST_TAG/${BINARY_NAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
 TEMP_DIR=$(mktemp -d)
 
 clean_up() {

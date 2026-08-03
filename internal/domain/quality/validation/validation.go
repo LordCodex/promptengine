@@ -73,7 +73,7 @@ func (v *projectConfigValidator) ID() string       { return "project-config" }
 func (v *projectConfigValidator) Category() string { return "configuration" }
 func (v *projectConfigValidator) Validate(fs filesystem.FileSystem) ([]quality.Finding, error) {
 	var findings []quality.Finding
-	if !fs.Exists("playbook-manifest.json") {
+	if !quality.CheckManifestExists(fs) {
 		findings = append(findings, quality.Finding{
 			Engine:         "validation",
 			Rule:           v.ID(),
@@ -93,7 +93,7 @@ func (v *promptEngineConfigValidator) ID() string       { return "promptengine-c
 func (v *promptEngineConfigValidator) Category() string { return "configuration" }
 func (v *promptEngineConfigValidator) Validate(fs filesystem.FileSystem) ([]quality.Finding, error) {
 	var findings []quality.Finding
-	if !fs.Exists(".promptengine") {
+	if !quality.CheckConfigExists(fs) {
 		findings = append(findings, quality.Finding{
 			Engine:         "validation",
 			Rule:           v.ID(),
@@ -112,20 +112,16 @@ type manifestValidator struct{}
 func (v *manifestValidator) ID() string       { return "manifest-schema" }
 func (v *manifestValidator) Category() string { return "integrity" }
 func (v *manifestValidator) Validate(fs filesystem.FileSystem) ([]quality.Finding, error) {
-	if !fs.Exists("playbook-manifest.json") {
+	if !quality.CheckManifestExists(fs) {
 		return nil, nil // covered by project-config
 	}
-	data, err := fs.ReadFile("playbook-manifest.json")
-	if err != nil {
-		return nil, err
-	}
-	if len(data) < 2 { // must be at least "{}"
+	if !quality.CheckManifestNonEmpty(fs) {
 		return []quality.Finding{{
 			Engine:         "validation",
 			Rule:           v.ID(),
 			Category:       v.Category(),
 			Severity:       quality.SeverityError,
-			Title:          "playbook-manifest.json is empty",
+			Title:          "playbook-manifest.json is empty or invalid",
 			Recommendation: "Restore or regenerate the manifest.",
 		}}, nil
 	}
@@ -138,23 +134,17 @@ func (v *documentationValidator) ID() string       { return "documentation-compl
 func (v *documentationValidator) Category() string { return "documentation" }
 func (v *documentationValidator) Validate(fs filesystem.FileSystem) ([]quality.Finding, error) {
 	var findings []quality.Finding
-	required := []string{
-		"docs/Architecture.md",
-		"docs/Database.md",
-		"docs/API.md",
-	}
-	for _, path := range required {
-		if !fs.Exists(path) {
-			findings = append(findings, quality.Finding{
-				Engine:         "validation",
-				Rule:           v.ID(),
-				Category:       v.Category(),
-				Severity:       quality.SeverityWarning,
-				Title:          fmt.Sprintf("Missing core document: %s", path),
-				Recommendation: fmt.Sprintf("Run 'promptengine generate' to create %s.", path),
-				FilePath:       path,
-			})
-		}
+	missing := quality.CheckCoreDocsComplete(fs)
+	for _, path := range missing {
+		findings = append(findings, quality.Finding{
+			Engine:         "validation",
+			Rule:           v.ID(),
+			Category:       v.Category(),
+			Severity:       quality.SeverityWarning,
+			Title:          fmt.Sprintf("Missing core document: %s", path),
+			Recommendation: fmt.Sprintf("Run 'promptengine generate' to create %s.", path),
+			FilePath:       path,
+		})
 	}
 	return findings, nil
 }

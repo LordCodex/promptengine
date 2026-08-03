@@ -82,7 +82,7 @@ func (s *PostconditionStage) Run(ctx context.Context, fs filesystem.FileSystem, 
 		if !fs.Exists(rd) {
 			return fmt.Errorf("postcondition check failed: documentation file %s was not updated", rd)
 		}
-		
+
 		// If exists, verify it isn't empty
 		data, err := fs.ReadFile(rd)
 		if err != nil || len(data) == 0 {
@@ -122,4 +122,13 @@ func stringsContains(s, sub string) bool {
 		}
 	}
 	return false
+}
+
+func StageHandler(stage PipelineStage, fs filesystem.FileSystem) StepHandler {
+	return StepHandlerFunc(func(ctx context.Context, step WorkflowStep, flow *FlowContext) (interface{}, error) {
+		if err := stage.Run(ctx, fs, flow); err != nil {
+			return nil, err
+		}
+		return map[string]string{"stage": stage.Name(), "status": "completed"}, nil
+	})
 }

@@ -6,14 +6,16 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
 // Telemetry holds diagnostic usage details (fully anonymous, disabled by default)
 type Telemetry struct {
-	Enabled bool   `json:"enabled"`
+	Enabled     bool   `json:"enabled"`
 	UserConsent bool   `json:"user_consent"`
 	Endpoint    string `json:"endpoint"`
+	wg          sync.WaitGroup
 }
 
 type Event struct {
@@ -43,8 +45,11 @@ func (t *Telemetry) Track(event Event) {
 
 	event.Timestamp = time.Now().UTC().Format(time.RFC3339)
 
+	t.wg.Add(1)
 	// Send non-blocking payload
 	go func() {
+		defer t.wg.Done()
+
 		data, err := json.Marshal(event)
 		if err != nil {
 			return
@@ -63,6 +68,11 @@ func (t *Telemetry) Track(event Event) {
 			_ = resp.Body.Close()
 		}
 	}()
+}
+
+// Flush blocks until all pending telemetry requests are completed.
+func (t *Telemetry) Flush() {
+	t.wg.Wait()
 }
 
 // SetConsent registers user tracking preferences

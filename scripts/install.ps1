@@ -31,7 +31,7 @@ if (-not (Test-Path $InstallDir)) {
 }
 
 # Build download url
-$DownloadUrl = "https://github.com/$Owner/$Repo/releases/download/$LatestTag/${BinaryName}_windows_${Arch}.zip"
+$DownloadUrl = "https://github.com/$Owner/$Repo/releases/download/$LatestTag/${BinaryName}_${Version}_windows_${Arch}.zip"
 $TempZip = Join-Path $env:TEMP "${BinaryName}_windows.zip"
 $TempDir = Join-Path $env:TEMP "${BinaryName}_extracted"
 

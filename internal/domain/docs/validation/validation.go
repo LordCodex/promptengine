@@ -2,28 +2,25 @@ package validation
 
 import (
 	"fmt"
+	"path/filepath"
+	"regexp"
 	"strings"
 
+	"github.com/LordCodex/promptengine/internal/domain/quality"
 	"github.com/LordCodex/promptengine/internal/filesystem"
 )
 
 // FindingSeverity classifies validation findings
-type FindingSeverity string
+type FindingSeverity = quality.Severity
 
 const (
-	SeverityError   FindingSeverity = "error"
-	SeverityWarning FindingSeverity = "warning"
-	SeverityInfo    FindingSeverity = "info"
+	SeverityError   FindingSeverity = quality.SeverityError
+	SeverityWarning FindingSeverity = quality.SeverityWarning
+	SeverityInfo    FindingSeverity = quality.SeverityInfo
 )
 
 // ValidationFinding is one actionable finding from a validation rule
-type ValidationFinding struct {
-	Rule        string
-	DocPath     string
-	Severity    FindingSeverity
-	Message     string
-	Suggestion  string
-}
+type ValidationFinding = quality.Finding
 
 // ValidationRule is the interface all validation rules must implement
 type ValidationRule interface {
@@ -62,11 +59,12 @@ func (v *Validator) Validate(fs filesystem.FileSystem, docPath string) ([]Valida
 
 	if !fs.Exists(docPath) {
 		return []ValidationFinding{{
-			Rule:       "missing-document",
-			DocPath:    docPath,
-			Severity:   SeverityError,
-			Message:    fmt.Sprintf("document '%s' does not exist", docPath),
-			Suggestion: fmt.Sprintf("run 'promptengine generate' to create the missing document at %s", docPath),
+			Engine:         "docs-validation",
+			Rule:           "missing-document",
+			FilePath:       docPath,
+			Severity:       SeverityError,
+			Title:          fmt.Sprintf("document '%s' does not exist", docPath),
+			Recommendation: fmt.Sprintf("run 'promptengine generate' to create the missing document at %s", docPath),
 		}}, nil
 	}
 
@@ -92,11 +90,12 @@ func (r *missingSectionsRule) Name() string { return "missing-sections" }
 func (r *missingSectionsRule) Run(_ filesystem.FileSystem, docPath string, content string) []ValidationFinding {
 	if !strings.Contains(content, "# ") {
 		return []ValidationFinding{{
-			Rule:       r.Name(),
-			DocPath:    docPath,
-			Severity:   SeverityError,
-			Message:    "document contains no headings",
-			Suggestion: "ensure the document has at least one top-level heading (# Heading)",
+			Engine:         "docs-validation",
+			Rule:           r.Name(),
+			FilePath:       docPath,
+			Severity:       SeverityError,
+			Title:          "document contains no headings",
+			Recommendation: "ensure the document has at least one top-level heading (# Heading)",
 		}}
 	}
 	return nil
@@ -113,11 +112,12 @@ func (r *staleDocumentRule) Run(_ filesystem.FileSystem, docPath string, content
 	for _, phrase := range stalePhrases {
 		if strings.Contains(content, phrase) {
 			return []ValidationFinding{{
-				Rule:       r.Name(),
-				DocPath:    docPath,
-				Severity:   SeverityWarning,
-				Message:    fmt.Sprintf("document contains stale placeholder text ('%s')", phrase),
-				Suggestion: "complete the document section or remove placeholder text",
+				Engine:         "docs-validation",
+				Rule:           r.Name(),
+				FilePath:       docPath,
+				Severity:       SeverityWarning,
+				Title:          fmt.Sprintf("document contains stale placeholder text ('%s')", phrase),
+				Recommendation: "complete the document section or remove placeholder text",
 			}}
 		}
 	}
@@ -130,29 +130,47 @@ type brokenReferencesRule struct{}
 func (r *brokenReferencesRule) Name() string { return "broken-references" }
 func (r *brokenReferencesRule) Run(fs filesystem.FileSystem, docPath string, content string) []ValidationFinding {
 	var findings []ValidationFinding
+	linkPattern := regexp.MustCompile(`\[[^\]]+\]\(([^)]+)\)`)
 	lines := strings.Split(content, "\n")
 	for _, line := range lines {
-		// Simple markdown link detection: [text](path)
-		for _, part := range strings.Split(line, "](") {
-			if !strings.Contains(part, ")") {
+		for _, match := range linkPattern.FindAllStringSubmatch(line, -1) {
+			href := strings.TrimSpace(match[1])
+			if href == "" || strings.HasPrefix(href, "http") || strings.HasPrefix(href, "#") || strings.HasPrefix(href, "mailto:") {
 				continue
 			}
-			href := strings.SplitN(part, ")", 2)[0]
-			if strings.HasPrefix(href, "http") || strings.HasPrefix(href, "#") {
+			if strings.HasPrefix(href, "file://") {
+				href = strings.TrimPrefix(href, "file://")
+			}
+			href = strings.SplitN(href, "#", 2)[0]
+			if href == "" {
 				continue
 			}
-			if !fs.Exists(href) {
+			candidates := []string{href}
+			if !filepath.IsAbs(href) {
+				candidates = append(candidates, filepath.Clean(filepath.Join(filepath.Dir(docPath), href)))
+			}
+			if !existsAny(fs, candidates) {
 				findings = append(findings, ValidationFinding{
-					Rule:       r.Name(),
-					DocPath:    docPath,
-					Severity:   SeverityWarning,
-					Message:    fmt.Sprintf("broken reference to '%s'", href),
-					Suggestion: fmt.Sprintf("update or remove the link to '%s'", href),
+					Engine:         "docs-validation",
+					Rule:           r.Name(),
+					FilePath:       docPath,
+					Severity:       SeverityWarning,
+					Title:          fmt.Sprintf("broken reference to '%s'", href),
+					Recommendation: fmt.Sprintf("update or remove the link to '%s'", href),
 				})
 			}
 		}
 	}
 	return findings
+}
+
+func existsAny(fs filesystem.FileSystem, paths []string) bool {
+	for _, path := range paths {
+		if fs.Exists(path) {
+			return true
+		}
+	}
+	return false
 }
 
 // duplicateContentRule flags duplicate top-level headings within a document
@@ -170,11 +188,12 @@ func (r *duplicateContentRule) Run(_ filesystem.FileSystem, docPath string, cont
 	for heading, count := range headings {
 		if count > 1 {
 			findings = append(findings, ValidationFinding{
-				Rule:       r.Name(),
-				DocPath:    docPath,
-				Severity:   SeverityWarning,
-				Message:    fmt.Sprintf("duplicate heading '%s' appears %d times", heading, count),
-				Suggestion: "merge duplicate sections or rename headings",
+				Engine:         "docs-validation",
+				Rule:           r.Name(),
+				FilePath:       docPath,
+				Severity:       SeverityWarning,
+				Title:          fmt.Sprintf("duplicate heading '%s' appears %d times", heading, count),
+				Recommendation: "merge duplicate sections or rename headings",
 			})
 		}
 	}
@@ -182,20 +201,18 @@ func (r *duplicateContentRule) Run(_ filesystem.FileSystem, docPath string, cont
 }
 
 // orphanedDocumentRule detects documents not referenced by any manifest entry
-// (In the current implementation this emits an advisory — future versions will cross-reference the manifest)
 type orphanedDocumentRule struct{}
 
 func (r *orphanedDocumentRule) Name() string { return "orphaned-document" }
 func (r *orphanedDocumentRule) Run(fs filesystem.FileSystem, docPath string, content string) []ValidationFinding {
-	// Advisory only — checking against the manifest requires a registry reference
-	// which is wired in by the calling engine. This rule emits info-level.
 	if len(content) < 50 {
 		return []ValidationFinding{{
-			Rule:       r.Name(),
-			DocPath:    docPath,
-			Severity:   SeverityInfo,
-			Message:    "document is very short and may be orphaned or empty",
-			Suggestion: "verify this document is referenced from the manifest and has substantive content",
+			Engine:         "docs-validation",
+			Rule:           r.Name(),
+			FilePath:       docPath,
+			Severity:       SeverityInfo,
+			Title:          "document is very short and may be orphaned or empty",
+			Recommendation: "verify this document is referenced from the manifest and has substantive content",
 		}}
 	}
 	return nil

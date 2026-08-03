@@ -1,57 +1,101 @@
 package context
 
-// BudgetType represents available token capacity constraints
+import "github.com/LordCodex/promptengine/internal/domain/discovery"
+
 type BudgetType string
 
 const (
-	BudgetTiny      BudgetType = "tiny"      // ~1,000 tokens (5,000 bytes limit)
-	BudgetSmall     BudgetType = "small"     // ~4,000 tokens (20,000 bytes limit)
-	BudgetMedium    BudgetType = "medium"    // ~20,000 tokens (100,000 bytes limit)
-	BudgetLarge     BudgetType = "large"     // ~100,000 tokens (500,000 bytes limit)
-	BudgetUnlimited BudgetType = "unlimited" // no limits
+	BudgetTiny      BudgetType = "tiny"
+	BudgetSmall     BudgetType = "small"
+	BudgetMedium    BudgetType = "medium"
+	BudgetLarge     BudgetType = "large"
+	BudgetUnlimited BudgetType = "unlimited"
 )
 
-// DocumentItem represents a spec or playbook candidate
+type ContextSourceType string
+
+const (
+	ContextFile          ContextSourceType = "file"
+	ContextDocumentation ContextSourceType = "documentation"
+	ContextManifestEntry ContextSourceType = "manifest_entry"
+	ContextStandard      ContextSourceType = "standard"
+	ContextWorkflow      ContextSourceType = "workflow"
+	ContextTemplate      ContextSourceType = "template"
+)
+
+type ContextRequest struct {
+	TaskType           TaskType                `json:"task_type"`
+	WorkflowType       string                  `json:"workflow_type,omitempty"`
+	Project            *discovery.ProjectModel `json:"project,omitempty"`
+	TechnologyStack    []string                `json:"technology_stack,omitempty"`
+	UserIntent         string                  `json:"user_intent,omitempty"`
+	RequestedOperation string                  `json:"requested_operation,omitempty"`
+	AffectedFiles      []string                `json:"affected_files,omitempty"`
+	MaxBytes           int                     `json:"max_bytes,omitempty"`
+	Budget             BudgetType              `json:"budget,omitempty"`
+	Metadata           map[string]string       `json:"metadata,omitempty"`
+}
+
+type ContextItem struct {
+	Path           string            `json:"path"`
+	Type           ContextSourceType `json:"type"`
+	RelevanceScore float64           `json:"relevance_score"`
+	Reason         string            `json:"reason_selected"`
+	Size           int               `json:"size"`
+	Content        string            `json:"-"`
+	Summary        string            `json:"summary,omitempty"`
+	Truncated      bool              `json:"truncated"`
+}
+
 type DocumentItem struct {
 	Path        string  `json:"path"`
-	Category    string  `json:"category"` // "business_rules", "architecture", "workflow", "stack", "generic"
+	Category    string  `json:"category"`
 	Content     string  `json:"-"`
-	Size        int     `json:"size"` // in bytes
+	Size        int     `json:"size"`
 	Score       float64 `json:"score"`
 	Explanation string  `json:"explanation"`
 }
 
-// OptimizationSummary provides metadata diagnostics
 type OptimizationSummary struct {
-	InitialCount   int     `json:"initial_count"`
-	FinalCount     int     `json:"final_count"`
-	InitialSize    int     `json:"initial_size"`
-	FinalSize      int     `json:"final_size"`
-	DroppedFiles   []string `json:"dropped_files"`
-	BudgetLimit    int     `json:"budget_limit"`
-	Deduplicated   bool    `json:"deduplicated"`
+	InitialCount int      `json:"initial_count"`
+	FinalCount   int      `json:"final_count"`
+	InitialSize  int      `json:"initial_size"`
+	FinalSize    int      `json:"final_size"`
+	DroppedFiles []string `json:"dropped_files"`
+	BudgetLimit  int      `json:"budget_limit"`
+	Deduplicated bool     `json:"deduplicated"`
+	CacheHit     bool     `json:"cache_hit"`
 }
 
-// ContextPackage is the complete payload delivered to prompt formatters
 type ContextPackage struct {
-	TaskType     string              `json:"task_type"`
-	BudgetType   BudgetType          `json:"budget_type"`
-	SystemPrompt string              `json:"system_prompt"`
-	Documents    []DocumentItem      `json:"documents"`
-	Explanations map[string]string   `json:"explanations"` // filepath -> explanation logs
-	Summary      OptimizationSummary `json:"optimization_summary"`
+	TaskType          string              `json:"task_type"`
+	WorkflowType      string              `json:"workflow_type,omitempty"`
+	BudgetType        BudgetType          `json:"budget_type"`
+	SystemPrompt      string              `json:"system_prompt"`
+	Items             []ContextItem       `json:"items"`
+	Documents         []DocumentItem      `json:"documents"`
+	SelectedFiles     []string            `json:"selected_files"`
+	SelectedDocs      []string            `json:"selected_documents"`
+	RelevantStandards []string            `json:"relevant_standards"`
+	RelatedPlaybooks  []string            `json:"related_playbooks"`
+	ProjectMetadata   map[string]string   `json:"project_metadata,omitempty"`
+	Reasoning         []string            `json:"reasoning"`
+	Explanations      map[string]string   `json:"explanations"`
+	Summary           OptimizationSummary `json:"optimization_summary"`
 }
 
 func NewContextPackage(task string, budget BudgetType) *ContextPackage {
 	return &ContextPackage{
-		TaskType:     task,
-		BudgetType:   budget,
-		Documents:    make([]DocumentItem, 0),
-		Explanations: make(map[string]string),
+		TaskType:        task,
+		BudgetType:      budget,
+		Items:           []ContextItem{},
+		Documents:       []DocumentItem{},
+		ProjectMetadata: map[string]string{},
+		Reasoning:       []string{},
+		Explanations:    map[string]string{},
 	}
 }
 
-// GetBudgetLimit returns the byte limit mapping the token capacity
 func GetBudgetLimit(b BudgetType) int {
 	switch b {
 	case BudgetTiny:

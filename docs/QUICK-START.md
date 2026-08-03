@@ -12,10 +12,17 @@ Run the `init` command at the root of your project:
 promptengine init
 ```
 
-This bootstraps:
-- `.promptengine/` configuration directory
-- `playbook-manifest.json` constitution file
-- `docs/` templates (scaffolds: `Architecture.md`, `Database.md`, `API.md`, `Decisions.md`)
+This creates the project configuration and manifest. To create project documentation, run:
+
+```bash
+promptengine docs generate --doc architecture --overwrite
+```
+
+Agent instruction files can be created during initialization:
+
+```bash
+promptengine init --agents codex,claude,cursor,windsurf
+```
 
 ---
 

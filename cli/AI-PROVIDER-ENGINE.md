@@ -7,7 +7,7 @@ The AI Provider Engine serves as the exclusive communication gateway between Pro
 ## 1. Capability System
 
 Instead of hardcoding provider mappings, each provider defines a map of active `Capability` flags:
-- **`CapStreaming`**: Supports real-time text segments rendering.
+- **`CapStreaming`**: Providers must advertise this only when `Stream` delivers provider-native incremental output.
 - **`CapToolCalling`**: Supports external function routing integrations (git, filesystem audits).
 - **`CapStructuredOutput`**: Supports returning strict JSON mapping schemas.
 - **`CapLongContext`**: Handles token windows greater than 100k.

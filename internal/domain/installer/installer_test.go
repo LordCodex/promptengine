@@ -43,6 +43,26 @@ func TestLocalInstaller_InstallAndUninstall(t *testing.T) {
 	}
 }
 
+func TestLocalInstaller_EnableDisableUpgrade(t *testing.T) {
+	fs := filesystem.NewMockFileSystem()
+	fs.WriteFile("plugin.json", []byte("{}"), 0644)
+	installer := NewLocalInstaller(fs, ".promptengine/plugins")
+	manifest := PackageManifest{ID: "company", Version: "1.0.0", Files: []string{"plugin.json"}}
+	if _, err := installer.Install(manifest); err != nil {
+		t.Fatalf("install failed: %v", err)
+	}
+	if err := installer.Enable("company"); err != nil {
+		t.Fatalf("enable failed: %v", err)
+	}
+	if err := installer.Disable("company"); err != nil {
+		t.Fatalf("disable failed: %v", err)
+	}
+	manifest.Version = "2.0.0"
+	if _, err := installer.Upgrade(manifest); err != nil {
+		t.Fatalf("upgrade failed: %v", err)
+	}
+}
+
 func TestLocalInstaller_MissingSourceFile(t *testing.T) {
 	fs := filesystem.NewMockFileSystem()
 	inst := NewLocalInstaller(fs, ".promptengine/plugins")

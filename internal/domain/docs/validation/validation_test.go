@@ -81,7 +81,59 @@ func TestValidator_CleanDocument(t *testing.T) {
 	findings, _ := v.Validate(fs, "docs/Clean.md")
 	for _, f := range findings {
 		if f.Severity == SeverityError {
-			t.Errorf("did not expect error-level finding on clean document: %s", f.Message)
+			t.Errorf("did not expect error-level finding on clean document: %s", f.Title)
+		}
+	}
+}
+
+func TestValidator_MarkdownLinksOnlyAndRelativePaths(t *testing.T) {
+	fs := filesystem.NewMockFileSystem()
+	_ = fs.WriteFile("docs/Guide.md", []byte("# Guide\n\nThis prose has [brackets] and (parentheses) but is not a link.\n\nSee [Architecture](Architecture.md).\n"), 0644)
+	_ = fs.WriteFile("docs/Architecture.md", []byte("# Architecture\n"), 0644)
+
+	v := NewValidator()
+	findings, err := v.Validate(fs, "docs/Guide.md")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for _, finding := range findings {
+		if finding.Rule == "broken-references" {
+			t.Fatalf("did not expect broken reference false positive: %#v", finding)
+		}
+	}
+}
+
+func TestValidator_BrokenMarkdownLink(t *testing.T) {
+	fs := filesystem.NewMockFileSystem()
+	_ = fs.WriteFile("docs/Guide.md", []byte("# Guide\n\nSee [Missing](Missing.md).\n"), 0644)
+	v := NewValidator()
+	findings, err := v.Validate(fs, "docs/Guide.md")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	found := false
+	for _, finding := range findings {
+		if finding.Rule == "broken-references" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected broken markdown link finding")
+	}
+}
+
+func TestValidator_LocalFileURILinks(t *testing.T) {
+	fs := filesystem.NewMockFileSystem()
+	_ = fs.WriteFile("docs/Guide.md", []byte("# Guide\n\nSee [Source](file:///repo/internal/app/root.go).\n"), 0644)
+	_ = fs.WriteFile("/repo/internal/app/root.go", []byte("package app"), 0644)
+	v := NewValidator()
+	findings, err := v.Validate(fs, "docs/Guide.md")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for _, finding := range findings {
+		if finding.Rule == "broken-references" {
+			t.Fatalf("did not expect local file URI to be broken: %#v", finding)
 		}
 	}
 }
@@ -91,7 +143,7 @@ type customRule struct{}
 
 func (r *customRule) Name() string { return "custom-rule" }
 func (r *customRule) Run(_ filesystem.FileSystem, path string, content string) []ValidationFinding {
-	return []ValidationFinding{{Rule: r.Name(), DocPath: path, Severity: SeverityInfo, Message: "custom check passed"}}
+	return []ValidationFinding{{Rule: r.Name(), FilePath: path, Severity: SeverityInfo, Title: "custom check passed"}}
 }
 
 func TestValidator_PluginRule(t *testing.T) {
