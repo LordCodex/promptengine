@@ -218,7 +218,7 @@ Before completing public-facing frontend work, verify against this SEO checklist
 ---
 
 ## References
-- Frontend Architecture: [core/23-frontend-architecture-standard.md](core/23-frontend-architecture-standard.md)
-- Frontend Performance: [core/26-frontend-performance-engineering-standard.md](core/26-frontend-performance-engineering-standard.md)
+- Frontend Architecture: [core/23-frontend-architecture-standard.md](23-frontend-architecture-standard.md)
+- Frontend Performance: [core/26-frontend-performance-engineering-standard.md](26-frontend-performance-engineering-standard.md)
 - Schema.org markup references: [https://schema.org](https://schema.org)
 - Google Search Console guidelines: [https://search.google.com/search-console/about](https://search.google.com/search-console/about)

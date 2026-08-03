@@ -47,4 +47,4 @@ When contributing code examples:
 
 ## Link Validity & Coherence
 
-Ensure that all cross-references use relative file links (e.g. `[thinking.md](../core/01-thinking-and-planning.md)`). Do not use absolute host links (such as github.com or gitlab.com) for internal file paths, as these links break when read by offline local agents.
+Ensure that all cross-references use relative file links (e.g. `[thinking.md](core/01-thinking-and-planning.md)`). Do not use absolute host links (such as github.com or gitlab.com) for internal file paths, as these links break when read by offline local agents.

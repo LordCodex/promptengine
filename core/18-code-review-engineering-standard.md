@@ -210,6 +210,6 @@ Use this checklist to evaluate a pull request before granting approval.
 ---
 
 ## References
-- Safe Refactoring Workflow: [core/16-legacy-modernization-and-refactoring-standard.md](core/16-legacy-modernization-and-refactoring-standard.md)
+- Safe Refactoring Workflow: [core/16-legacy-modernization-and-refactoring-standard.md](16-legacy-modernization-and-refactoring-standard.md)
 - Testing & CI Integrations: [core/11-testing-engineering-standard.md](11-testing-engineering-standard.md)
 - Conventional Commit Rules: [core/12-git-and-collaboration-standard.md](12-git-and-collaboration-standard.md)

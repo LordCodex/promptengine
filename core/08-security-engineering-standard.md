@@ -15,8 +15,14 @@ last_reviewed: 2026-08-01
 
 # Security Engineering Standard
 
-## Purpose & Inheritance
-This document defines the core standards for securing applications, networks, and databases. It inherits from and extends the [Universal Coding Standards](05-universal-coding-standards.md), the [Architecture Standards](02-architecture-and-simplicity.md), the [Database Engineering Standard](06-database-engineering-standard.md), and the [API Engineering Standard](07-api-engineering-standard.md). It outlines strict security rules across development frameworks (PHP/Laravel, Vue/Nuxt, Dart/Flutter), browser client environments, and API gateway configurations.
+## Playbook Metadata
+- **Purpose**: Defines core standards for application security, network hygiene, database safety, session config, secrets, file uploads, and browser protections.
+- **Scope**: Cross-platform development layers (backend APIs, frontend web apps, mobile clients).
+- **When to Read**: Whenever implementing authentication, data access controls, payment APIs, file uploads, or configuring headers/cookies.
+- **Related Playbooks**: [Universal Coding Standards](05-universal-coding-standards.md), [Threat Modeling & Security Testing](09-security-testing-and-threat-modeling.md), [Frontend Security Standard](24-frontend-security-and-privacy-hardening-standard.md).
+- **Canonical Source**: This is the canonical document for all application security guidelines.
+- **Version**: 1.1.0
+- **Last Reviewed**: 2026-08-03
 
 ---
 

@@ -18,17 +18,26 @@ last_reviewed: 2026-08-01
 
 # Legacy Code Modernisation and Safe Refactoring Standard
 
-## Purpose & Inheritance
-This document defines the core standards for analyzing, modifying, and upgrading legacy codebases. It inherits from and extends the [Universal Coding Standards](05-universal-coding-standards.md), the [Architecture Standards](02-architecture-and-simplicity.md), the [Database Engineering Standard](06-database-engineering-standard.md), the [Security Engineering Standard](08-security-engineering-standard.md), and the [Testing Engineering Standard](11-testing-engineering-standard.md). It establishes strict refactoring protocols for human developers and AI modernization agents.
+## Playbook Metadata
+- **Purpose**: Establishes standards for code smell identification, refactoring workflows, and architectural migration patterns (Strangler, Branch-by-Abstraction) for legacy codebase upgrades.
+- **Scope**: Code refactoring, code review, framework upgrades, database schema expansions, and legacy system modernization.
+- **When to Read**: Before performing any refactoring, migrating architectural blocks, correcting code smells, or upgrading language/framework versions.
+- **Related Playbooks**: [Universal Coding Standards](05-universal-coding-standards.md), [Architecture Standards](02-architecture-and-simplicity.md), [Database Engineering Standard](06-database-engineering-standard.md), [Testing Standard](11-testing-engineering-standard.md).
+- **Canonical Source**: This is the canonical document for Legacy Code Modernization and Refactoring standards.
+- **Version**: 1.1.0
+- **Last Reviewed**: 2026-08-03
 
 ---
 
-## 1. Legacy Engineering Philosophy
+## 1. Legacy Engineering & Refactoring Philosophy
 
 Legacy code is not "bad code"; it is **working code that generates business value but carries operational risk**.
+- **Refactoring Definition**: Refactoring is the process of improving the internal structure of code without altering its external behavior.
 - **Value Over Cleanliness**: Legacy systems have users, execute business logic, and store valuable data. Do not refactor code just because its syntax is outdated.
 - **Reject the Green-Field Rewrite Trap**: Avoid complete, top-down rewrites. Rewrites are high-risk, expensive, and often fail because they ignore the edge cases and business rules embedded in the legacy codebase.
-- **Continuous, Incremental Modernization**: Refactor code systematically. Improve the codebase structure incrementally as you touch files to implement new features or fix bugs (the "Boy Scout Rule").
+- **Incremental Modernization**: Refactor code systematically using the "Boy Scout Rule" (leave the codebase cleaner than you found it).
+- **Behavior Preservation**: Refactoring must not introduce new features or fix unrelated bugs in the same commit. External inputs, validation logic, error envelopes, and outputs must remain identical.
+- **Complexity Reduction**: Clean code is code that is easy to read and cheap to change. If a refactoring change increases code complexity or requires developers to learn new custom abstractions, the refactoring has failed.
 
 ---
 
@@ -58,7 +67,48 @@ Before refactoring, run a localized audit of the target module using these crite
 
 ---
 
-## 4. Characterization Testing Safety Nets
+## 4. Code Smell Identification & Resolution
+
+### Large Classes / Large Functions
+- **Large Classes**: Classes exceeding 300 lines of code, or multiple public methods handling unrelated responsibilities. Resolve by extracting focused, single-responsibility classes. Move business rules to Actions and third-party integrations to Services.
+- **Large Functions**: Methods containing multiple nested blocks, long sequential steps, and complex calculations. Resolve by applying the "Extract Method" pattern. Keep methods under 30 lines.
+
+### Duplicate Code
+- **Refactor when**: Duplicate code contains core business calculations (like tax rates, interest formulas, or permission authorizations).
+- **Acceptable duplication**: Duplicating simple visual formatting rules or minor layout properties is acceptable if merging them introduces complex, over-parameterized helper functions.
+
+### Deep Nesting (Guard Clauses)
+- **Symptoms**: Deeply nested logic statements ($>3$ indentation levels).
+- **Resolution**: Enforce Guard Clauses (early returns) to exit functions early if requirements fail. This flattens control structures:
+
+```typescript
+// Bad: Deeply nested conditions
+function processPayment(invoice) {
+    if (invoice !== null) {
+        if (invoice.status === 'pending') {
+            if (invoice.amount_cents > 0) {
+                executePayment(invoice);
+            }
+        }
+    }
+}
+
+// Good: Flattened control structure using Guard Clauses
+function processPayment(invoice) {
+    if (!invoice) return;
+    if (invoice.status !== 'pending') return;
+    if (invoice.amount_cents <= 0) return;
+
+    executePayment(invoice);
+}
+```
+
+### Poor Naming
+- **Naming Principles**: Variable, method, and class names must be intention-revealing (e.g. `isSubscriptionExpired` instead of `checkExp`). Use names that match the business domain language. Avoid abbreviations (`inv` should be `invoice`).
+
+---
+
+## 5. Characterization Testing Safety Nets
 
 A **Characterization Test** asserts the *actual current behavior* of a legacy module (including its bugs), establishing a safety baseline before you modify the code.
 
@@ -73,7 +123,7 @@ Define Inputs ──> Execute Legacy Logic ──> Capture Actual Output ──>
 
 ---
 
-## 5. Safe Refactoring Workflow
+## 6. Safe Refactoring Workflow
 
 We enforce a strict seven-step workflow for modifying legacy code:
 
@@ -93,7 +143,7 @@ We enforce a strict seven-step workflow for modifying legacy code:
 
 ---
 
-## 6. Code Modernization Areas
+## 7. Code Modernization Areas
 
 ### Architecture & Boundaries
 - **Introduce Dependency Injection**: Replace hardcoded class initializations with Dependency Injection (DI) containers.
@@ -109,7 +159,7 @@ We enforce a strict seven-step workflow for modifying legacy code:
 
 ---
 
-## 7. Modernizing Legacy PHP & Laravel Systems
+## 8. Modernizing Legacy PHP & Laravel Systems
 
 ### Legacy Pure PHP (No Framework)
 - **Gradually Introduce Autoloading**: Replace manual `require` or `include` calls with Composer PSR-4 autoloading.
@@ -132,16 +182,49 @@ We enforce a strict seven-step workflow for modifying legacy code:
 
 ---
 
-## 8. Modernizing Legacy Frontend Client Systems
+## 9. Modernizing Legacy Frontend Client Systems (Vue/Nuxt)
 
 When upgrading legacy Vue/Nuxt files:
-- **Break Up God Components**: Extract nested sub-templates and repeated loops into smaller, stateless visual components.
-- **Extract Stateful Composables**: Move logic, state variables, and API request calls from script setup blocks into reusable Composables (`composables/useDomain.ts`).
+- **Break Up God Components**: Extract nested sub-templates and repeated loops into smaller, stateless visual components. UI components must only manage presentation layout.
+- **Extract Stateful Composables**: Move logic, state variables, and HTTP client calls from script setup blocks into reusable Composables (`composables/useDomain.ts`).
 - **Clean Up Shared Global State**: Replace dynamic, untracked global variables with structured Pinia store models.
+- **Avoid Wrapper Component Bloat**: Do not create custom components that merely wrap standard HTML tags without adding new behaviors or styles.
 
 ---
 
-## 9. Backward Compatibility Safeguards
+## 10. Modernizing Legacy Mobile Client Systems (Flutter)
+
+When upgrading legacy Flutter files:
+- **Decompose Widget Trees**: Extract large widget layouts into small, focused stateless widgets. Ensure child components compile with `const` constructors to prevent unnecessary redraw cycles.
+- **Extract Controller Logic**: Move state management, validation logic, and repository calls out of widget files and into dedicated Riverpod providers or Bloc controllers.
+- **Enforce Repository Boundary**: Widgets and view state controllers must never interact directly with database files or API client configurations. Route all data requests through Repository interfaces.
+
+---
+
+## 11. Architectural Migration Strategies
+
+### 1. The Strangler Pattern
+- **Concept**: Gradually replace legacy system components with modern implementations, route by route.
+- **When to Use**: Upgrading legacy monolith systems to modular monoliths or distributed architectures.
+- **Execution**: Route incoming traffic to the new implementation at the load balancer, proxy, or gateway routing layer, leaving the legacy code intact for un-migrated paths.
+
+### 2. Branch By Abstraction
+- **Concept**: Replace an internal code dependency dynamically using abstraction wrappers.
+- **When to Use**: Swapping core backend systems (e.g. replacing a legacy PDF builder or changing SMS gateways).
+- **Execution**:
+  1. Define an Interface abstraction wrapper around the target component.
+  2. Modify the codebase to consume this Interface.
+  3. Build the new component implementation matching this Interface.
+  4. Swap the active class binding in the dependency injector container.
+
+### 3. Feature Flags
+- **Concept**: Toggle runtime execution paths dynamically using configuration flags.
+- **When to Use**: Releasing high-risk refactored code safely to production.
+- **Execution**: Run the refactored logic for a small percentage of users (canary release), and monitor error rates before rolling out the change to all users.
+
+---
+
+## 12. Backward Compatibility Safeguards
 
 Modernizing code must not break downstream API consumers or mobile clients.
 - **Preserve API Response Contracts**: Ensure that refactored API routes return identical JSON keys and data types. Use API Resource wrappers to maintain response structures.
@@ -149,14 +232,82 @@ Modernizing code must not break downstream API consumers or mobile clients.
 
 ---
 
-## 10. Security & Performance Verification
+## 13. Security & Performance Verification
 
 - **Maintain Authorization Policies**: When refactoring routing layers or controllers, verify that permission gates and middleware policies remain active. Do not bypass policy validations.
 - **Benchmark Performance**: Run latency and CPU benchmarks before and after refactoring. Ensure that new abstractions have not introduced performance regressions (like N+1 queries).
 
 ---
 
-## 11. Decision Matrices
+## 14. Concurrency Safety in Legacy Systems
+
+Legacy applications often have hidden concurrency bugs because they were originally written for single-server deployments. Modernization must address these systematically.
+
+### Principles
+- Assume **thousands of concurrent requests** and **multiple application servers** running simultaneously at all times.
+- Never rely on local filesystem state for correctness of business logic — filesystem locks prevent duplicate execution on a **single server only**. Correctness must come from database constraints, transactions, atomic updates, or idempotency keys.
+- Prefer **idempotent operations** — running the same operation twice must produce the same result.
+
+### Transaction Rules
+- Use database transactions for all multi-query operations. If any query in a sequence fails, the entire operation must roll back.
+- Keep transactions **as short as possible**. Do not perform slow operations (HTTP calls, file writes, queue dispatches) inside a database transaction.
+- Never hold locks longer than necessary. Acquire the lock, read and write the data, then commit and release immediately.
+- Do not perform external HTTP requests, email sends, or queue dispatches while holding a database lock.
+
+### Race Condition Prevention
+- Never check then act on a value without first acquiring a lock:
+  ```sql
+  -- Correct: Lock before reading
+  SELECT balance FROM wallets WHERE id = ? FOR UPDATE;
+  ```
+- Two simultaneous requests must never both pass the same balance check, inventory availability check, or booking availability check.
+- Use atomic database operations (`UPDATE wallets SET balance = balance - ? WHERE balance >= ?`) where supported.
+
+### Scheduled Job Safety
+- Background and scheduled jobs must:
+  - Use non-blocking overlap protection (database flag or lock) to prevent two instances running simultaneously.
+  - Perform **bounded work per run** (process a limited number of rows, then exit).
+  - Log summaries without sensitive payloads.
+  - Return a non-zero exit code on failure.
+  - Be registered in the existing scheduler — do not require a separate, undocumented scheduling mechanism.
+
+---
+
+## 15. Avoiding Overengineering
+
+We value simplicity. Do not introduce:
+- **Patterns Without Problems**: Do not apply design patterns (like Command Query Responsibility Segregation or Repository patterns) unless the codebase has structural problems that require them.
+- **Extra Layers Without Need**: Do not insert intermediate service boundaries between simple CRUD controllers and Eloquent models.
+- **Microservices Unnecessarily**: Keep applications structured as Monoliths or Modular Monoliths until deployment scale demands distributed services.
+
+---
+
+## 16. Legacy Refactoring Review Checklist
+
+Use this checklist during code review to evaluate legacy code modifications.
+
+### Discovery & Safety
+- [ ] Has the module's business intent and integration dependencies been documented?
+- [ ] Have characterization tests been written to establish a behavior baseline?
+- [ ] Does the codebase pass all tests after the refactor?
+
+### Architecture & Quality
+- [ ] Have large files ($>100\text{ lines}$) or deeply nested code blocks (indentation level $>3$) been simplified?
+- [ ] Are business logic calculations separated from controllers and templates?
+- [ ] Has dependency injection been used instead of hardcoded class initializations?
+
+### Database & Compatibility
+- [ ] Are schema upgrades backward-compatible (no direct column drops or modifications)?
+- [ ] Have API response contracts been preserved (no changes to JSON key keys or data types)?
+
+### Security & Performance
+- [ ] Are input validation and authorization policies active in the refactored code?
+- [ ] Has performance benchmarking verified that no latency regressions have been introduced?
+- [ ] Have all hardcoded credentials or API keys been removed from the code?
+
+---
+
+## 17. Decision Matrices
 
 Use these matrices to identify the correct refactoring decision based on project context.
 
@@ -172,27 +323,9 @@ Use these matrices to identify the correct refactoring decision based on project
 | Calculations used across multiple features (e.g. tax calculators) | **Extract Service** | Centralizes updates; enforces DRY (Don't Repeat Yourself). |
 | Page-specific visual formatting, one-off state conversions | **Keep Inline** | Avoids overengineering; keeps simple logic easy to read. |
 
-### Matrix 3: Upgrade Framework/Language Now vs. Delay
-| Context | Choice | Rationale |
-| :--- | :--- | :--- |
-| Current version has reached End-of-Life (EOL), contains CVE security issues | **Upgrade Now** | Critical security requirement. |
-| Stable version with minor features updates, team is in active shipping | **Delay** | Schedule upgrade during a dedicated maintenance window. |
-
-### Matrix 4: Replace Dependency vs. Keep Existing Package
-| Context | Choice | Rationale |
-| :--- | :--- | :--- |
-| Library is unmaintained, incompatible with modern language updates | **Replace** | Prevents system compilation failures during future upgrades. |
-| Stable, matching current language version, has minor styling limitations | **Keep Existing** | Avoids the risk of introducing runtime integration bugs. |
-
-### Matrix 5: Fix Bug vs. Preserve Legacy Behaviour
-| Context | Choice | Rationale |
-| :--- | :--- | :--- |
-| Legacy bug causes data corruption, security leaks, or loss | **Fix Bug** | Critical correctness requirement; override legacy behavior. |
-| Bug is a known visual layout issue that users have adapted to | **Preserve / Document** | Schedule the fix as a documented feature change to prevent user confusion. |
-
 ---
 
-## 12. AI Modernization Rules
+## 18. AI Modernization Rules
 
 AI agents modernizing or refactoring code in this repository must follow these rules:
 
@@ -204,73 +337,8 @@ AI agents modernizing or refactoring code in this repository must follow these r
 
 ---
 
-## 13. Legacy Refactoring Review Checklist
-
-Use this checklist during code review to evaluate legacy code modifications.
-
-### Discovery & Safety
-- [ ] Has the module's business intent and integration dependencies been documented?
-- [ ] Have characterization tests been written to establish a behavior baseline?
-- [ ] Does the codebase pass all tests after the refactor?
-
-### Architecture & Quality
-- [ ] Have large files ($>100\text{ lines}$) or deeply nested code blocks been simplified?
-- [ ] Are business logic calculations separated from controllers and templates?
-- [ ] Has dependency injection been used instead of hardcoded class initializations?
-
-### Database & Compatibility
-- [ ] Are schema upgrades backward-compatible (no direct column drops or modifications)?
-- [ ] Have API response contracts been preserved (no changes to JSON key keys or data types)?
-
-### Security & Performance
-- [ ] Are input validation and authorization policies active in the refactored code?
-- [ ] Has performance benchmarking verified that no latency regressions have been introduced?
-- [ ] Have all hardcoded credentials or API keys been removed from the code?
-
----
-
-## 14. Concurrency Safety in Legacy Systems
-
-Legacy applications often have hidden concurrency bugs because they were originally written for single-server deployments. Modernization must address these systematically.
-
-### Principles
-- Assume **thousands of concurrent requests** and **multiple application servers** running simultaneously at all times.
-- Never rely on local filesystem state for correctness of business logic \u2014 filesystem locks prevent duplicate execution on a **single server only**. Correctness must come from database constraints, transactions, atomic updates, or idempotency keys.
-- Prefer **idempotent operations** \u2014 running the same operation twice must produce the same result.
-
-### Transaction Rules
-- Use database transactions for all multi-query operations. If any query in a sequence fails, the entire operation must roll back.
-- Keep transactions **as short as possible**. Do not perform slow operations (HTTP calls, file writes, queue dispatches) inside a database transaction.
-- Never hold locks longer than necessary. Acquire the lock, read and write the data, then commit and release immediately.
-- Do not perform external HTTP requests, email sends, or queue dispatches while holding a database lock.
-
-### Race Condition Prevention
-- Never check then act on a value without first acquiring a lock:
-  ```sql
-  -- Correct: Lock before reading
-  SELECT balance FROM wallets WHERE id = ? FOR UPDATE;
-  
-  -- Wrong: Read then lock (race window between the two queries)
-  SELECT balance FROM wallets WHERE id = ?;
-  -- ... time passes, another request modifies the row ...
-  UPDATE wallets SET balance = ? WHERE id = ?;
-  ```
-- Two simultaneous requests must never both pass the same balance check, inventory availability check, or booking availability check.
-- Use atomic database operations (`UPDATE wallets SET balance = balance - ? WHERE balance >= ?`) where supported.
-
-### Scheduled Job Safety
-- Background and scheduled jobs must:
-  - Use non-blocking overlap protection (database flag or lock) to prevent two instances running simultaneously.
-  - Perform **bounded work per run** (process a limited number of rows, then exit).
-  - Log summaries without sensitive payloads.
-  - Return a non-zero exit code on failure.
-  - Be registered in the existing scheduler \u2014 do not require a separate, undocumented scheduling mechanism.
-
----
-
 ## References
 - Universal Naming Rules: [core/05-universal-coding-standards.md](05-universal-coding-standards.md)
 - Safe Database Migrations: [core/06-database-engineering-standard.md](06-database-engineering-standard.md)
 - QA Test Verification: [core/11-testing-engineering-standard.md](11-testing-engineering-standard.md)
 - Rollback Deployment: [core/13-cicd-and-deployment-standard.md](13-cicd-and-deployment-standard.md)
-

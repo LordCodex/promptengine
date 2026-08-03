@@ -8,7 +8,14 @@ last_reviewed: 2026-08-01
 
 # Universal Coding Standards
 
-This document defines the universal coding standards for all codebases. Framework-specific guides (PHP, Laravel, Dart, Vue, etc.) extend this document and inherit its principles.
+## Playbook Metadata
+- **Purpose**: Establishes universal coding standards for naming, function lengths, error boundaries, data structure isolation, and code review criteria.
+- **Scope**: All codebases, languages, and frameworks.
+- **When to Read**: Enforced constantly during all coding tasks. Every language/framework conventions file inherits from this standard.
+- **Related Playbooks**: [Thinking and Planning Before Coding](01-thinking-and-planning.md), [Database Engineering Standard](06-database-engineering-standard.md), [API Engineering Standard](07-api-engineering-standard.md).
+- **Canonical Source**: This is the canonical source for naming conventions, general coding style limits, and universal design patterns.
+- **Version**: 1.1.0
+- **Last Reviewed**: 2026-08-03
 
 ---
 

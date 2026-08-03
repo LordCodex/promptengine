@@ -17,8 +17,14 @@ last_reviewed: 2026-08-01
 
 # Performance Engineering Standard
 
-## Purpose & Inheritance
-This document defines the core standards for profiling, measuring, and optimizing software performance. It inherits from and extends the [Universal Coding Standards](05-universal-coding-standards.md), the [Architecture Standards](02-architecture-and-simplicity.md), the [Database Engineering Standard](06-database-engineering-standard.md), and the [API Engineering Standard](07-api-engineering-standard.md). It outlines practical guidelines for resource utilization across backend frameworks (PHP/Laravel), frontends (Vue/Nuxt), mobile applications (Flutter/Dart), and server infrastructure.
+## Playbook Metadata
+- **Purpose**: Defines core standards for system profiling, memory management, database index optimizations, Redis caching schemas, background queues, and concurrent process scheduling.
+- **Scope**: Backend web servers, database indexes, state cache layers, frontend components, and mobile execution paths.
+- **When to Read**: Whenever conducting profiling, writing SQL migrations, adding cache layers (Redis), designing background jobs, or optimizing frontend widgets.
+- **Related Playbooks**: [Universal Coding Standards](05-universal-coding-standards.md), [Database Engineering Standard](06-database-engineering-standard.md), [Frontend Performance Standard](26-frontend-performance-engineering-standard.md).
+- **Canonical Source**: This is the canonical document for all performance engineering guidelines.
+- **Version**: 1.1.0
+- **Last Reviewed**: 2026-08-03
 
 ---
 

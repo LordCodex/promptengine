@@ -206,7 +206,7 @@ Verify the frontend work against this testing checklist before shipping:
 
 ## References
 - Testing Philosophy: [core/04-testing-philosophy.md](04-testing-philosophy.md)
-- Frontend Architecture: [core/23-frontend-architecture-standard.md](core/23-frontend-architecture-standard.md)
-- Frontend Security: [core/24-frontend-security-and-privacy-hardening-standard.md](core/24-frontend-security-and-privacy-hardening-standard.md)
+- Frontend Architecture: [core/23-frontend-architecture-standard.md](23-frontend-architecture-standard.md)
+- Frontend Security: [core/24-frontend-security-and-privacy-hardening-standard.md](24-frontend-security-and-privacy-hardening-standard.md)
 - Playwright: [https://playwright.dev](https://playwright.dev)
 - MSW (Mock Service Worker): [https://mswjs.io](https://mswjs.io)

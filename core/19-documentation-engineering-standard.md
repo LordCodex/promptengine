@@ -226,5 +226,5 @@ Before completing software work, verify the documentation against this checklist
 ## References
 - Universal Naming Rules: [core/05-universal-coding-standards.md](05-universal-coding-standards.md)
 - Secure Database Schemas: [core/06-database-engineering-standard.md](06-database-engineering-standard.md)
-- Git atomic commit conventions: [core/12-git-and-collaboration-standard.md](core/12-git-and-collaboration-standard.md)
+- Git atomic commit conventions: [core/12-git-and-collaboration-standard.md](12-git-and-collaboration-standard.md)
 - Design system decisions log: [design/07-design-resources.md](../design/07-design-resources.md)

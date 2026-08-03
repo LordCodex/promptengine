@@ -20,8 +20,14 @@ last_reviewed: 2026-08-01
 
 # CI/CD and Deployment Engineering Standard
 
-## Purpose & Inheritance
-This document defines the core standards for continuous integration pipelines, container build configurations, deployment strategies, configuration management, and rollback procedures. It inherits from and extends the [Universal Coding Standards](05-universal-coding-standards.md), the [Architecture Standards](02-architecture-and-simplicity.md), and all preceding core engineering documents. It establishes strict deployment rules for human developers and AI coding agents.
+## Playbook Metadata
+- **Purpose**: Defines standard continuous integration checks, container configurations, deployment patterns, configuration management, and rollback rules.
+- **Scope**: Production environments, cloud hosting, CI pipelines, Docker container execution, and IaC settings.
+- **When to Read**: When writing CI workflows, creating Dockerfiles, deploying updates, configuring env variables, or writing database migrations.
+- **Related Playbooks**: [Universal Coding Standards](05-universal-coding-standards.md), [Database Engineering Standard](06-database-engineering-standard.md), [Git & Collaboration Standard](12-git-and-collaboration-standard.md), [Observability Standard](29-observability-and-operational-excellence-standard.md).
+- **Canonical Source**: This is the canonical document for CI/CD, Containerization, deployments, and IaC.
+- **Version**: 1.1.0
+- **Last Reviewed**: 2026-08-03
 
 ---
 
@@ -92,6 +98,17 @@ We use GitHub Actions as our primary CI/CD runner.
   ```
 - **Job Concurrency Control**: Cancel in-progress pipelines when a developer pushes new commits to the same PR branch to save runner resources.
 
+### CI/CD Quality Gates & Supply Chain Security
+Every commit pipeline must execute validation checks and fail fast on quality gate errors:
+- **Linting & Formatting**: Enforce strict syntax formatting and type checks.
+- **Configuration Validation**: Verify environment variable structures against schemas before build execution.
+- **Security Scanners**: Scan codebases for hardcoded credentials (e.g. TruffleHog) and vulnerability exposures.
+- **Supply Chain Security**:
+  - Run automated dependency audits against security advisories (`npm audit`, `composer audit`).
+  - Verify dependency integrity checksums (`package-lock.json`, `composer.lock`) before installs.
+  - Maintain a Software Bill of Materials (SBOM) where appropriate.
+  - Sign build artifacts and restrict runner credentials to the minimum permission scope.
+
 ---
 
 ## 5. Docker & Container Best Practices
@@ -136,8 +153,10 @@ CMD ["php-fpm"]
 
 ### Docker Directives
 - **Enforce Non-Root Users**: Never run container entrypoints as `root` in production. Always declare a low-privilege `USER` in the Dockerfile.
-- **Pin Base Images**: Enforce explicit version tags on base images (e.g., `php:8.3-fpm-alpine`). Never build from the `latest` tag.
+- **Pin Base Images**: Enforce explicit version tags on base images (e.g., `php:8.3-fpm-alpine`). Never build from the `latest` tag. Prefer Alpine or distroless minimal base images.
 - **Lock Dependencies**: Copy `composer.lock` or `package-lock.json` and install dependencies using strict lock flags (`composer install --no-dev`, `npm ci`).
+- **Minimize Image Layers**: Combine `RUN` instructions and clean up build cache flags (`apk del`, `rm -rf /var/cache/apk/*`) in the same layer to minimize container sizes.
+- **Graceful Shutdown**: Configure container processes to handle standard termination signals (`SIGTERM`) gracefully, allowing active connections to drain and DB transactions to complete.
 
 ---
 
@@ -306,9 +325,16 @@ Use this checklist during code review to evaluate deployment pipeline safety.
 - [ ] Has the `/health` check returned `200 OK`?
 - [ ] Have response latency and error rates been verified against SLA targets?
 
+## 16. Infrastructure as Code (IaC) Hygiene
+
+- **Version-Controlled Infrastructure**: All hosting configurations, databases, compute clusters, and load balancers must be provisioned and updated using version-controlled configurations (Terraform, Pulumi, Kubernetes manifests, or Docker Compose).
+- **No Manual Adjustments**: Banish manual configuration changes in cloud provider web interfaces. All modifications must flow through git-managed IaC templates and automated deploy runners.
+- **Environment Parity**: Dev, staging, and production environments should share identical service layouts, databases, and configuration keys to prevent "works on my machine" failures.
+
 ---
 
 ## References
 - Database Migration Safety: [06-database-engineering-standard.md](06-database-engineering-standard.md)
 - Testing & CI Integrations: [11-testing-engineering-standard.md](11-testing-engineering-standard.md)
 - Git Branching & Merges: [12-git-and-collaboration-standard.md](12-git-and-collaboration-standard.md)
+- Observability Standards: [29-observability-and-operational-excellence-standard.md](29-observability-and-operational-excellence-standard.md)

@@ -149,7 +149,7 @@ Verify the application against this checklist for global readiness:
 ---
 
 ## References
-- Frontend Architecture: [core/23-frontend-architecture-standard.md](core/23-frontend-architecture-standard.md)
-- SEO Engineering: [core/27-seo-engineering-standard.md](core/27-seo-engineering-standard.md)
+- Frontend Architecture: [core/23-frontend-architecture-standard.md](23-frontend-architecture-standard.md)
+- SEO Engineering: [core/27-seo-engineering-standard.md](27-seo-engineering-standard.md)
 - Intl API Reference: [https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
 - W3C Internationalization: [https://www.w3.org/International/](https://www.w3.org/International/)

@@ -8,11 +8,16 @@ last_reviewed: 2026-08-01
 
 # Thinking and Planning Before Coding
 
-## Purpose
-This document establishes the "Thinking Loop" as the mandatory starting process for all software engineering tasks. It guides developers and AI agents to define requirements, model constraints, and evaluate edge cases before writing active production code.
+## Playbook Metadata
+- **Purpose**: Establishes the "Thinking Loop" as the mandatory starting process for all software engineering tasks to ensure structured requirements analysis before coding.
+- **Scope**: All software changes, including backend coding, frontend components, database migrations, and CI workflows.
+- **When to Read**: At the very beginning of any engineering task, before analyzing stack playbooks or writing code.
+- **Related Playbooks**: [Universal Coding Standards](05-universal-coding-standards.md), [AI Agent Engineering Workflow](20-ai-agent-engineering-workflow-standard.md), [Bootstrap Guide](../ai/bootstrap.md).
+- **Canonical Source**: This is the canonical source for thinking, planning, and pre-coding workflows.
+- **Version**: 1.1.0
+- **Last Reviewed**: 2026-08-03
 
-## Scope
-Applies to all software changes, including core business logic updates, database schema changes, framework routing configurations, and cross-platform mobile implementations.
+---
 
 ## Why This Exists
 Writing code without planning leads to:

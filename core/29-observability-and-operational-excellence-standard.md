@@ -207,7 +207,7 @@ Before declaring a feature ready for production, verify against this checklist:
 ---
 
 ## References
-- Frontend Security: [core/24-frontend-security-and-privacy-hardening-standard.md](core/24-frontend-security-and-privacy-hardening-standard.md)
-- Frontend Performance: [core/26-frontend-performance-engineering-standard.md](core/26-frontend-performance-engineering-standard.md)
+- Frontend Security: [core/24-frontend-security-and-privacy-hardening-standard.md](24-frontend-security-and-privacy-hardening-standard.md)
+- Frontend Performance: [core/26-frontend-performance-engineering-standard.md](26-frontend-performance-engineering-standard.md)
 - OpenTelemetry: [https://opentelemetry.io](https://opentelemetry.io)
 - Sentry Documentation: [https://docs.sentry.io](https://docs.sentry.io)

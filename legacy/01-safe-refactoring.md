@@ -67,5 +67,5 @@ If you must modify legacy code that has zero unit tests:
 ---
 
 ## References
-- Caching legacy data: [performance/03-caching-and-queues.md](file:///Users/kodexkode/Documents/workspace/promptengine/performance/README.md)
-- Modernizing Pure PHP files: [stacks/php-laravel/modernization.md](file:///Users/kodexkode/Documents/workspace/promptengine/stacks/php-laravel/modernization.md)
+- Caching legacy data: [performance/03-caching-and-queues.md](../performance/03-caching-and-queues.md)
+- Modernizing Pure PHP files: [core/16-legacy-modernization-and-refactoring-standard.md](../core/16-legacy-modernization-and-refactoring-standard.md#7-modernizing-legacy-php--laravel-systems)
