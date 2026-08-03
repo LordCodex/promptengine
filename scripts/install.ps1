@@ -21,8 +21,6 @@ if (-not $LatestTag) {
 }
 
 $Version = $LatestTag.TrimStart('v')
-$OsLabel = "Windows"
-$ArchLabel = if ($Arch -eq "amd64") { "x86_64" } else { "arm64" }
 
 Write-Host "Installing $BinaryName $LatestTag for windows-$Arch..."
 
@@ -33,7 +31,7 @@ if (-not (Test-Path $InstallDir)) {
 }
 
 # Build download url
-$DownloadUrl = "https://github.com/$Owner/$Repo/releases/download/$LatestTag/${BinaryName}_${Version}_${OsLabel}_${ArchLabel}.zip"
+$DownloadUrl = "https://github.com/$Owner/$Repo/releases/download/$LatestTag/${BinaryName}_${Version}_windows_${Arch}.zip"
 $TempZip = Join-Path $env:TEMP "${BinaryName}_windows.zip"
 $TempDir = Join-Path $env:TEMP "${BinaryName}_extracted"
 
