@@ -34,7 +34,8 @@
     "ai_configurations": "ai/",
     "architecture": "architecture/",
     "environment": "environment/",
-    "legacy": "legacy/"
+    "legacy": "legacy/",
+    "project": "project/"
   },
   "core_playbooks": [
     { "id": "philosophy", "path": "core/00-engineering-philosophy.md" },
@@ -169,6 +170,21 @@
       { "id": "cicd_pipelines", "path": "environment/03-ci-cd-pipelines.md" }
     ]
   },
+  "project_playbooks": [
+    { "id": "project_readme", "path": "project/README.md" },
+    { "id": "project_bootstrap", "path": "project/01-project-bootstrap-standard.md" },
+    { "id": "project_docs_standard", "path": "project/02-project-documentation-standard.md" },
+    { "id": "template_prd", "path": "project/templates/PRD.template.md" },
+    { "id": "template_architecture", "path": "project/templates/Architecture.template.md" },
+    { "id": "template_business_rules", "path": "project/templates/BusinessRules.template.md" },
+    { "id": "template_database", "path": "project/templates/Database.template.md" },
+    { "id": "template_api", "path": "project/templates/API.template.md" },
+    { "id": "template_progress", "path": "project/templates/Progress.template.md" },
+    { "id": "template_roadmap", "path": "project/templates/Roadmap.template.md" },
+    { "id": "template_decisions", "path": "project/templates/Decisions.template.md" },
+    { "id": "template_deployment", "path": "project/templates/Deployment.template.md" },
+    { "id": "template_troubleshooting", "path": "project/templates/Troubleshooting.template.md" }
+  ],
   "bridge_playbooks": [
     { "id": "bridge_inertia_vue", "path": "bridges/laravel-inertia-vue.md" },
     { "id": "bridge_inertia_vue_standard", "path": "bridges/laravel-inertia-vue-engineering-standard.md" },
@@ -186,7 +202,9 @@
     { "id": "workflow_feature", "path": "workflows/01-feature-implementation.md" },
     { "id": "workflow_modernization", "path": "workflows/02-legacy-modernization.md" },
     { "id": "workflow_hotfix", "path": "workflows/03-security-hotfix.md" },
-    { "id": "workflow_ui_review", "path": "workflows/04-ui-review.md" }
+    { "id": "workflow_ui_review", "path": "workflows/04-ui-review.md" },
+    { "id": "workflow_new_project", "path": "workflows/NewProjectBootstrap.md" },
+    { "id": "workflow_existing_project", "path": "workflows/ExistingProjectBootstrap.md" }
   ],
   "decision_guides": [
     { "id": "guide_readme", "path": "decision-guides/README.md" },
@@ -204,173 +222,308 @@
       "required_playbook_ids": [
         "thinking_planning",
         "universal_coding_standards",
+        "project_bootstrap",
+        "project_docs_standard",
         "checklist_feature",
         "workflow_feature"
       ],
       "optional_playbook_ids": [
         "architecture_simplicity",
-        "data_api_modeling"
+        "data_api_modeling",
+        "template_prd",
+        "template_architecture",
+        "template_business_rules",
+        "template_database",
+        "template_api",
+        "template_progress",
+        "template_roadmap",
+        "template_decisions",
+        "template_deployment"
       ]
     },
     "bug_fix": {
       "required_playbook_ids": [
         "thinking_planning",
         "universal_coding_standards",
+        "project_bootstrap",
+        "project_docs_standard",
         "testing_standard"
       ],
       "optional_playbook_ids": [
-        "checklist_feature"
+        "checklist_feature",
+        "template_progress",
+        "template_troubleshooting"
       ]
     },
     "refactor": {
       "required_playbook_ids": [
         "architecture_simplicity",
         "legacy_modernization",
+        "project_bootstrap",
+        "project_docs_standard",
         "workflow_modernization"
       ],
       "optional_playbook_ids": [
-        "guide_rewrite_vs_refactor"
+        "guide_rewrite_vs_refactor",
+        "template_architecture",
+        "template_business_rules",
+        "template_database",
+        "template_api",
+        "template_progress",
+        "template_roadmap",
+        "template_decisions",
+        "template_deployment",
+        "template_troubleshooting"
       ]
     },
     "code_review": {
       "required_playbook_ids": [
         "code_review_standard"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_progress"
+      ]
     },
     "performance_optimization": {
       "required_playbook_ids": [
-        "performance_standard"
+        "performance_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
       "optional_playbook_ids": [
         "frontend_performance",
-        "guide_caching_database"
+        "guide_caching_database",
+        "template_progress",
+        "template_decisions",
+        "template_troubleshooting"
       ]
     },
     "security_review": {
       "required_playbook_ids": [
         "security_standard",
+        "project_bootstrap",
+        "project_docs_standard",
         "checklist_security"
       ],
       "optional_playbook_ids": [
         "security_threat",
-        "frontend_security"
+        "frontend_security",
+        "template_progress",
+        "template_decisions",
+        "template_deployment",
+        "template_troubleshooting"
       ]
     },
     "authentication": {
       "required_playbook_ids": [
-        "security_standard"
+        "security_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_troubleshooting"
+      ]
     },
     "authorization": {
       "required_playbook_ids": [
-        "security_standard"
+        "security_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_troubleshooting"
+      ]
     },
     "api_development": {
       "required_playbook_ids": [
         "data_api_modeling",
+        "project_bootstrap",
+        "project_docs_standard",
         "api_standard"
       ],
       "optional_playbook_ids": [
-        "bridge_cors"
+        "bridge_cors",
+        "template_prd",
+        "template_architecture",
+        "template_business_rules",
+        "template_database",
+        "template_api",
+        "template_progress",
+        "template_roadmap",
+        "template_decisions"
       ]
     },
     "database_design": {
       "required_playbook_ids": [
         "data_api_modeling",
+        "project_bootstrap",
+        "project_docs_standard",
         "database_standard"
       ],
       "optional_playbook_ids": [
-        "legacy_modernization"
+        "legacy_modernization",
+        "template_prd",
+        "template_architecture",
+        "template_business_rules",
+        "template_database",
+        "template_progress",
+        "template_roadmap",
+        "template_decisions"
       ]
     },
     "database_optimization": {
       "required_playbook_ids": [
-        "database_standard"
+        "database_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
       "optional_playbook_ids": [
-        "guide_caching_database"
+        "guide_caching_database",
+        "template_database",
+        "template_progress",
+        "template_decisions",
+        "template_troubleshooting"
       ]
     },
     "payment_integration": {
       "required_playbook_ids": [
         "security_standard",
+        "project_bootstrap",
+        "project_docs_standard",
         "api_standard"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_prd",
+        "template_architecture",
+        "template_business_rules",
+        "template_api",
+        "template_progress",
+        "template_roadmap",
+        "template_decisions",
+        "template_troubleshooting"
+      ]
     },
     "file_upload": {
       "required_playbook_ids": [
         "security_standard",
+        "project_bootstrap",
+        "project_docs_standard",
         "frontend_security"
       ],
       "optional_playbook_ids": []
     },
     "queue_processing": {
       "required_playbook_ids": [
-        "performance_standard"
+        "performance_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_troubleshooting"
+      ]
     },
     "background_jobs": {
       "required_playbook_ids": [
-        "performance_standard"
+        "performance_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_troubleshooting"
+      ]
     },
     "notifications": {
       "required_playbook_ids": [
         "performance_standard",
+        "project_bootstrap",
+        "project_docs_standard",
         "observability_standard"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_troubleshooting"
+      ]
     },
     "email": {
       "required_playbook_ids": [
-        "security_standard"
+        "security_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_troubleshooting"
+      ]
     },
     "search": {
       "required_playbook_ids": [
-        "performance_standard"
+        "performance_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_troubleshooting"
+      ]
     },
     "dashboard": {
       "required_playbook_ids": [
         "design_philosophy",
+        "project_bootstrap",
+        "project_docs_standard",
         "design_product_thinking"
       ],
       "optional_playbook_ids": [
-        "design_systems"
+        "design_systems",
+        "template_prd",
+        "template_architecture",
+        "template_business_rules",
+        "template_database",
+        "template_api",
+        "template_progress",
+        "template_roadmap",
+        "template_decisions"
       ]
     },
     "admin_panel": {
       "required_playbook_ids": [
         "design_philosophy",
+        "project_bootstrap",
+        "project_docs_standard",
         "design_product_thinking"
       ],
       "optional_playbook_ids": [
-        "design_systems"
+        "design_systems",
+        "template_prd",
+        "template_architecture",
+        "template_business_rules",
+        "template_database",
+        "template_api",
+        "template_progress",
+        "template_roadmap",
+        "template_decisions"
       ]
     },
     "mobile_screen": {
       "required_playbook_ids": [
         "mobile_standard",
+        "project_bootstrap",
+        "project_docs_standard",
         "flutter_widgets",
         "flutter_architecture"
       ],
       "optional_playbook_ids": [
-        "flutter_state"
+        "flutter_state",
+        "template_prd",
+        "template_architecture",
+        "template_business_rules",
+        "template_api",
+        "template_progress",
+        "template_roadmap"
       ]
     },
     "frontend_component": {
       "required_playbook_ids": [
         "frontend_architecture",
+        "project_bootstrap",
+        "project_docs_standard",
         "design_governance"
       ],
       "optional_playbook_ids": [
@@ -381,56 +534,88 @@
     "ui_design": {
       "required_playbook_ids": [
         "design_philosophy",
+        "project_bootstrap",
+        "project_docs_standard",
         "design_systems",
         "design_visual_quality",
         "checklist_ui_quality",
         "workflow_ui_review"
       ],
       "optional_playbook_ids": [
-        "design_components"
+        "design_components",
+        "template_prd",
+        "template_architecture",
+        "template_business_rules"
       ]
     },
     "testing": {
       "required_playbook_ids": [
         "testing_philosophy",
+        "project_bootstrap",
+        "project_docs_standard",
         "testing_standard"
       ],
       "optional_playbook_ids": [
-        "frontend_testing_standard"
+        "frontend_testing_standard",
+        "template_progress",
+        "template_troubleshooting"
       ]
     },
     "deployment": {
       "required_playbook_ids": [
         "cicd_standard",
+        "project_bootstrap",
+        "project_docs_standard",
         "checklist_deployment"
       ],
       "optional_playbook_ids": [
-        "cicd_pipelines"
+        "cicd_pipelines",
+        "template_progress",
+        "template_deployment",
+        "template_troubleshooting"
       ]
     },
     "ci_cd": {
       "required_playbook_ids": [
         "cicd_standard",
+        "project_bootstrap",
+        "project_docs_standard",
         "cicd_pipelines"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_deployment",
+        "template_troubleshooting"
+      ]
     },
     "migration": {
       "required_playbook_ids": [
         "database_standard",
+        "project_bootstrap",
+        "project_docs_standard",
         "legacy_modernization"
       ],
-      "optional_playbook_ids": []
+      "optional_playbook_ids": [
+        "template_architecture",
+        "template_business_rules",
+        "template_database",
+        "template_progress",
+        "template_decisions",
+        "template_troubleshooting"
+      ]
     },
     "localization": {
       "required_playbook_ids": [
-        "i18n_l10n"
+        "i18n_l10n",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
       "optional_playbook_ids": []
     },
     "seo": {
       "required_playbook_ids": [
-        "seo_standard"
+        "seo_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
       "optional_playbook_ids": []
     }
@@ -451,7 +636,9 @@
         "testing_standard",
         "git_collaboration",
         "cicd_standard",
-        "infrastructure_devops"
+        "infrastructure_devops",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
       "required_stack_ids": [
         "php_conventions",
@@ -471,7 +658,9 @@
         "testing_philosophy",
         "universal_coding_standards",
         "git_collaboration",
-        "mobile_standard"
+        "mobile_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
       "required_stack_ids": [
         "dart_conventions",
@@ -499,7 +688,9 @@
         "frontend_security",
         "frontend_testing",
         "frontend_performance",
-        "seo_standard"
+        "seo_standard",
+        "project_bootstrap",
+        "project_docs_standard"
       ],
       "required_stack_ids": [
         "js_ts_conventions",
@@ -525,7 +716,9 @@
   "validation_rules": {
     "required_global_playbooks": [
       "thinking_planning",
-      "universal_coding_standards"
+      "universal_coding_standards",
+      "project_bootstrap",
+      "project_docs_standard"
     ],
     "conflicting_playbook_rules": [
       {

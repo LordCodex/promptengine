@@ -17,17 +17,24 @@ Before performing any engineering task, the AI assistant must follow these steps
    -->
    Read and analyze [promptengine/ai/bootstrap.md](promptengine/ai/bootstrap.md) to understand operating principles and priority hierarchies.
 
-2. **Read the Index Manifest**:
+2. **Read the Project Bootstrap Standard**:
+   <!-- 
+   If PromptEngine is located in an external directory (e.g. "../PromptEngine/"), 
+   update this path to: ../PromptEngine/project/01-project-bootstrap-standard.md 
+   -->
+   Read and follow the workflows in [promptengine/project/01-project-bootstrap-standard.md](promptengine/project/01-project-bootstrap-standard.md) to adopt or initialize the project state.
+
+3. **Read the Index Manifest**:
    <!-- 
    If PromptEngine is located in an external directory, 
    update this path to: ../PromptEngine/playbook-manifest.json 
    -->
    Read and parse [promptengine/playbook-manifest.json](promptengine/playbook-manifest.json) to locate the relevant standards mapping for the current task.
 
-3. **Identify & Load Required Playbooks**:
+4. **Identify & Load Required Playbooks**:
    Determine which specific playbooks match the task classification. Load **only** the playbooks required for the current task to conserve context space. Do not load unrelated playbooks.
 
-4. **Load Project-Specific Context**:
+5. **Load Project-Specific Context**:
    After loading PromptEngine standards, read local project documentation to understand requirements and invariants:
    - [docs/PRD.md](docs/PRD.md) (Product requirements)
    - [docs/Architecture.md](docs/Architecture.md) (Service layouts, structural bounds)
@@ -35,7 +42,7 @@ Before performing any engineering task, the AI assistant must follow these steps
    - [docs/API.md](docs/API.md) (Routing contracts and payload examples)
    - [docs/BusinessRules.md](docs/BusinessRules.md) (Core calculations, domain workflows)
 
-5. **Priority Order of Guidance**:
+6. **Priority Order of Guidance**:
    Always follow project-specific guidelines and user instructions before generic PromptEngine rules. Keep all applicable rules active throughout the coding process.
 
 ---

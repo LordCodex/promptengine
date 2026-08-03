@@ -66,6 +66,9 @@ ai-engineering-playbook/
 │   ├── php-laravel-sandbox/             # Minimal Laravel execution reference
 │   ├── dart-flutter-sandbox/            # Minimal Flutter widget/logic testing reference
 │   └── js-vue-sandbox/                  # Minimal Vue 3 Composition layout reference
+├── project/                             # Project Knowledge System
+│   ├── README.md                        # Overview of project documentation categories
+│   └── 01-project-bootstrap-standard.md # Workflows to adopt and initialize codebases
 └── ai/                                  # AI Agent System Instructions
     ├── agent-prompts.md                 # Markdown instructions to inject into external AI models
     └── agent-rules.json                 # Path-to-rule mapping configuration for automated agent loading
