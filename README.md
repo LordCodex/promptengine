@@ -96,55 +96,70 @@ ai-engineering-playbook/
 
 # Using PromptEngine in Your Projects
 
-PromptEngine is designed to be reusable across multiple software projects. It acts as a centralized engineering knowledge base that you can integrate directly into your codebase or keep in a shared location.
+PromptEngine acts as a centralized engineering knowledge base that integrates directly into your workspace. By utilizing our structured playbooks, templates, workflows, and prompts, you can establish an automated, high-quality development ecosystem.
 
-## Quick Start
+---
 
-To use PromptEngine in your projects, follow this workflow:
+## Quick Start Navigation
 
-1. **Add PromptEngine**: Add PromptEngine to your project repository (or keep it in a shared directory).
-2. **Create AGENTS.md**: Create an `AGENTS.md` file in your project root.
-3. **Point AGENTS.md to PromptEngine**: Write instructions in `AGENTS.md` pointing to your PromptEngine location.
-4. **Start Your Assistant**: Start your AI coding assistant or agent.
-5. **Read AGENTS.md**: The assistant reads `AGENTS.md` automatically on startup.
-6. **Load PromptEngine**: The assistant loads PromptEngine from the path defined.
-7. **Select Playbooks**: The assistant selects only the playbooks relevant to the current task using `playbook-manifest.json`.
-8. **Begin Engineering**: Begin implementing your features with the assistant following the mapped playbooks.
+- **Developer Guides**: Explore step-by-step instructions in the [Guides Index](guides/README.md).
+  - [Getting Started](guides/01-getting-started.md) | [New Project Setup](guides/02-new-project.md) | [Existing Project Onboarding](guides/03-existing-project.md) | [Legacy Migration](guides/04-migrate-existing-project.md) | [Daily Development](guides/05-daily-development.md) | [Troubleshooting](guides/09-troubleshooting.md)
+- **AI Prompts Library**: Access copy-and-paste ready prompts in the [Prompts Index](prompts/README.md).
+  - [Bootstrap New Project](prompts/01-new-project.md) | [Scan Existing Project](prompts/02-existing-project.md) | [Migrate Legacy Systems](prompts/03-migrate-existing-project.md) | [Add Feature](prompts/04-add-feature.md) | [Bug Fix](prompts/05-bug-fix.md) | [Safe Refactoring](prompts/06-refactor.md) | [Reviews](prompts/09-project-review.md)
+- **CLI Foundation Specs**: Explore the design, roadmap, and specifications for the future production CLI in the [CLI Foundation Index](cli/README.md).
+  - [CLI Spec](cli/CLI-Spec.md) | [Architecture](cli/CLI-Architecture.md) | [Configuration](cli/CLI-Configuration.md) | [Command Reference](cli/CLI-Command-Reference.md) | [Roadmap](cli/CLI-Roadmap.md)
 
-### Example Project Structure (Nested)
+---
 
-When PromptEngine is nested directly within your project repository:
+## 1. Creating a New Project
 
-```text
-Project/
-├── AGENTS.md
-├── app/
-├── docs/
-├── routes/
-└── promptengine/      # PromptEngine repository clone
-```
+When initiating a greenfield project:
+1. Create a root directory for your project. Clone the PromptEngine repository inside it (or in a shared parent directory).
+2. Start your AI assistant (e.g., Cursor, Claude Code) and execute the **[New Project Bootstrap Prompt](prompts/01-new-project.md)**.
+3. The AI will conduct a brief requirements interview and automatically generate:
+   - **`AGENTS.md`** in your project root (your project's AI Constitution).
+   - **`docs/` Folder** containing the 10 core documentation specifications.
+4. For detailed guidelines, read the **[New Project Setup Guide](guides/02-new-project.md)**.
 
-### Example Project Structure (Shared/External)
+---
 
-If you have multiple projects and want to keep a single, shared PromptEngine in a parent folder:
+## 2. Migrating an Existing Project
 
-```text
-Workspace/
-├── PromptEngine/      # Shared PromptEngine repository
-├── Project-A/
-│   ├── AGENTS.md      # Points to ../PromptEngine/
-│   └── ...
-└── Project-B/
-    ├── AGENTS.md      # Points to ../PromptEngine/
-    └── ...
-```
+If you want to onboard an existing active codebase:
+1. Clone PromptEngine nested or shared in your workspace.
+2. Start your AI assistant and execute the **[Existing Project Bootstrap Prompt](prompts/02-existing-project.md)** (or the **[Migration Prompt](prompts/03-migrate-existing-project.md)** if you have pre-existing custom instruction files).
+3. The AI will scan package files and source code directories on disk to reverse-engineer your database schema, routing boundaries, and stack conventions.
+4. The AI will automatically generate your root `AGENTS.md` constitution and the 10 specifications in the `docs/` folder.
+5. For detailed steps, consult the **[Existing Project Onboarding Guide](guides/03-existing-project.md)** and the **[Legacy Migration Guide](guides/04-migrate-existing-project.md)**.
 
-In this case, adjust the paths inside `AGENTS.md` to reference `../PromptEngine/`.
+---
 
-## Recommended Workflow
+## 3. Daily Development Workflow
 
-1. **Keep Global Standards Centralized**: Keep all reusable, language-agnostic coding standards and stack playbooks inside PromptEngine.
-2. **Declare Local Rules Locally**: Put project-specific parameters (e.g. database schemas, business rules, product requirements) inside the project's `docs/` folder or `AGENTS.md`.
-3. **Automate Agent Routing**: Let the AI assistant programmatically query `playbook-manifest.json` and load the minimum necessary documents for the current task.
-4. **Update PromptEngine**: Rather than duplicating rules across multiple projects, update the centralized PromptEngine repository and pull changes to keep configurations synchronized.
+For daily development tasks, always plan and coordinate with the AI using our structured workflows:
+- **Adding Features**: Use the **[Add Feature Prompt](prompts/04-add-feature.md)** to check `docs/PRD.md` and write an implementation plan. Follow the [Feature Workflow](workflows/01-feature-implementation.md).
+- **Fixing Bugs**: Use the **[Bug Fix Prompt](prompts/05-bug-fix.md)** to isolate issues and write reproduction tests.
+- **Refactoring Code**: Use the **[Safe Refactoring Prompt](prompts/06-refactor.md)** to simplify logic step-by-step while preserving behaviour. Follow the [Modernization Workflow](workflows/02-legacy-modernization.md).
+- **Architecture Updates**: Use the **[Architecture Change Prompt](prompts/07-architecture-change.md)** to log decisions in `docs/Decisions.md` (ADR log).
+- **Reviewing Code**: Use the **[Project Review Prompt](prompts/09-project-review.md)** to audit security, performance, and accessibility.
+- See the **[Daily Development Guide](guides/05-daily-development.md)** for a complete walkthrough.
+
+---
+
+## 4. The Project Knowledge System
+
+PromptEngine enforces a structured documentation model consisting of:
+- **`AGENTS.md`**: Placed in the project root. It serves as the project's AI Constitution. It is automatically generated and contains Section 1 (PromptEngine Core Rules) and Section 2 (Project Constitution detailing tech stack, auth, databases, constraints, and exceptions).
+- **`/docs/` Specifications**: The 10 core markdown documents (`PRD.md`, `Architecture.md`, `Database.md`, `API.md`, `Progress.md`, `Roadmap.md`, `Decisions.md`, `Deployment.md`, `Troubleshooting.md`).
+- Read the **[Managing Project Documentation Guide](guides/06-project-documentation.md)** to understand how to keep specs synchronized.
+
+---
+
+## 5. PromptEngine Workflows & Best Practices
+
+To prevent AI context loss, minimize token consumption, and resolve ignoring behaviors:
+- Always enforce the **5-Step Entry Rule**: The AI must read `AGENTS.md` first, check `docs/` specs, load standards playbooks, select the correct workflow, and plan before coding.
+- Keep chat threads short. Start a fresh chat thread once a task is completed.
+- Learn token optimization tips and integration instructions for Cursor, Claude Code, Windsurf, ChatGPT, and Codex in the **[Developer Best Practices Guide](guides/08-best-practices.md)**.
+- For unresolved issues, view the **[Troubleshooting Guide](guides/09-troubleshooting.md)**.
 

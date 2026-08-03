@@ -1,0 +1,23 @@
+name: Nightly Build Snapshot
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  nightly-snapshot:
+    name: Package Nightly Snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go Environment
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Verify build compilation
+        run: go build -v -ldflags "-s -w -X github.com/LordCodex/promptengine/internal/version.Version=nightly-snapshot-$(date -u +%Y%m%d)" -o bin/promptengine cmd/promptengine/main.go

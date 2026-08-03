@@ -35,7 +35,10 @@
     "architecture": "architecture/",
     "environment": "environment/",
     "legacy": "legacy/",
-    "project": "project/"
+    "project": "project/",
+    "guides": "guides/",
+    "prompts": "prompts/",
+    "cli": "cli/"
   },
   "core_playbooks": [
     { "id": "philosophy", "path": "core/00-engineering-philosophy.md" },
@@ -174,6 +177,7 @@
     { "id": "project_readme", "path": "project/README.md" },
     { "id": "project_bootstrap", "path": "project/01-project-bootstrap-standard.md" },
     { "id": "project_docs_standard", "path": "project/02-project-documentation-standard.md" },
+    { "id": "template_agents", "path": "project/templates/AGENTS.template.md" },
     { "id": "template_prd", "path": "project/templates/PRD.template.md" },
     { "id": "template_architecture", "path": "project/templates/Architecture.template.md" },
     { "id": "template_business_rules", "path": "project/templates/BusinessRules.template.md" },
@@ -217,6 +221,70 @@
     { "id": "ai_bootstrap_guide", "path": "ai/bootstrap.md" },
     { "id": "ai_agent_prompts", "path": "ai/agent-prompts.md" }
   ],
+  "guides": [
+    { "id": "guides_readme", "path": "guides/README.md" },
+    { "id": "guide_getting_started", "path": "guides/01-getting-started.md" },
+    { "id": "guide_new_project", "path": "guides/02-new-project.md" },
+    { "id": "guide_existing_project", "path": "guides/03-existing-project.md" },
+    { "id": "guide_migrate_existing_project", "path": "guides/04-migrate-existing-project.md" },
+    { "id": "guide_daily_development", "path": "guides/05-daily-development.md" },
+    { "id": "guide_project_documentation", "path": "guides/06-project-documentation.md" },
+    { "id": "guide_ai_prompt_library", "path": "guides/07-ai-prompt-library.md" },
+    { "id": "guide_best_practices", "path": "guides/08-best-practices.md" },
+    { "id": "guide_troubleshooting", "path": "guides/09-troubleshooting.md" }
+  ],
+  "prompts_library": [
+    { "id": "prompts_readme", "path": "prompts/README.md" },
+    { "id": "prompt_new_project", "path": "prompts/01-new-project.md" },
+    { "id": "prompt_existing_project", "path": "prompts/02-existing-project.md" },
+    { "id": "prompt_migrate_existing_project", "path": "prompts/03-migrate-existing-project.md" },
+    { "id": "prompt_add_feature", "path": "prompts/04-add-feature.md" },
+    { "id": "prompt_bug_fix", "path": "prompts/05-bug-fix.md" },
+    { "id": "prompt_refactor", "path": "prompts/06-refactor.md" },
+    { "id": "prompt_architecture_change", "path": "prompts/07-architecture-change.md" },
+    { "id": "prompt_documentation_sync", "path": "prompts/08-documentation-sync.md" },
+    { "id": "prompt_project_review", "path": "prompts/09-project-review.md" },
+    { "id": "prompt_release", "path": "prompts/10-release.md" }
+  ],
+  "cli_foundation": [
+    { "id": "cli_readme", "path": "cli/README.md" },
+    { "id": "cli_spec", "path": "cli/CLI-Spec.md" },
+    { "id": "cli_roadmap", "path": "cli/CLI-Roadmap.md" },
+    { "id": "cli_architecture", "path": "cli/CLI-Architecture.md" },
+    { "id": "cli_implementation_architecture", "path": "cli/CLI-Implementation-Architecture.md" },
+    { "id": "cli_contributing", "path": "cli/CONTRIBUTING.md" },
+    { "id": "cli_discovery_engine", "path": "cli/DISCOVERY-ENGINE.md" },
+    { "id": "cli_context_engine", "path": "cli/CONTEXT-ENGINE.md" },
+    { "id": "cli_workflow_engine", "path": "cli/WORKFLOW-ENGINE.md" },
+    { "id": "cli_ai_provider_engine", "path": "cli/AI-PROVIDER-ENGINE.md" },
+    { "id": "cli_manifest_engine", "path": "cli/MANIFEST-ENGINE.md" },
+    { "id": "cli_extensibility_platform", "path": "cli/EXTENSIBILITY-PLATFORM.md" },
+    { "id": "cli_documentation_platform", "path": "cli/DOCUMENTATION-PLATFORM.md" },
+    { "id": "cli_quality_platform", "path": "cli/QUALITY-PLATFORM.md" },
+    { "id": "cli_configuration", "path": "cli/CLI-Configuration.md" },
+    { "id": "cli_command_reference", "path": "cli/CLI-Command-Reference.md" }
+  ],
+  "cli_command_specifications": [
+    { "id": "cli_spec_init", "path": "cli/specs/init.md" },
+    { "id": "cli_spec_migrate", "path": "cli/specs/migrate.md" },
+    { "id": "cli_spec_doctor", "path": "cli/specs/doctor.md" },
+    { "id": "cli_spec_analyze", "path": "cli/specs/analyze.md" },
+    { "id": "cli_spec_scan", "path": "cli/specs/scan.md" },
+    { "id": "cli_spec_review", "path": "cli/specs/review.md" },
+    { "id": "cli_spec_sync", "path": "cli/specs/sync.md" },
+    { "id": "cli_spec_update", "path": "cli/specs/update.md" },
+    { "id": "cli_spec_context", "path": "cli/specs/context.md" },
+    { "id": "cli_spec_prompt", "path": "cli/specs/prompt.md" },
+    { "id": "cli_spec_docs", "path": "cli/specs/docs.md" },
+    { "id": "cli_spec_generate", "path": "cli/specs/generate.md" },
+    { "id": "cli_spec_config", "path": "cli/specs/config.md" },
+    { "id": "cli_spec_install", "path": "cli/specs/install.md" },
+    { "id": "cli_spec_health", "path": "cli/specs/health.md" },
+    { "id": "cli_spec_hooks", "path": "cli/specs/hooks.md" },
+    { "id": "cli_spec_plugins", "path": "cli/specs/plugins.md" },
+    { "id": "cli_spec_version", "path": "cli/specs/version.md" },
+    { "id": "cli_spec_help", "path": "cli/specs/help.md" }
+  ],
   "task_mappings": {
     "new_feature": {
       "required_playbook_ids": [
@@ -230,6 +298,7 @@
       "optional_playbook_ids": [
         "architecture_simplicity",
         "data_api_modeling",
+        "template_agents",
         "template_prd",
         "template_architecture",
         "template_business_rules",
@@ -265,6 +334,7 @@
       ],
       "optional_playbook_ids": [
         "guide_rewrite_vs_refactor",
+        "template_agents",
         "template_architecture",
         "template_business_rules",
         "template_database",
@@ -343,6 +413,7 @@
       ],
       "optional_playbook_ids": [
         "bridge_cors",
+        "template_agents",
         "template_prd",
         "template_architecture",
         "template_business_rules",
@@ -362,6 +433,7 @@
       ],
       "optional_playbook_ids": [
         "legacy_modernization",
+        "template_agents",
         "template_prd",
         "template_architecture",
         "template_business_rules",

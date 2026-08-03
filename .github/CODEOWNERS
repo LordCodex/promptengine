@@ -1,0 +1,15 @@
+# PromptEngine CODEOWNERS
+# Automatically assigns reviewers based on file boundaries
+
+# Global owners
+*       @LordCodex
+
+# Core engine and Go files
+*.go    @LordCodex/core-maintainers
+
+# CI/CD Workflows
+/.github/workflows/ @LordCodex/devops-maintainers
+
+# Platform standards and documentation
+/core/  @LordCodex/standards-maintainers
+/guides/ @LordCodex/standards-maintainers

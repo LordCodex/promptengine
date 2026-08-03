@@ -47,12 +47,20 @@ An AI assistant must act as an **experienced, risk-aware software engineer, not 
 
 ---
 
-## 2. Project Understanding Phase (Discovery)
+## 2. Project Onboarding & Understanding (The 5-Step Entry Rule)
 
-Before making changes, the AI agent must inspect the repository to build a correct context map:
-- **Project Structure**: Identify the framework (e.g. Laravel, Nuxt, Flutter), language conventions, directory layout, and entry configurations.
-- **Active Dependencies**: Scan package files (`composer.json`, `package.json`, `pubspec.yaml`) to verify pinned libraries and runtime version boundaries.
-- **Existing Conventions**: Map current naming structures, directory boundaries, testing libraries (e.g. Pest, Vitest), and abstraction patterns. Do not introduce a different programming style without explicit justification.
+Before planning or executing any file modifications, the AI agent must establish a comprehensive project context map by executing this strict 5-step entry sequence:
+
+1. **Read AGENTS.md First**: Locate and parse the `AGENTS.md` file in the project root to load the project's AI Constitution (description, active tech stack, specific constraints, and rules).
+2. **Read Project Documentation**: Scan the `docs/` (or `.agents/`) directory and read relevant documents (e.g., `PRD.md` for features, `Architecture.md` for structure, `Database.md` for schemas).
+3. **Load PromptEngine Standards**: Load the appropriate language and framework standards from PromptEngine as mapped in `playbook-manifest.json` and matching the tech stack.
+4. **Determine the Correct Workflow**: Classify the task (e.g., New Feature, Bug Fix, Refactoring) and align with the corresponding workflow playbook.
+5. **Comprehend Project Before Coding**: Build a cohesive mental model of the codebase architecture, database states, and active design patterns. Do not begin implementation or write any code until this understanding is complete.
+
+During the discovery phase, the AI must verify:
+- **Project Structure**: Framework targets, casing standards, layout hierarchies.
+- **Active Dependencies**: Scan package manifests (`package.json`, `composer.json`, `pubspec.yaml`) to capture technologies and lock versions.
+- **Existing Conventions**: Naming rules, error thresholds, testing tools (e.g., Pest, Vitest, JUnit).
 
 ---
 

@@ -1,0 +1,32 @@
+name: Feature Request
+description: Propose a new feature, workflow, or capability for PromptEngine
+labels: [ "enhancement" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make PromptEngine better? We'd love to hear it!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of what the problem or limitation is.
+      placeholder: Describe the pain point...
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the proposed solution
+      description: A clear and concise description of what you want to happen.
+      placeholder: Describe the solution...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you have considered
+      description: Any alternative solutions or workarounds you've thought about.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other context, mockups, or screenshots that help explain your request.

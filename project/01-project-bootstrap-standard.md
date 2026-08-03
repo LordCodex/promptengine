@@ -45,7 +45,8 @@ When starting a project from scratch (zero codebase lines):
 - Define what the project **will not do** to establish a clear architectural scope boundary.
 
 ### Step 3: Document Initialization
-- Generate the initial project context templates under a local `/docs/` folder (such as `docs/PRD.md`, `docs/Architecture.md`, and `docs/Database.md`).
+- Generate the project's AI Constitution (`AGENTS.md`) in the project root by filling the PromptEngine `AGENTS.template.md` with discovered stack, constraints, and overview.
+- Generate the initial project context documents under a local `/docs/` folder (such as `docs/PRD.md`, `docs/Architecture.md`, and `docs/Database.md`).
 - Present these documents to the developer for review and confirmation.
 
 ### Step 4: Avoid Speculation
@@ -67,45 +68,43 @@ Perform a systematic scan of the repository structure to identify:
 - Scan the source code to locate core business calculations, state transitions, and integration points.
 - Map the primary data models, database relationships, and API endpoints.
 
-### Step 3: Identify Documentation Gaps
-- Compare the existing code implementation against the `/docs/` folder.
-- Highlight missing schemas, undocumented APIs, or obsolete requirements.
+### Step 3: Identify Documentation & Constitution Gaps
+- Compare the existing code implementation against the `/docs/` folder and `AGENTS.md`.
+- Highlight missing schemas, undocumented APIs, obsolete requirements, or outdated stack definitions.
 
-### Step 4: Infer vs. Confirm Knowledge
+### Step 4: Auto-Generate or Update AGENTS.md
+- If `AGENTS.md` is missing or stale, generate it in the project root by filling the `AGENTS.template.md` template, reverse-engineering the tech stack, database, and constraints from codebase scanning.
+
+### Step 5: Infer vs. Confirm Knowledge
 - **Inferred Knowledge**: Code behavior you reverse-engineered from scanning files.
 - **Confirmed Knowledge**: Rules explicitly stated in documentation, requirement files, or user instructions.
 - **Rule**: Clearly distinguish assumptions from confirmed facts in your planning reports.
 
 ---
 
-## 4. Documentation Initialization Lifecycle
+## 4. Documentation & Constitution Initialization Lifecycle
 
-- **Create Once**: Generate the core documentation files (`PRD.md`, `Architecture.md`, `Database.md`, `API.md`) on startup.
-- **Human Audit**: Present the initialized documentation to human developers for manual review and staging confirmation.
-- **Incremental Maintenance**: Do not let documentation go stale. Update API files and business rules incrementally during active feature pull requests.
+- **Create Once**: Generate `AGENTS.md` in the project root and the core documentation files under `docs/` (`PRD.md`, `Architecture.md`, `Database.md`, `API.md`) on startup. The developer never manually writes `AGENTS.md` but audits it.
+- **Human Audit**: Present the initialized constitution and documentation to human developers for manual review and staging confirmation.
+- **Incremental Maintenance**: Do not let documentation or the project constitution go stale. Update `AGENTS.md` and API/database files incrementally during active feature pull requests when architectural paths or stacks evolve.
 
 ---
 
-## 5. Repository Analysis Workflow
+## 5. Repository Analysis Workflow (The 5-Step Entry Rule)
 
-AI coding assistants must execute this 8-step workflow on boot:
+AI coding assistants must execute this 5-step entry workflow on boot:
 
 ```text
-[1. Read AGENTS.md] ──> [2. Read Bootstrap] ──> [3. Read Local Docs]
-                                                      │
- [6. Ask Developer] <──  [5. Audit Code]    <── [4. Identify Stack] ┘
-         │
- [7. Stage Docs]    ──> [8. Begin Plan]
+[1. Read AGENTS.md] ──> [2. Read docs/ Specs] ──> [3. Load Playbooks]
+                                                        │
+   [5. Understand & Plan] <── [4. Audit Code & Stack] ──┘
 ```
 
-1. **Step 1 — Read AGENTS.md**: Read the onboarding instruction file in the project root.
-2. **Step 2 — Read PromptEngine Bootstrap**: Read `promptengine/ai/bootstrap.md` to load rules and manifest priorities.
-3. **Step 3 — Read Local Docs**: Scan the local `docs/` or `.agents/` folder for product requirements, databases, and API schemas.
-4. **Step 4 — Identify Stack**: Identify dependencies and framework targets from lock files.
-5. **Step 5 — Audit Code**: Scan directories to confirm database models, routes, and controllers align with documentation.
-6. **Step 6 — Detect Gaps**: Highlight missing information or contradictions.
-7. **Step 7 — Ask & Verify**: Compile assumptions and ask the developer to confirm design decisions.
-8. **Step 8 — Begin Planning**: Draft your implementation plan inside the conversation log.
+1. **Step 1 — Read AGENTS.md First**: Always read the `AGENTS.md` in the project root to load the project's AI Constitution (tech stack, exception logs, constraints). If starting a new bootstrap, read PromptEngine's own bootstrap files and manifest.
+2. **Step 2 — Read docs/ Specs Second**: Read the relevant project requirements, architecture design, and database schema files under `docs/` (or `.agents/`).
+3. **Step 3 — Load Playbooks Third**: Query the `playbook-manifest.json` and load the appropriate PromptEngine standard playbooks matching the stack.
+4. **Step 4 — Audit Code & Stack Fourth**: Scan directories and dependency manifests to verify implementation aligns with `AGENTS.md` and `docs/`.
+5. **Step 5 — Understand & Plan Fifth**: Build a complete mental model of the system. Propose architectural exceptions or updates to the Project Constitution if gaps are found, then draft the implementation plan.
 
 ---
 

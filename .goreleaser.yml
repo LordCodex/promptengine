@@ -1,0 +1,56 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    main: ./cmd/promptengine/main.go
+    binary: promptengine
+    ldflags:
+      - -s -w -X github.com/LordCodex/promptengine/internal/version.Version={{.Version}} -X github.com/LordCodex/promptengine/internal/version.Commit={{.ShortCommit}} -X github.com/LordCodex/promptengine/internal/version.BuildDate={{.Date}}
+
+archives:
+  - format: tar.gz
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Os }}_
+      {{- .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+brews:
+  - repository:
+      owner: LordCodex
+      name: homebrew-promptengine
+    directory: Formula
+    homepage: "https://github.com/LordCodex/promptengine"
+    description: "AI Coding Standards Engine for software teams."
+    install: |
+      bin.install "promptengine"
+      # shell completion
+      (bash_completion/"promptengine").write `#{bin}/promptengine completion bash`
+      (zsh_completion/"_promptengine").write `#{bin}/promptengine completion zsh`
+      (fish_completion/"promptengine.fish").write `#{bin}/promptengine completion fish`

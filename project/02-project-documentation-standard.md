@@ -58,12 +58,13 @@ When code implementation, documentation, and agent assumptions conflict, the AI 
 
 ```text
 1. Explicit Developer Instructions (Highest Priority)
-2. Approved Project Documentation (docs/ folder)
-3. Repository Implementation (Source code)
-4. Infrastructure Configuration (Dockerfiles, CI files)
-5. Automated Tests (Unit and integration suites)
-6. Historical Decisions (Committed ADR logs)
-7. AI Inference (Codebase scans and logs analysis) (Lowest Priority)
+2. Project-Specific AI Constitution (AGENTS.md)
+3. Approved Project Documentation (docs/ folder)
+4. Repository Implementation (Source code)
+5. Infrastructure Configuration (Dockerfiles, CI files)
+6. Automated Tests (Unit and integration suites)
+7. Historical Decisions (Committed ADR logs)
+8. AI Inference (Codebase scans and logs analysis) (Lowest Priority)
 ```
 
 ### Conflict Resolution Heuristics
@@ -92,8 +93,14 @@ Every documentation file moves through six sequential stages:
 
 ## 6. Required Project Documentation
 
-Every repository must maintain these ten core documents under the local `docs/` or `.agents/` folder:
+Every repository must maintain the project-specific AI Constitution in the project root, along with the ten core documents under the local `docs/` or `.agents/` folder:
 
+### Root Onboarding File
+| Document | Purpose | Owner | Update Frequency | Primary Audience |
+| :--- | :--- | :--- | :--- | :--- |
+| **AGENTS.md** | Project AI Constitution (tech stack, rules, constraints) | Lead Architect | On stack/exception change | AI Agents, Developers |
+
+### Core Project Specs
 | Document | Purpose | Owner | Update Frequency | Primary Audience |
 | :--- | :--- | :--- | :--- | :--- |
 | **PRD** | Product requirements, user stories, features scope | Product Manager / Lead | Per feature cycle | Developers, AI |
@@ -162,7 +169,8 @@ Documentation must satisfy these ten criteria:
 
 ## 11. Repository Rules
 
-- All project context files must reside in the `docs/` folder (or `.agents/` folder).
+- The project root must contain the auto-generated `AGENTS.md` file.
+- All other core project context files must reside in the `docs/` folder (or `.agents/` folder).
 - Documentation files participate in pull requests.
 - A pull request containing database changes or API updates **must** include corresponding documentation changes in the same commit.
 
@@ -174,6 +182,7 @@ Before marking an engineering task as complete, the AI must verify:
 
 ```text
 Did any of the following change?
+[ ] Project Constitution / Tech Stack (AGENTS.md)
 [ ] Product Requirements (PRD)
 [ ] Architecture Layout
 [ ] Business Calculations / Rules

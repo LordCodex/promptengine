@@ -171,6 +171,7 @@ All code modifications for new features must execute through this pipeline:
 Onboard new human engineers and AI agents using this checklist:
 - **Day 1 Goal**: Run the local setup script (`bin/setup.sh`) and verify that all automated tests pass successfully.
 - **Day 1 Reading List**:
+  - Read the project-specific AI Constitution ([AGENTS.md](../AGENTS.md)) first.
   - Read [README.md](../README.md) for local run command parameters.
   - Read [docs/architecture/](19-documentation-engineering-standard.md) for data flows.
   - Read [docs/decisions/](19-documentation-engineering-standard.md) to understand current technology choices.
@@ -231,12 +232,14 @@ When structuring monorepo systems containing multiple backend/frontend/mobile ap
 
 ## 14. AI Agent Bootstrap Rules
 
-AI agents initializing or writing code in a new repository must follow these rules:
+AI agents initializing or writing code in a project repository must follow these rules:
 
-1. **Never Generate Code Immediately**: Do not generate massive, template-driven code bases on the first prompt. Ask clarifying questions first.
-2. **Never Create Redundant Folders**: Follow the initial repository folder organization. Do not introduce custom folders (like `/helpers/` or `/utils/`) without approval.
-3. **No Dynamic Dependencies Additions**: Do not suggest adding package libraries unless the current pinned dependencies cannot support the feature.
-4. **Enforce the Workflow Sequence**: Follow the exact First Development Tasks sequence (Repo setup $\rightarrow$ Env configuration $\rightarrow$ Migrations $\rightarrow$ Auth policies).
+1. **Auto-Generate AGENTS.md**: On project bootstrap (either New Project Bootstrap or Existing Project Bootstrap), automatically generate `AGENTS.md` in the project root using `project/templates/AGENTS.template.md`. Never require the developer to write it manually.
+2. **First-Step Entry Point**: Always read the project-specific `AGENTS.md` first, followed by the relevant documentation files under `docs/`, and load PromptEngine standards before writing any code.
+3. **Never Generate Code Immediately**: Do not generate massive, template-driven code bases on the first prompt. Ask clarifying questions first.
+4. **Never Create Redundant Folders**: Follow the initial repository folder organization. Do not introduce custom folders (like `/helpers/` or `/utils/`) without approval.
+5. **No Dynamic Dependencies Additions**: Do not suggest adding package libraries unless the current pinned dependencies cannot support the feature.
+6. **Enforce the Workflow Sequence**: Follow the exact First Development Tasks sequence (Repo setup $\rightarrow$ Env configuration $\rightarrow$ Migrations $\rightarrow$ Auth policies).
 
 ---
 

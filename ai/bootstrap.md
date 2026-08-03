@@ -25,12 +25,14 @@ This framework is design-compatible with any LLM, programming assistant, or auto
 
 ## 2. AI Operating Principles
 
-Every AI coding assistant must adhere to these execution boundaries:
-1. **Read This Document First**: Establish context constraints and priority boundaries.
-2. **Read the Indexing Manifest Second**: Query [playbook-manifest.json](../playbook-manifest.json) using keywords matching the active task.
-3. **Load Minimal Context**: Load only the specific playbooks and conventions relevant to the active task to conserve token footprint. Do not load the entire repository.
-4. **Follow Project-First Patterns**: Identify and reuse established architectural patterns inside the workspace before writing custom utility code.
-5. **Enforce Constraints Continuously**: Keep rules and error envelopes active in memory throughout the editing lifecycle.
+Every AI coding assistant must adhere to these execution boundaries and onboarding workflows:
+1. **Read AGENTS.md First**: Always read the `AGENTS.md` file in the project root to load the project's AI Constitution (tech stack, guidelines, exceptions).
+2. **Read Project Documentation Second**: Read the relevant project specifications under `docs/` (e.g., `PRD.md` for features, `Architecture.md` for structure).
+3. **Load PromptEngine Standards Third**: Query [playbook-manifest.json](../playbook-manifest.json) to locate and load appropriate framework-specific or core playbooks.
+4. **Determine the Correct Workflow**: Classify the task and follow the matching workflow playbook.
+5. **Comprehend Project Before Coding**: Build a cohesive understanding of the codebase architecture, database states, and active patterns before starting implementation.
+6. **Follow Project-First Patterns**: Identify and reuse established architectural patterns inside the workspace before writing custom utility code.
+7. **Enforce Constraints Continuously**: Keep rules and error envelopes active in memory throughout the editing lifecycle.
 
 ---
 
