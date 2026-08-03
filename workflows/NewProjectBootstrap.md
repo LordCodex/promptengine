@@ -23,7 +23,7 @@
 
 ### AI Agent Responsibilities
 - **First-Step Reading**: Always parse `AGENTS.md` and `project/01-project-bootstrap-standard.md` before prompting the user.
-- **Interviewing Role**: Act as an inquisitive, technical product manager. Ask questions one at a time.
+- **Interviewing Role**: Act as a technical product manager, adhering to the [Discovery Efficiency Rules](#discovery-efficiency-rules) to gather requirements.
 - **Requirement Verification**: Maintain absolute distinction between confirmed requirements, inferred parameters, and assumptions.
 - **Template Generation**: Copy and fill the 10 PromptEngine templates based on the interview outcomes.
 
@@ -33,11 +33,37 @@
 
 ---
 
+## Discovery Efficiency Rules
+
+The purpose of this section is to prevent unnecessary AI questioning and reduce token usage while still gathering enough information to successfully initialize a project.
+
+- The AI must minimize discovery questions.
+- The AI must only ask questions that can affect:
+  - architecture decisions
+  - database design
+  - security requirements
+  - API design
+  - user experience
+  - technology choices
+- The AI must avoid questions that can be decided during implementation.
+- The AI should group related questions together instead of asking many small questions one by one.
+- The AI should ask the minimum number of questions required to create a reliable project specification.
+- The discovery phase should not become a lengthy interview.
+- The goal is to gather enough information to generate:
+  - PRD
+  - Architecture
+  - Business Rules
+  - Database Design
+  - API Design
+  - Implementation Roadmap
+
+---
+
 ## 3. Workflow Steps
 
 ```mermaid
 graph TD
-    A[Read AGENTS.md] --> B[One-Question-at-a-Time Interview]
+    A[Read AGENTS.md] --> B[Discovery Interview]
     B --> C[Verify Requirements vs Assumptions]
     C --> D[Generate docs/ Directory]
     D --> E[Create 10 Core Project Specs]
@@ -51,9 +77,9 @@ Prior to writing code or planning files:
 - Read `AGENTS.md` to load the current PromptEngine manifest and active guidelines.
 - Read `project/README.md` and `project/01-project-bootstrap-standard.md` to align on project standards.
 
-### Step 2: One-Question-at-a-Time Discovery Interview
-To avoid user cognitive overload and verify requirements:
-- Ask exactly **one question at a time** in the chat UI.
+### Step 2: Discovery Interview
+To avoid user cognitive overload and verify requirements, while maintaining efficiency:
+- Group related questions together instead of asking many small questions one by one, adhering to the [Discovery Efficiency Rules](#discovery-efficiency-rules).
 - Never list a wall of multiple-choice questions unless explicitly requested.
 - Focus questions on:
   1. High-level project purpose and business objectives.
@@ -104,7 +130,7 @@ During active coding phases:
 
 ### Discovery Phase Checklist
 - [ ] Parse `AGENTS.md` and confirm local workspace root paths.
-- [ ] Complete the one-question-at-a-time discovery interview sequence.
+- [ ] Complete the discovery interview sequence adhering to the efficiency rules.
 - [ ] Validate all assumptions with the project owner.
 - [ ] Create the `docs/` directory.
 
