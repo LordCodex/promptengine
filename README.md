@@ -88,3 +88,60 @@ ai-engineering-playbook/
 1. **Pre-Flight Indexing**: Locate the `playbook-manifest.json` file in the root. Query it using the keywords of your assigned task (e.g., "Laravel routing", "Inertia Vue sharing") to find the minimal required rule files.
 2. **Minimal Context Loading**: Load only the files specified by the manifest search. Avoid reading the entire repository to conserve context tokens.
 3. **Execution Plan**: Always write a detailed implementation plan in your thinking block or scratchpad based on [01-thinking-and-planning.md](file:///Users/kodexkode/Documents/workspace/promptengine/core/01-thinking-and-planning.md) before executing filesystem changes.
+
+---
+
+# Using PromptEngine in Your Projects
+
+PromptEngine is designed to be reusable across multiple software projects. It acts as a centralized engineering knowledge base that you can integrate directly into your codebase or keep in a shared location.
+
+## Quick Start
+
+To use PromptEngine in your projects, follow this workflow:
+
+1. **Add PromptEngine**: Add PromptEngine to your project repository (or keep it in a shared directory).
+2. **Create AGENTS.md**: Create an `AGENTS.md` file in your project root.
+3. **Point AGENTS.md to PromptEngine**: Write instructions in `AGENTS.md` pointing to your PromptEngine location.
+4. **Start Your Assistant**: Start your AI coding assistant or agent.
+5. **Read AGENTS.md**: The assistant reads `AGENTS.md` automatically on startup.
+6. **Load PromptEngine**: The assistant loads PromptEngine from the path defined.
+7. **Select Playbooks**: The assistant selects only the playbooks relevant to the current task using `playbook-manifest.json`.
+8. **Begin Engineering**: Begin implementing your features with the assistant following the mapped playbooks.
+
+### Example Project Structure (Nested)
+
+When PromptEngine is nested directly within your project repository:
+
+```text
+Project/
+├── AGENTS.md
+├── app/
+├── docs/
+├── routes/
+└── promptengine/      # PromptEngine repository clone
+```
+
+### Example Project Structure (Shared/External)
+
+If you have multiple projects and want to keep a single, shared PromptEngine in a parent folder:
+
+```text
+Workspace/
+├── PromptEngine/      # Shared PromptEngine repository
+├── Project-A/
+│   ├── AGENTS.md      # Points to ../PromptEngine/
+│   └── ...
+└── Project-B/
+    ├── AGENTS.md      # Points to ../PromptEngine/
+    └── ...
+```
+
+In this case, adjust the paths inside `AGENTS.md` to reference `../PromptEngine/`.
+
+## Recommended Workflow
+
+1. **Keep Global Standards Centralized**: Keep all reusable, language-agnostic coding standards and stack playbooks inside PromptEngine.
+2. **Declare Local Rules Locally**: Put project-specific parameters (e.g. database schemas, business rules, product requirements) inside the project's `docs/` folder or `AGENTS.md`.
+3. **Automate Agent Routing**: Let the AI assistant programmatically query `playbook-manifest.json` and load the minimum necessary documents for the current task.
+4. **Update PromptEngine**: Rather than duplicating rules across multiple projects, update the centralized PromptEngine repository and pull changes to keep configurations synchronized.
+
