@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"path/filepath"
 
 	"github.com/LordCodex/promptengine/internal/filesystem"
 )
@@ -12,9 +13,9 @@ type ArchStage struct{}
 func (s *ArchStage) Name() string { return "architecture_stage" }
 func (s *ArchStage) Execute(ctx context.Context, fs filesystem.FileSystem, pm *ProjectModel) error {
 	// Check MVC (typical of Laravel, Rails, or Express routing structures)
-	hasControllers := fs.Exists("app/Http/Controllers") || fs.Exists("controllers") || fs.Exists("src/controllers")
-	hasModels := fs.Exists("app/Models") || fs.Exists("models") || fs.Exists("src/models")
-	hasViews := fs.Exists("resources/views") || fs.Exists("views") || fs.Exists("templates")
+	hasControllers := fs.Exists(filepath.Join(pm.RootDir, "app/Http/Controllers")) || fs.Exists(filepath.Join(pm.RootDir, "controllers")) || fs.Exists(filepath.Join(pm.RootDir, "src/controllers"))
+	hasModels := fs.Exists(filepath.Join(pm.RootDir, "app/Models")) || fs.Exists(filepath.Join(pm.RootDir, "models")) || fs.Exists(filepath.Join(pm.RootDir, "src/models"))
+	hasViews := fs.Exists(filepath.Join(pm.RootDir, "resources/views")) || fs.Exists(filepath.Join(pm.RootDir, "views")) || fs.Exists(filepath.Join(pm.RootDir, "templates"))
 
 	if hasControllers && hasModels && hasViews {
 		pm.Architectures = append(pm.Architectures, ArchitectureInference{
@@ -25,9 +26,9 @@ func (s *ArchStage) Execute(ctx context.Context, fs filesystem.FileSystem, pm *P
 	}
 
 	// Check Clean Architecture (typical Go/TS domains, entities, usecases layouts)
-	hasDomain := fs.Exists("internal/domain") || fs.Exists("src/domain")
-	hasUsecases := fs.Exists("internal/usecase") || fs.Exists("src/usecases") || fs.Exists("internal/app")
-	hasAdapters := fs.Exists("internal/adapters") || fs.Exists("internal/filesystem")
+	hasDomain := fs.Exists(filepath.Join(pm.RootDir, "internal/domain")) || fs.Exists(filepath.Join(pm.RootDir, "src/domain"))
+	hasUsecases := fs.Exists(filepath.Join(pm.RootDir, "internal/usecase")) || fs.Exists(filepath.Join(pm.RootDir, "src/usecases")) || fs.Exists(filepath.Join(pm.RootDir, "internal/app"))
+	hasAdapters := fs.Exists(filepath.Join(pm.RootDir, "internal/adapters")) || fs.Exists(filepath.Join(pm.RootDir, "internal/filesystem"))
 
 	if hasDomain && (hasUsecases || hasAdapters) {
 		pm.Architectures = append(pm.Architectures, ArchitectureInference{
@@ -38,7 +39,7 @@ func (s *ArchStage) Execute(ctx context.Context, fs filesystem.FileSystem, pm *P
 	}
 
 	// Check Domain-Driven Design (DDD)
-	hasBoundedContexts := fs.Exists("src/Domain") && fs.Exists("src/Infrastructure") && fs.Exists("src/Application")
+	hasBoundedContexts := fs.Exists(filepath.Join(pm.RootDir, "src/Domain")) && fs.Exists(filepath.Join(pm.RootDir, "src/Infrastructure")) && fs.Exists(filepath.Join(pm.RootDir, "src/Application"))
 	if hasBoundedContexts {
 		pm.Architectures = append(pm.Architectures, ArchitectureInference{
 			Style:      "Domain-Driven Design (DDD)",

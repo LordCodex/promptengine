@@ -29,7 +29,7 @@ type DocumentSpec struct {
 	Name             string
 	Purpose          string
 	DefaultPath      string
-	Priority         int      // higher = more critical to health score
+	Priority         int // higher = more critical to health score
 	RequiredSections []RequiredSection
 	DependsOn        []string // IDs of other docs this doc depends on
 	UpdateTriggers   []string // change signals that should trigger an update
@@ -47,10 +47,10 @@ type SpecMetadata struct {
 
 // VersionedDoc records a generation event for audit and rollback purposes
 type VersionedDoc struct {
-	DocID      string
-	Version    string
+	DocID       string
+	Version     string
 	GeneratedAt time.Time
-	Content    []byte
+	Content     []byte
 }
 
 // DocRegistry is the central catalogue of all known document types

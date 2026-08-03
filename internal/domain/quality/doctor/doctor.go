@@ -153,7 +153,7 @@ func (c *manifestIntegrityCheck) ID() string          { return "manifest-integri
 func (c *manifestIntegrityCheck) Category() string    { return "integrity" }
 func (c *manifestIntegrityCheck) Description() string { return "Verify playbook-manifest.json exists" }
 func (c *manifestIntegrityCheck) Run(fs filesystem.FileSystem) ([]quality.Finding, error) {
-	if !fs.Exists("playbook-manifest.json") {
+	if !quality.CheckManifestExists(fs) {
 		return []quality.Finding{{
 			Engine:         "doctor",
 			Rule:           c.ID(),
@@ -176,7 +176,7 @@ func (c *configurationCheck) ID() string          { return "configuration-exists
 func (c *configurationCheck) Category() string    { return "configuration" }
 func (c *configurationCheck) Description() string { return "Verify PromptEngine configuration" }
 func (c *configurationCheck) Run(fs filesystem.FileSystem) ([]quality.Finding, error) {
-	if !fs.Exists(".promptengine") {
+	if !quality.CheckConfigExists(fs) {
 		return []quality.Finding{{
 			Engine:         "doctor",
 			Rule:           c.ID(),
@@ -198,7 +198,7 @@ func (c *documentationExistenceCheck) ID() string          { return "docs-direct
 func (c *documentationExistenceCheck) Category() string    { return "documentation" }
 func (c *documentationExistenceCheck) Description() string { return "Verify docs directory exists" }
 func (c *documentationExistenceCheck) Run(fs filesystem.FileSystem) ([]quality.Finding, error) {
-	if !fs.Exists("docs") {
+	if !quality.CheckDocsDirExists(fs) {
 		return []quality.Finding{{
 			Engine:         "doctor",
 			Rule:           c.ID(),

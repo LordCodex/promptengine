@@ -13,6 +13,7 @@ import (
 type Format string
 
 const (
+	FormatText  Format = "text"
 	FormatHuman Format = "human"
 	FormatJSON  Format = "json"
 	FormatYAML  Format = "yaml"
@@ -49,7 +50,9 @@ func (r *ConfiguredRenderer) Render(w io.Writer, data interface{}) error {
 		encoder.SetIndent("", "  ")
 		return encoder.Encode(data)
 	case FormatYAML:
-		return yaml.NewEncoder(w).Encode(data)
+		encoder := yaml.NewEncoder(w)
+		defer encoder.Close()
+		return encoder.Encode(data)
 	default:
 		// Human readable text presentation
 		if str, ok := data.(string); ok {

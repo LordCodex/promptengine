@@ -1,0 +1,11 @@
+{"command":"promptengine context","status":"completed","started_at":"2026-08-03T19:47:39.432711Z","ended_at":"2026-08-03T19:47:39.540857Z","duration":"108.146ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine workflow","status":"completed","started_at":"2026-08-03T20:01:25.299107Z","ended_at":"2026-08-03T20:01:25.574231Z","duration":"275.124ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine version","status":"completed","started_at":"2026-08-03T20:04:55.035499Z","ended_at":"2026-08-03T20:04:55.063266Z","duration":"27.767ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine completion","status":"completed","started_at":"2026-08-03T20:09:52.556085Z","ended_at":"2026-08-03T20:09:52.581999Z","duration":"25.914ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine completion","status":"completed","started_at":"2026-08-03T20:09:52.605636Z","ended_at":"2026-08-03T20:09:52.630183Z","duration":"24.547ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine completion","status":"completed","started_at":"2026-08-03T20:09:52.65905Z","ended_at":"2026-08-03T20:09:52.682764Z","duration":"23.714ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine completion","status":"completed","started_at":"2026-08-03T20:09:52.707567Z","ended_at":"2026-08-03T20:09:52.731156Z","duration":"23.589ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine version","status":"completed","started_at":"2026-08-03T20:15:43.353939Z","ended_at":"2026-08-03T20:15:43.384422Z","duration":"30.483ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine version","status":"completed","started_at":"2026-08-03T20:16:20.854436Z","ended_at":"2026-08-03T20:16:20.880565Z","duration":"26.129ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine version","status":"completed","started_at":"2026-08-03T20:20:17.014519Z","ended_at":"2026-08-03T20:20:17.047132Z","duration":"32.613ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine scan","status":"completed","started_at":"2026-08-03T20:20:28.824051Z","ended_at":"2026-08-03T20:20:28.850013Z","duration":"25.962ms","metadata":{"phase":"lifecycle"}}

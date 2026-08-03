@@ -6,31 +6,31 @@ import "fmt"
 type ChangeSignal string
 
 const (
-	SignalNewMigration      ChangeSignal = "new-migration"
-	SignalNewAPI            ChangeSignal = "new-api"
-	SignalNewService        ChangeSignal = "new-service"
-	SignalNewQueue          ChangeSignal = "new-queue"
-	SignalNewScheduledJob   ChangeSignal = "new-scheduled-job"
-	SignalNewModule         ChangeSignal = "new-module"
+	SignalNewMigration       ChangeSignal = "new-migration"
+	SignalNewAPI             ChangeSignal = "new-api"
+	SignalNewService         ChangeSignal = "new-service"
+	SignalNewQueue           ChangeSignal = "new-queue"
+	SignalNewScheduledJob    ChangeSignal = "new-scheduled-job"
+	SignalNewModule          ChangeSignal = "new-module"
 	SignalNewPackage         ChangeSignal = "new-package"
-	SignalNewTechnology     ChangeSignal = "new-technology"
+	SignalNewTechnology      ChangeSignal = "new-technology"
 	SignalArchitectureChange ChangeSignal = "architecture-change"
-	SignalNewDocumentation  ChangeSignal = "new-documentation"
+	SignalNewDocumentation   ChangeSignal = "new-documentation"
 )
 
 // SyncRule maps a ChangeSignal to the document IDs that should be updated
 type SyncRule struct {
-	Signal      ChangeSignal
+	Signal       ChangeSignal
 	AffectedDocs []string // doc IDs (matches DocumentSpec.ID)
 	Description  string
 }
 
 // SyncRecommendation is one actionable update suggestion
 type SyncRecommendation struct {
-	DocID       string
-	Reason      string
-	Signal      ChangeSignal
-	AutoApply   bool // true = safe to auto-update without approval
+	DocID     string
+	Reason    string
+	Signal    ChangeSignal
+	AutoApply bool // true = safe to auto-update without approval
 }
 
 // SyncResult is the outcome of a sync operation
@@ -67,9 +67,9 @@ func (d *ChangeDetector) Detect(signals []ChangeSignal) []SyncRecommendation {
 					if !seen[key] {
 						seen[key] = true
 						recs = append(recs, SyncRecommendation{
-							DocID:  docID,
-							Reason: rule.Description,
-							Signal: signal,
+							DocID:     docID,
+							Reason:    rule.Description,
+							Signal:    signal,
 							AutoApply: signal == SignalNewDocumentation, // only safe for doc additions
 						})
 					}

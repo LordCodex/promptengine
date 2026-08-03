@@ -1,0 +1,127 @@
+{
+  "name": "promptengine-vscode",
+  "displayName": "PromptEngine",
+  "description": "Use PromptEngine project standards, context, workflows, and AI handoff packages from VS Code.",
+  "version": "0.1.0",
+  "publisher": "promptengine",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:promptengine.analyzeProject",
+    "onCommand:promptengine.generateContext",
+    "onCommand:promptengine.generatePrompt",
+    "onCommand:promptengine.runWorkflow",
+    "onCommand:promptengine.checkHealth",
+    "onCommand:promptengine.syncDocumentation",
+    "onCommand:promptengine.exportSelectedCodeContext",
+    "onCommand:promptengine.exportCurrentFileContext"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "promptengine.analyzeProject",
+        "title": "PromptEngine: Analyze Project"
+      },
+      {
+        "command": "promptengine.generateContext",
+        "title": "PromptEngine: Generate Context"
+      },
+      {
+        "command": "promptengine.generatePrompt",
+        "title": "PromptEngine: Generate AI Prompt"
+      },
+      {
+        "command": "promptengine.runWorkflow",
+        "title": "PromptEngine: Run Workflow"
+      },
+      {
+        "command": "promptengine.checkHealth",
+        "title": "PromptEngine: Check Health"
+      },
+      {
+        "command": "promptengine.syncDocumentation",
+        "title": "PromptEngine: Sync Documentation"
+      },
+      {
+        "command": "promptengine.exportSelectedCodeContext",
+        "title": "PromptEngine: Selected Code to Context"
+      },
+      {
+        "command": "promptengine.exportCurrentFileContext",
+        "title": "PromptEngine: Analyze Current File"
+      }
+    ],
+    "configuration": {
+      "title": "PromptEngine",
+      "properties": {
+        "promptengine.path": {
+          "type": "string",
+          "default": "promptengine",
+          "description": "Path to the PromptEngine CLI binary."
+        },
+        "promptengine.configPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional PromptEngine project configuration path."
+        },
+        "promptengine.preferredAIClient": {
+          "type": "string",
+          "default": "codex",
+          "enum": ["claude", "codex", "chatgpt", "cursor", "windsurf", "generic"],
+          "description": "Preferred external AI client handoff format."
+        },
+        "promptengine.outputFormat": {
+          "type": "string",
+          "default": "markdown",
+          "enum": ["markdown", "json", "yaml"],
+          "description": "Default export format for context and prompt packages."
+        },
+        "promptengine.contextLimitBytes": {
+          "type": "number",
+          "default": 100000,
+          "description": "Maximum context size requested from PromptEngine."
+        }
+      }
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "promptengine.analyzeProject"
+        },
+        {
+          "command": "promptengine.generateContext"
+        },
+        {
+          "command": "promptengine.generatePrompt"
+        },
+        {
+          "command": "promptengine.runWorkflow"
+        },
+        {
+          "command": "promptengine.checkHealth"
+        },
+        {
+          "command": "promptengine.syncDocumentation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "promptengine.exportSelectedCodeContext",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "promptengine.exportCurrentFileContext"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "test": "node ./test/promptengineClient.test.js"
+  },
+  "devDependencies": {}
+}

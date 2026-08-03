@@ -1,51 +1,42 @@
 # CLI Command Specification: `install`
 
----
+## Purpose
 
-## 1. Purpose
-Downloads, registers, and pre-configures stack-specific plugins or standard playbooks components into the local workspace.
+Install a local PromptEngine package or plugin from a YAML or JSON manifest.
 
-## 2. Use Cases
-- A developer adds a new technology stack (e.g. `react-next` or `vue-components`) to their project and installs the corresponding playbooks configurations.
+## Inputs
 
-## 3. Inputs
-- **Arguments**:
-  - `[plugin_id]`: Package/Plugin identifier to install (maps to standard stacks or third-party registries).
-- **Flags**:
-  - `-g`, `--global`: Install globally into user global configuration paths.
+- Optional argument: `[id]`, the package identifier.
+- Required flag: `--manifest`, the local manifest path.
 
-## 4. Outputs
-- **Files Created**:
-  - Playbook source markdown files added inside `.promptengine/plugins/` folder.
-- **Files Modified**:
-  - Updates `.promptengine.json` local file registry mapping.
-- **Console Dumps**: Status log showing plugin installation progress and dependency resolution results.
+## Outputs
 
----
+Installed package files, metadata, and state are written under:
 
-## 5. Interactive Behaviour
-1. If no arguments are passed, lists available plugins from standard mappings list.
-2. Prompts user: `Select plugin to install:`.
-3. Validates dependencies configurations.
-4. Asks: `Proceed with installation? (y/n)`.
+```text
+.promptengine/plugins/<id>/
+```
 
-## 6. Non-Interactive Behaviour
-1. Pulls specified plugin.
-2. Resolves schemas and files silent.
-3. Exits with code `1` if plugin registry cannot be contacted.
+## Workflow
 
----
+1. Read and validate the local manifest.
+2. Validate compatibility, permissions, and declared source files.
+3. Copy declared files and persist plugin metadata.
+4. Exit with code `1` when validation or installation fails.
 
-## 7. Expected Workflow
-- Run `promptengine install stacks-laravel` in workspace console.
-- Confirm setup scripts runs.
-- Playbooks are installed.
+Example:
 
-## 8. Error Handling
-- **Registry Timeout**: Exits code `1` and prints DNS/network warning log.
+```bash
+promptengine install --manifest ./plugins/company/plugin.yaml
+promptengine plugin list
+```
 
-## 9. Future Extensions
-- Third-party packages signature verification checks to prevent dependency execution exploits.
+Uninstalling removes the installed package state:
 
-## 10. Related PromptEngine Workflows
-- **[Plugin Architecture Guide](../CLI-Architecture.md)**.
+```bash
+promptengine plugin remove company
+```
+
+## Related Documentation
+
+- [Plugin Architecture Guide](../CLI-Architecture.md)

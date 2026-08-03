@@ -7,7 +7,7 @@ import (
 
 var (
 	// Version is the current SemVer version. Set via ldflags.
-	Version = "0.1.0-alpha"
+	Version = "1.0.0"
 
 	// Commit is the git commit SHA. Set via ldflags.
 	Commit = "unknown"

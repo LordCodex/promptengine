@@ -1,6 +1,8 @@
 package context
 
 import (
+	"context"
+
 	"github.com/LordCodex/promptengine/internal/filesystem"
 	"github.com/LordCodex/promptengine/pkg/manifest"
 )
@@ -21,8 +23,9 @@ const (
 
 // Builder computes the minimum set of playbooks and documents files to load
 type Builder struct {
-	fs       filesystem.FileSystem
-	manifest *manifest.PlaybookManifest
+	fs             filesystem.FileSystem
+	manifest       *manifest.PlaybookManifest
+	manifestEngine *manifest.Engine
 }
 
 func NewBuilder(fs filesystem.FileSystem, m *manifest.PlaybookManifest) *Builder {
@@ -30,6 +33,10 @@ func NewBuilder(fs filesystem.FileSystem, m *manifest.PlaybookManifest) *Builder
 		fs:       fs,
 		manifest: m,
 	}
+}
+
+func NewBuilderWithManifestEngine(fs filesystem.FileSystem, engine *manifest.Engine) *Builder {
+	return &Builder{fs: fs, manifestEngine: engine}
 }
 
 func (b *Builder) BuildContext(task TaskType, affectedFiles []string) ([]string, error) {
@@ -58,4 +65,12 @@ func (b *Builder) BuildContext(task TaskType, affectedFiles []string) ([]string,
 	}
 
 	return resolved, nil
+}
+
+func (b *Builder) BuildPackage(req ContextRequest) (*ContextPackage, error) {
+	var query *manifest.QueryEngine
+	if b.manifestEngine != nil {
+		query = manifest.NewQueryEngine(b.manifestEngine)
+	}
+	return NewEngine(b.fs, WithManifestQuery(query)).Build(context.Background(), req)
 }

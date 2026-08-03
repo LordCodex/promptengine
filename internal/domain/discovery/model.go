@@ -1,6 +1,7 @@
 package discovery
 
-// ProjectClassification defines project archetypes
+import "time"
+
 type ProjectClassification string
 
 const (
@@ -21,22 +22,56 @@ const (
 	ClassHybrid             ProjectClassification = "hybrid"
 )
 
-// DocSpec defines localized target specifications
-type DocSpec struct {
-	Name       string `json:"name"`
-	Exists     bool   `json:"exists"`
-	Path       string `json:"path"`
-	Completeness float64 `json:"completeness"` // percentage 0.0 - 100.0
+type ProjectInfo struct {
+	Name         string            `json:"name"`
+	RootPath     string            `json:"root_path"`
+	DetectedType string            `json:"detected_type"`
+	Metadata     map[string]string `json:"metadata,omitempty"`
+	GeneratedAt  time.Time         `json:"generated_at"`
 }
 
-// ArchitectureInference defines architectural style scores
+type TechnologyInfo struct {
+	Languages       []string `json:"languages"`
+	Frameworks      []string `json:"frameworks"`
+	Runtimes        []string `json:"runtimes"`
+	PackageManagers []string `json:"package_managers"`
+	Databases       []string `json:"databases"`
+	Infrastructure  []string `json:"infrastructure"`
+	Testing         []string `json:"testing"`
+}
+
+type RepositoryInfo struct {
+	RootPath           string   `json:"root_path"`
+	Directories        []string `json:"directories"`
+	Files              []string `json:"files"`
+	ConfigurationFiles []string `json:"configuration_files"`
+	DocumentationFiles []string `json:"documentation_files"`
+	IgnoredFiles       []string `json:"ignored_files"`
+	PermissionErrors   []string `json:"permission_errors"`
+	IsMonorepo         bool     `json:"is_monorepo"`
+}
+
+type ArchitectureInfo struct {
+	Backend        bool     `json:"backend"`
+	Frontend       bool     `json:"frontend"`
+	Mobile         bool     `json:"mobile"`
+	Services       []string `json:"services"`
+	Infrastructure bool     `json:"infrastructure"`
+}
+
+type DocSpec struct {
+	Name         string  `json:"name"`
+	Exists       bool    `json:"exists"`
+	Path         string  `json:"path"`
+	Completeness float64 `json:"completeness"`
+}
+
 type ArchitectureInference struct {
-	Style      string  `json:"style"`      // e.g. "MVC", "Clean Architecture", "Hexagonal"
-	Confidence float64 `json:"confidence"` // score 0.0 - 1.0
+	Style      string  `json:"style"`
+	Confidence float64 `json:"confidence"`
 	Reason     string  `json:"reason"`
 }
 
-// PromptEngineStatus outlines PromptEngine installation properties
 type PromptEngineStatus struct {
 	Installed       bool   `json:"installed"`
 	AgentsMDPresent bool   `json:"agents_md_present"`
@@ -45,8 +80,12 @@ type PromptEngineStatus struct {
 	ConfigVersion   string `json:"config_version"`
 }
 
-// ProjectModel represents everything discovered about a repository
 type ProjectModel struct {
+	Project      ProjectInfo      `json:"project"`
+	Technology   TechnologyInfo   `json:"technology"`
+	Repository   RepositoryInfo   `json:"repository"`
+	Architecture ArchitectureInfo `json:"architecture"`
+
 	RootDir         string                  `json:"root_dir"`
 	Classifications []ProjectClassification `json:"classifications"`
 	Languages       []string                `json:"languages"`
@@ -63,17 +102,18 @@ type ProjectModel struct {
 }
 
 func NewProjectModel(rootDir string) *ProjectModel {
+	if rootDir == "" {
+		rootDir = "."
+	}
 	return &ProjectModel{
-		RootDir:         rootDir,
-		Classifications: make([]ProjectClassification, 0),
-		Languages:       make([]string, 0),
-		Frameworks:      make([]string, 0),
-		Databases:       make([]string, 0),
-		PackageManagers: make([]string, 0),
-		TestingFrames:   make([]string, 0),
-		CIs:             make([]string, 0),
-		Architectures:   make([]ArchitectureInference, 0),
-		Docs:            make(map[string]DocSpec),
+		Project: ProjectInfo{
+			RootPath:    rootDir,
+			Metadata:    map[string]string{},
+			GeneratedAt: time.Now().UTC(),
+		},
+		Repository: RepositoryInfo{RootPath: rootDir},
+		RootDir:    rootDir,
+		Docs:       map[string]DocSpec{},
 	}
 }
 
@@ -84,4 +124,48 @@ func (pm *ProjectModel) HasClassification(c ProjectClassification) bool {
 		}
 	}
 	return false
+}
+
+func (pm *ProjectModel) SyncLegacyFields() {
+	pm.Technology.Languages = uniqueStrings(append(pm.Technology.Languages, pm.Languages...))
+	pm.Technology.Frameworks = uniqueStrings(append(pm.Technology.Frameworks, pm.Frameworks...))
+	pm.Technology.Databases = uniqueStrings(append(pm.Technology.Databases, pm.Databases...))
+	pm.Technology.PackageManagers = uniqueStrings(append(pm.Technology.PackageManagers, pm.PackageManagers...))
+	pm.Technology.Testing = uniqueStrings(append(pm.Technology.Testing, pm.TestingFrames...))
+	pm.Technology.Infrastructure = uniqueStrings(append(pm.Technology.Infrastructure, pm.CIs...))
+	if pm.HasDocker {
+		pm.Technology.Infrastructure = addUnique(pm.Technology.Infrastructure, "Docker")
+	}
+
+	pm.Languages = uniqueStrings(pm.Technology.Languages)
+	pm.Frameworks = uniqueStrings(pm.Technology.Frameworks)
+	pm.Databases = uniqueStrings(pm.Technology.Databases)
+	pm.PackageManagers = uniqueStrings(pm.Technology.PackageManagers)
+	pm.TestingFrames = uniqueStrings(pm.Technology.Testing)
+	pm.CIs = uniqueStrings(pm.Technology.Infrastructure)
+}
+
+func addUnique(items []string, item string) []string {
+	if item == "" {
+		return items
+	}
+	for _, existing := range items {
+		if existing == item {
+			return items
+		}
+	}
+	return append(items, item)
+}
+
+func uniqueStrings(items []string) []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, item := range items {
+		if item == "" || seen[item] {
+			continue
+		}
+		seen[item] = true
+		out = append(out, item)
+	}
+	return out
 }

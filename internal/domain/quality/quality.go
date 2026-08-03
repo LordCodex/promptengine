@@ -12,7 +12,7 @@ import (
 type Severity string
 
 const (
-	SeverityCritical   Severity = "critical"  // blocks CI/deploy
+	SeverityCritical   Severity = "critical"   // blocks CI/deploy
 	SeverityError      Severity = "error"      // blocks commit
 	SeverityWarning    Severity = "warning"    // advisory
 	SeverityInfo       Severity = "info"       // informational
@@ -23,31 +23,36 @@ const (
 
 // Finding is the canonical quality observation emitted by every engine.
 type Finding struct {
-	Engine            string   // e.g. "doctor", "audit", "compliance"
-	Rule              string   // rule/check ID
-	Category          string   // e.g. "documentation", "security"
-	Severity          Severity
-	Title             string
-	Explanation       string
-	Impact            string
-	Recommendation    string
-	RelatedStandards  []string // PromptEngine doc IDs
-	RelatedDocs       []string // project doc paths
-	SuggestedWorkflow string
-	AutoFixID         string // empty = no auto-fix available
-	FilePath          string // optional - file the finding relates to
+	ID                string   `json:"id" yaml:"id"`
+	Engine            string   `json:"engine" yaml:"engine"`
+	Rule              string   `json:"rule" yaml:"rule"`
+	Category          string   `json:"category" yaml:"category"`
+	Severity          Severity `json:"severity" yaml:"severity"`
+	Title             string   `json:"title" yaml:"title"`
+	Explanation       string   `json:"explanation,omitempty" yaml:"explanation,omitempty"`
+	Impact            string   `json:"impact,omitempty" yaml:"impact,omitempty"`
+	Recommendation    string   `json:"recommendation,omitempty" yaml:"recommendation,omitempty"`
+	RelatedStandards  []string `json:"related_standards,omitempty" yaml:"related_standards,omitempty"`
+	RelatedDocs       []string `json:"related_docs,omitempty" yaml:"related_docs,omitempty"`
+	SuggestedWorkflow string   `json:"suggested_workflow,omitempty" yaml:"suggested_workflow,omitempty"`
+	AutoFixID         string   `json:"auto_fix_id,omitempty" yaml:"auto_fix_id,omitempty"`
+	DocRef            string   `json:"documentation_reference,omitempty" yaml:"documentation_reference,omitempty"`
+	FilePath          string   `json:"file_path,omitempty" yaml:"file_path,omitempty"`
+	Line              int      `json:"line,omitempty" yaml:"line,omitempty"`
+	StartLine         int      `json:"start_line,omitempty" yaml:"start_line,omitempty"`
+	EndLine           int      `json:"end_line,omitempty" yaml:"end_line,omitempty"`
 }
 
 // ─── Score ─────────────────────────────────────────────────────────────────
 
 // CategoryScore is a weighted score for a single quality dimension
 type CategoryScore struct {
-	Category       string
-	Weight         float64 // 0.0–1.0; all weights in a registry must sum to 1.0
-	Raw            int     // 0–100
-	Weighted       float64 // Raw * Weight
-	CriticalFail   bool    // if true, this category forces overall to 0
-	FindingCount   int
+	Category     string
+	Weight       float64 // 0.0–1.0; all weights in a registry must sum to 1.0
+	Raw          int     // 0–100
+	Weighted     float64 // Raw * Weight
+	CriticalFail bool    // if true, this category forces overall to 0
+	FindingCount int
 }
 
 // Score is the overall result of a quality evaluation

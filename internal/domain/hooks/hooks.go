@@ -1,9 +1,11 @@
 package hooks
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/LordCodex/promptengine/internal/eventbus"
 	"github.com/LordCodex/promptengine/internal/filesystem"
 )
 
@@ -42,6 +44,12 @@ type Hook interface {
 	Uninstall(fs filesystem.FileSystem) error
 }
 
+type EventHook interface {
+	ID() string
+	Event() eventbus.EventType
+	Handle(ctx context.Context, event eventbus.Event) error
+}
+
 // GitHook is a concrete Git hook implementation that writes shell scripts
 type GitHook struct {
 	name   string
@@ -53,8 +61,8 @@ func NewGitHook(name string, htype HookType, cfg HookConfig) *GitHook {
 	return &GitHook{name: name, htype: htype, config: cfg}
 }
 
-func (h *GitHook) Name() string      { return h.name }
-func (h *GitHook) Type() HookType    { return h.htype }
+func (h *GitHook) Name() string       { return h.name }
+func (h *GitHook) Type() HookType     { return h.htype }
 func (h *GitHook) Config() HookConfig { return h.config }
 
 func (h *GitHook) Install(fs filesystem.FileSystem) error {
@@ -142,9 +150,11 @@ jobs:
 
 // Registry handles optional compliance hooks management
 type Registry struct {
-	fs     filesystem.FileSystem
-	hooks  []Hook
-	policy HookPolicy // org-level default policy
+	fs         filesystem.FileSystem
+	hooks      []Hook
+	eventHooks []EventHook
+	bus        *eventbus.EventBus
+	policy     HookPolicy // org-level default policy
 }
 
 func NewRegistry(fs filesystem.FileSystem) *Registry {
@@ -161,6 +171,39 @@ func (r *Registry) SetOrgPolicy(p HookPolicy) {
 
 func (r *Registry) Register(h Hook) {
 	r.hooks = append(r.hooks, h)
+}
+
+func (r *Registry) RegisterEventHook(h EventHook) {
+	r.eventHooks = append(r.eventHooks, h)
+	if r.bus != nil {
+		r.subscribe(h)
+	}
+}
+
+func (r *Registry) Attach(bus *eventbus.EventBus) {
+	r.bus = bus
+	for _, hook := range r.eventHooks {
+		r.subscribe(hook)
+	}
+}
+
+func (r *Registry) subscribe(hook EventHook) {
+	h := hook
+	r.bus.Subscribe(h.Event(), func(e eventbus.Event) {
+		_ = h.Handle(context.Background(), e)
+	})
+}
+
+func (r *Registry) Dispatch(ctx context.Context, e eventbus.Event) error {
+	for _, hook := range r.eventHooks {
+		if hook.Event() != e.Type {
+			continue
+		}
+		if err := hook.Handle(ctx, e); err != nil {
+			return fmt.Errorf("event hook '%s' failed: %w", hook.ID(), err)
+		}
+	}
+	return nil
 }
 
 func (r *Registry) InstallAll() error {
@@ -183,4 +226,8 @@ func (r *Registry) UninstallAll() error {
 
 func (r *Registry) ListHooks() []Hook {
 	return r.hooks
+}
+
+func (r *Registry) ListEventHooks() []EventHook {
+	return r.eventHooks
 }

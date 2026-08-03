@@ -37,10 +37,19 @@ fi
 
 VERSION=${LATEST_TAG#v}
 
+case "$OS" in
+  darwin) OS_LABEL="Darwin" ;;
+  linux) OS_LABEL="Linux" ;;
+esac
+case "$ARCH" in
+  amd64) ARCH_LABEL="x86_64" ;;
+  arm64) ARCH_LABEL="arm64" ;;
+esac
+
 echo "Installing $BINARY_NAME $LATEST_TAG for $OS-$ARCH..."
 
 # Build download url
-DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$LATEST_TAG/${BINARY_NAME}_${OS}_${ARCH}.tar.gz"
+DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$LATEST_TAG/${BINARY_NAME}_${VERSION}_${OS_LABEL}_${ARCH_LABEL}.tar.gz"
 TEMP_DIR=$(mktemp -d)
 
 clean_up() {

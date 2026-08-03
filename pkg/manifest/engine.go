@@ -1,119 +1,188 @@
 package manifest
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"sync"
+
+	"github.com/LordCodex/promptengine/internal/filesystem"
 )
 
-// Engine is the central configuration coordinator
+type SourceKind string
+
+const (
+	SourceCore         SourceKind = "core"
+	SourceOrganization SourceKind = "organization"
+	SourceMarketplace  SourceKind = "marketplace"
+	SourcePlugin       SourceKind = "plugin"
+	SourceProject      SourceKind = "project"
+)
+
+type Source struct {
+	Name     string
+	Kind     SourceKind
+	Priority int
+	Manifest *Manifest
+}
+
 type Engine struct {
-	mu           sync.RWMutex
-	manifests    map[string]*DeclarativeManifest // sourceName -> parsed manifest
-	mergedCache  *DeclarativeManifest
-	cacheInvalid bool
+	mu      sync.RWMutex
+	fs      filesystem.FileSystem
+	sources map[string]Source
+	merged  *Manifest
+	dirty   bool
+
+	// Legacy registry retained for existing tests/packages during rollout.
+	legacyManifests map[string]*DeclarativeManifest
+	legacyMerged    *DeclarativeManifest
+	legacyDirty     bool
 }
 
 func NewEngine() *Engine {
+	return NewEngineWithFS(&filesystem.OSFileSystem{})
+}
+
+func NewEngineWithFS(fs filesystem.FileSystem) *Engine {
+	if fs == nil {
+		fs = &filesystem.OSFileSystem{}
+	}
 	return &Engine{
-		manifests:    make(map[string]*DeclarativeManifest),
-		cacheInvalid: true,
+		fs:              fs,
+		sources:         map[string]Source{},
+		dirty:           true,
+		legacyManifests: map[string]*DeclarativeManifest{},
+		legacyDirty:     true,
 	}
 }
 
 func (e *Engine) LoadManifest(sourceName, path string) error {
-	data, err := os.ReadFile(path)
+	loader := NewLoader(e.fs)
+	m, err := loader.Load(path)
 	if err != nil {
 		return err
 	}
+	return e.Register(sourceName, SourceProject, m)
+}
 
-	var m DeclarativeManifest
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("invalid manifest schema format for source %s: %w", sourceName, err)
+func (e *Engine) Register(sourceName string, kind SourceKind, m *Manifest) error {
+	if sourceName == "" {
+		return fmt.Errorf("manifest source name is required")
+	}
+	if m == nil {
+		return fmt.Errorf("manifest source %q is nil", sourceName)
+	}
+	if err := Validate(m, e.fs); err != nil {
+		return err
 	}
 
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	e.manifests[sourceName] = &m
-	e.cacheInvalid = true
+	e.sources[sourceName] = Source{Name: sourceName, Kind: kind, Priority: sourcePriority(kind), Manifest: m}
+	e.dirty = true
 	return nil
 }
 
-// RegisterMemoryManifest registers a manifest in memory directly (useful for tests and plugins)
-func (e *Engine) RegisterMemoryManifest(sourceName string, m *DeclarativeManifest) {
-	e.mu.Lock()
-	defer e.mu.Unlock()
-	e.manifests[sourceName] = m
-	e.cacheInvalid = true
+func (e *Engine) RegisterPluginManifest(pluginID string, m *Manifest) error {
+	return e.Register(pluginID, SourcePlugin, m)
 }
 
-func (e *Engine) GetMergedManifest() *DeclarativeManifest {
+func (e *Engine) Sources() []Source {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	out := make([]Source, 0, len(e.sources))
+	for _, source := range e.sources {
+		out = append(out, source)
+	}
+	return out
+}
+
+func (e *Engine) ActiveManifest() *Manifest {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-
-	if !e.cacheInvalid && e.mergedCache != nil {
-		return e.mergedCache
+	if !e.dirty && e.merged != nil {
+		return cloneManifest(e.merged)
 	}
 
-	// Merge all loaded manifests with priority: Project > Plugin > Organization > Core
-	merged := &DeclarativeManifest{
-		SchemaVersion: "1",
-		Workflows:     make(map[string]WorkflowDef),
-		Standards:     make(map[string]StandardDef),
-		Technologies:  make(map[string]TechDef),
-		Prompts:       make(map[string]PromptDef),
-		HealthRules:   make(map[string]HealthRuleDef),
+	merged := &Manifest{
+		Metadata:   ProjectMetadata{SchemaVersion: SupportedSchemaVersion},
+		PluginData: map[string]map[string]any{},
+		Extensions: map[string][]ExtensionResource{},
 	}
+	for _, source := range orderedSources(e.sources) {
+		mergeManifest(merged, source.Manifest)
+	}
+	e.merged = merged
+	e.dirty = false
+	return cloneManifest(merged)
+}
 
-	// Order of precedence: compile from lowest priority to highest priority
-	sources := []string{"core", "organization", "plugin", "project"}
+func sourcePriority(kind SourceKind) int {
+	switch kind {
+	case SourceCore:
+		return 10
+	case SourceOrganization:
+		return 20
+	case SourceMarketplace:
+		return 30
+	case SourcePlugin:
+		return 40
+	case SourceProject:
+		return 50
+	default:
+		return 0
+	}
+}
+
+func orderedSources(sources map[string]Source) []Source {
+	out := make([]Source, 0, len(sources))
 	for _, source := range sources {
-		if m, ok := e.manifests[source]; ok {
-			e.merge(merged, m)
-		}
+		out = append(out, source)
 	}
-
-	// Also catch any unstructured plugin sources
-	for source, m := range e.manifests {
-		isStructured := false
-		for _, s := range sources {
-			if s == source {
-				isStructured = true
-				break
+	for i := 0; i < len(out); i++ {
+		for j := i + 1; j < len(out); j++ {
+			if out[j].Priority < out[i].Priority || (out[j].Priority == out[i].Priority && out[j].Name < out[i].Name) {
+				out[i], out[j] = out[j], out[i]
 			}
 		}
-		if !isStructured {
-			e.merge(merged, m)
-		}
 	}
-
-	e.mergedCache = merged
-	e.cacheInvalid = false
-	return merged
+	return out
 }
 
-func (e *Engine) merge(dest, src *DeclarativeManifest) {
-	if src.SchemaVersion != "" {
-		dest.SchemaVersion = src.SchemaVersion
+func mergeManifest(dest, src *Manifest) {
+	if src.Metadata.Name != "" {
+		dest.Metadata = src.Metadata
 	}
-	if src.Compatibility.MinCLIVersion != "" || src.Compatibility.ManifestSchemaVer != "" {
-		dest.Compatibility = src.Compatibility
+	dest.Technologies = upsertTech(dest.Technologies, src.Technologies)
+	dest.Playbooks = upsertPlaybooks(dest.Playbooks, src.Playbooks)
+	dest.Workflows = upsertWorkflows(dest.Workflows, src.Workflows)
+	dest.Prompts = upsertPrompts(dest.Prompts, src.Prompts)
+	dest.Templates = upsertTemplates(dest.Templates, src.Templates)
+	dest.CommandMappings = append(dest.CommandMappings, src.CommandMappings...)
+	dest.TaskRelationships = append(dest.TaskRelationships, src.TaskRelationships...)
+	if dest.PluginData == nil {
+		dest.PluginData = map[string]map[string]any{}
 	}
+	for k, v := range src.PluginData {
+		dest.PluginData[k] = v
+	}
+	if dest.Extensions == nil {
+		dest.Extensions = map[string][]ExtensionResource{}
+	}
+	for k, v := range src.Extensions {
+		dest.Extensions[k] = append(dest.Extensions[k], v...)
+	}
+}
 
-	for k, v := range src.Workflows {
-		dest.Workflows[k] = v
+func cloneManifest(m *Manifest) *Manifest {
+	if m == nil {
+		return nil
 	}
-	for k, v := range src.Standards {
-		dest.Standards[k] = v
-	}
-	for k, v := range src.Technologies {
-		dest.Technologies[k] = v
-	}
-	for k, v := range src.Prompts {
-		dest.Prompts[k] = v
-	}
-	for k, v := range src.HealthRules {
-		dest.HealthRules[k] = v
-	}
+	c := *m
+	c.Technologies = append([]TechnologyDefinition(nil), m.Technologies...)
+	c.Playbooks = append([]PlaybookDefinition(nil), m.Playbooks...)
+	c.Workflows = append([]WorkflowDefinition(nil), m.Workflows...)
+	c.Prompts = append([]PromptMapping(nil), m.Prompts...)
+	c.Templates = append([]TemplateDefinition(nil), m.Templates...)
+	c.CommandMappings = append([]CommandMapping(nil), m.CommandMappings...)
+	c.TaskRelationships = append([]TaskRelationship(nil), m.TaskRelationships...)
+	return &c
 }

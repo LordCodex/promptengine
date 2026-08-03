@@ -1,8 +1,12 @@
 package review
 
 import (
+	"github.com/LordCodex/promptengine/internal/domain/quality"
 	"github.com/LordCodex/promptengine/internal/filesystem"
 )
+
+// Finding is now an alias for the consolidated quality.Finding struct
+type Finding = quality.Finding
 
 // ─── ReviewType ────────────────────────────────────────────────────────────
 
@@ -23,21 +27,6 @@ const (
 	ReviewOrgStandards    ReviewType = "org-standards"
 	ReviewTechBestPractice ReviewType = "tech-best-practice"
 )
-
-// ─── Finding (original preserved) ──────────────────────────────────────────
-
-type Finding struct {
-	Category string // "architecture", "security", "performance", "testing", "documentation", "compliance"
-	Severity string // "block", "important", "suggestion"
-	File     string
-	Line     int
-	Message  string
-	Fix      string
-	// Extended fields
-	Impact            string
-	Recommendation    string
-	SuggestedWorkflow string
-}
 
 // ─── Rule (original preserved) ─────────────────────────────────────────────
 
@@ -71,7 +60,7 @@ func (s *ReviewSession) Add(findings ...Finding) {
 func (s *ReviewSession) CountBySeverity(severity string) int {
 	n := 0
 	for _, f := range s.Findings {
-		if f.Severity == severity {
+		if string(f.Severity) == severity {
 			n++
 		}
 	}
@@ -172,11 +161,13 @@ func (r *docsExistRule) Name() string { return "docs-exist" }
 func (r *docsExistRule) Evaluate(fs filesystem.FileSystem, path string) ([]Finding, error) {
 	if !fs.Exists("docs") {
 		return []Finding{{
+			Engine:         "review",
+			Rule:           r.Name(),
 			Category:       string(ReviewDocumentation),
-			Severity:       "important",
-			Message:        "docs/ directory is missing",
-			Fix:            "run 'promptengine generate' to scaffold documentation",
-			Recommendation: "Create docs/ directory with all standard PromptEngine documents",
+			Severity:       quality.SeverityError,
+			Title:          "docs/ directory is missing",
+			Recommendation: "run 'promptengine generate' to scaffold documentation",
+			Explanation:    "Create docs/ directory with all standard PromptEngine documents",
 		}}, nil
 	}
 	return nil, nil
@@ -195,10 +186,12 @@ func (r *securityDocRule) Name() string { return "security-doc-exists" }
 func (r *securityDocRule) Evaluate(fs filesystem.FileSystem, path string) ([]Finding, error) {
 	if !fs.Exists("docs/Security.md") {
 		return []Finding{{
-			Category: string(ReviewSecurity),
-			Severity: "important",
-			Message:  "docs/Security.md is missing",
-			Fix:      "run 'promptengine generate security' to scaffold security documentation",
+			Engine:         "review",
+			Rule:           r.Name(),
+			Category:       string(ReviewSecurity),
+			Severity:       quality.SeverityError,
+			Title:          "docs/Security.md is missing",
+			Recommendation: "run 'promptengine generate security' to scaffold security documentation",
 		}}, nil
 	}
 	return nil, nil
@@ -217,10 +210,12 @@ func (r *testingDocRule) Name() string { return "testing-doc-exists" }
 func (r *testingDocRule) Evaluate(fs filesystem.FileSystem, path string) ([]Finding, error) {
 	if !fs.Exists("docs/Testing.md") {
 		return []Finding{{
-			Category: string(ReviewTesting),
-			Severity: "suggestion",
-			Message:  "docs/Testing.md is missing",
-			Fix:      "run 'promptengine generate testing' to scaffold testing documentation",
+			Engine:         "review",
+			Rule:           r.Name(),
+			Category:       string(ReviewTesting),
+			Severity:       quality.SeveritySuggestion,
+			Title:          "docs/Testing.md is missing",
+			Recommendation: "run 'promptengine generate testing' to scaffold testing documentation",
 		}}, nil
 	}
 	return nil, nil
@@ -239,10 +234,12 @@ func (r *manifestRule) Name() string { return "manifest-exists" }
 func (r *manifestRule) Evaluate(fs filesystem.FileSystem, path string) ([]Finding, error) {
 	if !fs.Exists("playbook-manifest.json") {
 		return []Finding{{
-			Category: string(ReviewCompliance),
-			Severity: "block",
-			Message:  "playbook-manifest.json is missing",
-			Fix:      "run 'promptengine init' to initialise PromptEngine",
+			Engine:         "review",
+			Rule:           r.Name(),
+			Category:       string(ReviewCompliance),
+			Severity:       quality.SeverityCritical,
+			Title:          "playbook-manifest.json is missing",
+			Recommendation: "run 'promptengine init' to initialise PromptEngine",
 		}}, nil
 	}
 	return nil, nil
