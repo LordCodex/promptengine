@@ -102,6 +102,17 @@ To prevent context window saturation and code quality degradation, the AI agent 
 
 ---
 
+## Engineering Decision Rules
+
+When generating or modifying technical designs, the AI agent must follow these decision-making principles in addition to the implementation rules above:
+
+- **Follow current industry best practices**: Prefer well-established, peer-validated patterns (e.g., SOLID principles, domain-driven design boundaries, REST or event-driven conventions) over framework-specific magic or opinionated defaults. Validate that the chosen approach is appropriate for the current project context.
+- **Evaluate framework defaults critically**: Do not accept framework scaffolding or generated boilerplate as the correct design for every situation. Assess whether defaults fit the project's architecture, scalability requirements, and security posture before adopting them.
+- **Explain important architectural and technical decisions**: When making a choice between two or more viable engineering paths (e.g., event-driven vs. synchronous processing, monolith vs. service extraction, ORM vs. raw SQL), document the trade-offs and rationale in your planning output. Do not silently pick the path of least resistance.
+- **Document deviations from recommended standards**: If project constraints force a deviation from an established standard in this Prompt Engine (e.g., skipping a foreign key constraint for performance, using soft deletes instead of archive tables), the deviation must be explicitly noted and recorded in the project's `Architecture.md` or `Decisions.md` file.
+
+---
+
 ## 7. Legacy Code Modernization Workflow for AI
 
 When refactoring legacy modules:

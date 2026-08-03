@@ -51,9 +51,10 @@ erDiagram
   3. A mitigation plan is documented for reconciling values if sync breaks.
 
 ### Primary Keys & Key Strategies
-- **Default Option (Internal Only)**: Use autoincrementing integers (`BIGINT` in PostgreSQL, `BIGINT AUTO_INCREMENT` in MySQL) for physical join performance.
-- **Default Option (Public/External Boundaries)**: Never expose auto-incrementing integer IDs in APIs, URLs, or search bounds (preventing resource enumeration). Use **UUIDv7** or **ULID** as the external identifier.
-- **Why UUIDv7/ULID**: Unlike random UUIDv4, UUIDv7 and ULID are time-ordered and sortable. This preserves database B-Tree index clustering performance while hiding primary key structures.
+
+Primary key selection directly impacts indexing performance, security, distributed system correctness, and external API design. There is no universally correct choice; the right strategy depends on the database engine, architecture, and scalability requirements.
+
+See **[Section 2A: Primary Key & Identifier Strategy](#2a-primary-key--identifier-strategy)** for the full decision framework, tradeoff analysis, and default recommendations.
 
 ### Relationships and Constraints
 - **Foreign Keys**: Every reference to an external entity must use a physical foreign key constraint with explicit cascading actions:
@@ -71,6 +72,235 @@ erDiagram
   - **Do not use soft deletes by default**. Soft deletes pollute query planning, break unique constraints, and require developer overhead to filter deleted records out of every custom query.
   - **Alternative**: Use hard deletes for transient records. For business-critical data, use a separate archiving table (`archived_invoices`), or implement a strict status-based soft-state (e.g., `status = 'deleted'`) that is validated explicitly.
 - **History Tracking**: When historical records are legally required (e.g., auditing user profile changes or shipping rates), write a separate history ledger table (`shipping_rate_history`) to store immutable snapshots of changes, rather than maintaining mutable updates in the main table.
+
+---
+
+## 2A. Primary Key & Identifier Strategy
+
+Choosing the right primary key and identifier strategy is one of the highest-impact architectural decisions in database engineering. This section provides the full decision framework, tradeoff analysis, and default recommendations.
+
+> **Exception Policy**: Any deviation from the defaults defined in this section must be documented in the project's `Architecture.md` or `Decisions.md` file with a clear rationale.
+
+---
+
+### Identifier Strategy Comparison
+
+The table below compares the most common identifier strategies across key evaluation axes.
+
+| Strategy | Sortable | Sequential | Index Performance | Collision Risk | Exposes Sequence | Distributed-Safe | Storage (bytes) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Auto-Increment Integer** (`BIGINT`) | ✅ | ✅ | ⭐⭐⭐⭐⭐ | None (DB-enforced) | ❌ Yes | ❌ No | 8 |
+| **UUIDv4** (random) | ❌ | ❌ | ⭐⭐ (random fragmentation) | Negligible | ✅ No | ✅ Yes | 16 |
+| **UUIDv7** (time-ordered) | ✅ | ✅ | ⭐⭐⭐⭐ | Negligible | ✅ No | ✅ Yes | 16 |
+| **ULID** | ✅ | ✅ | ⭐⭐⭐⭐ | Negligible | ✅ No | ✅ Yes | 16 |
+| **NanoID** | ❌ | ❌ | ⭐⭐ | Low (configurable) | ✅ No | ✅ Yes | variable |
+| **Composite Natural Key** | Contextual | Contextual | ⭐⭐⭐ | None (if unique) | Contextual | Contextual | variable |
+
+---
+
+### Strategy Definitions & Tradeoffs
+
+#### Auto-Increment Integer (`BIGINT` / `BIGINT AUTO_INCREMENT`)
+
+**How it works**: The database engine generates sequential integers (1, 2, 3…) on each insert, enforced at the engine level.
+
+**Advantages**:
+- Highest possible B-Tree index performance. Sequential inserts fill index pages in order, minimising page splits.
+- Minimal storage footprint (8 bytes vs. 16 bytes for UUID).
+- Simple, human-readable values that are trivial to debug in log files and support tooling.
+- Zero risk of collision.
+
+**Disadvantages**:
+- **Exposes record count and sequence** to anyone who can observe an ID in a URL or API response. This enables resource enumeration attacks (IDOR — Insecure Direct Object Reference).
+- **Not safe for distributed systems**: Requires a single authoritative writer (or a coordination sequence). Multi-node generation produces collisions.
+- **Not portable across databases**: Merging data from two database instances requires ID remapping.
+- **Poor for sharding**: Sequential IDs concentrate writes on the same partition, preventing horizontal write distribution.
+
+**When to use**: Internal join keys on tables never exposed in external APIs or URLs, where the application runs on a single primary writer database.
+
+---
+
+#### UUIDv4 (Random)
+
+**How it works**: A 128-bit randomly generated identifier per RFC 4122. Each UUID is fully random and statistically unique.
+
+**Advantages**:
+- Distributed-safe: Any node can generate a UUID independently without coordination.
+- No sequence exposure. Resistant to enumeration attacks.
+- Portable and mergeable across database instances without collision.
+
+**Disadvantages**:
+- **Index fragmentation**: Random values cause B-Tree page splits on every insert, leading to severely fragmented indexes on high-volume tables. This degrades both insert and read performance significantly at scale.
+- Larger storage cost (16 bytes vs. 8 bytes for integers).
+- Joins on UUID foreign keys consume more memory and CPU than integer joins.
+- Human-unfriendly in logs and debugging sessions.
+
+**When to use**: Legacy systems already using UUIDv4. **Avoid for new projects** where index performance matters. Prefer UUIDv7 or ULID instead.
+
+---
+
+#### UUIDv7 (Time-Ordered) — **Default for New Projects**
+
+**How it works**: A 128-bit identifier per RFC 9562. The most significant 48 bits encode a Unix millisecond timestamp, followed by random bits. This produces lexicographically sortable UUIDs that cluster chronologically in B-Tree indexes.
+
+**Advantages**:
+- **Time-ordered and sortable**: Inserts are monotonically increasing in the same millisecond window, dramatically reducing B-Tree page fragmentation compared to UUIDv4.
+- Distributed-safe: No coordination required between nodes.
+- No sequence exposure. Resistant to enumeration attacks.
+- Portable and mergeable across database instances.
+- Natively supported in PostgreSQL 17+ (`gen_random_uuid()` produces v4; UUIDv7 support arrives via extension or application layer). MySQL 8.4+ has no native UUIDv7 function but accepts `CHAR(36)` / `BINARY(16)` values generated in the application layer.
+- RFC 9562 standardised in May 2024; broad library support across PHP, Node.js, Python, Go, Rust, and Java.
+
+**Disadvantages**:
+- Slightly more complex to generate than auto-increment (requires a library call).
+- 16-byte storage cost vs. 8 bytes for integers.
+- Millisecond timestamp leaks creation time to an observer who decodes the UUID — this is rarely a security concern but must be evaluated for high-confidentiality records.
+
+**When to use**: **Default recommendation for all new projects**. Recommended whenever distributed safety, non-enumerable IDs, or cross-shard portability are required.
+
+> **PostgreSQL Note**: Use `uuid` column type natively. For UUIDv7 generation, use the `pg_uuidv7` extension (PostgreSQL 13+) or generate in the application layer using a RFC 9562-compliant library (e.g., `ramsey/uuid` v4.7+ for PHP, `uuidv7` for Node.js).
+
+> **MySQL / MariaDB Note**: Store as `BINARY(16)` (not `CHAR(36)`) to preserve index performance and halve the storage cost of the text representation. Use the application layer to generate and convert values.
+
+---
+
+#### ULID (Universally Unique Lexicographically Sortable Identifier)
+
+**How it works**: A 128-bit identifier encoded as a 26-character Crockford Base32 string. The first 48 bits are a millisecond Unix timestamp; the remaining 80 bits are random.
+
+**Advantages**:
+- Time-ordered and lexicographically sortable, like UUIDv7.
+- Human-readable and URL-safe (26 uppercase alphanumeric characters, no hyphens).
+- Distributed-safe.
+- Case-insensitive and compatible with string columns.
+
+**Disadvantages**:
+- Less universally supported than UUID at the database engine level. Requires string storage (`CHAR(26)`) rather than a native UUID type.
+- String comparison is slower than integer comparison; larger storage than native UUID binary.
+- The ULID spec (v0.3.0) is less formally standardised than RFC 9562 UUIDv7.
+
+**When to use**: Prefer UUIDv7. Use ULID only when human-readability of the identifier itself is a specific product requirement (e.g., ticket IDs, reference numbers in support tooling).
+
+---
+
+#### NanoID
+
+**How it works**: A cryptographically secure URL-friendly unique string generator. Defaults to a 21-character alphanumeric string with a collision probability comparable to UUIDv4.
+
+**Advantages**:
+- Short, URL-safe, human-copy-friendly output (e.g., `V1StGXR8_Z5jdHi6B-myT`).
+- Good for short codes, public slugs, invite tokens, and short-lived resource IDs.
+
+**Disadvantages**:
+- Not time-ordered. Random, so index performance degrades similarly to UUIDv4.
+- Not a database-native concept; requires careful collision testing for high-volume tables.
+- Not suitable as a primary database key for large tables.
+
+**When to use**: Short public identifiers (referral codes, invite tokens, short-lived slugs), not as primary keys for large tables.
+
+---
+
+#### Composite Natural Keys
+
+**How it works**: A multi-column primary key formed from natural business attributes (e.g., `(tenant_id, order_number)`).
+
+**Advantages**:
+- Eliminates surrogate key joins for pivot and relationship tables.
+- Self-documenting; the key encodes business meaning.
+
+**Disadvantages**:
+- Natural keys can change (e.g., a username-based key breaks on rename). Requires careful stability analysis.
+- Wider keys increase the size of all foreign key references in child tables.
+- Complex to manage in ORM layers that assume single-column PKs.
+
+**When to use**: Pivot/junction tables (e.g., `user_roles`, `category_product`) where the relationship itself is the entity. Avoid for business entity tables.
+
+---
+
+### Default Recommendation for New Projects
+
+For **all new projects**, use the following strategy unless a documented exception is approved:
+
+```
+Primary Key Type: UUIDv7
+Column Type:      PostgreSQL → uuid | MySQL/MariaDB → BINARY(16)
+Generation:       Application layer (RFC 9562-compliant library)
+External APIs:    Expose UUIDv7 directly (non-enumerable, non-sequential)
+Internal Joins:   UUIDv7 — do not maintain a separate surrogate integer key
+                  unless profiling evidence justifies the dual-key overhead
+```
+
+**Rationale**: UUIDv7 is time-ordered (preserving B-Tree insert performance), distributed-safe (no single sequence writer required), non-enumerable (resistant to IDOR attacks), and is now standardised under RFC 9562. It is the pragmatic convergence point between the performance characteristics of sequential integers and the security and distribution properties of random UUIDs.
+
+---
+
+### Decision Framework: Choosing an Identifier Strategy
+
+Use the following decision tree when selecting an identifier strategy for a new table or service:
+
+```
+1. Is this an internal pivot/junction table with no external exposure?
+   └─ YES → Composite natural key (e.g., (user_id, role_id))
+
+2. Is the system distributed (multi-node writes, microservices, event sourcing)?
+   └─ YES → UUIDv7 (default) or ULID
+
+3. Is the record ID ever exposed in an API response, URL, or external system?
+   └─ YES → UUIDv7 (default). Never expose auto-increment integers.
+   └─ NO  → Continue to question 4
+
+4. Is the database a single primary writer with no distributed concerns?
+   └─ YES → Auto-increment BIGINT is acceptable IF the ID will never be
+             exposed externally AND index performance is the primary concern.
+             Document this exception in Architecture.md or Decisions.md.
+
+5. Is a human-readable, URL-safe short code specifically required?
+   └─ YES → ULID for reference numbers; NanoID for invite tokens / short slugs
+             (not as a primary key for high-volume tables)
+```
+
+---
+
+### Dual-Key Pattern (Integer PK + UUID Public ID)
+
+In legacy systems or performance-critical tables, a dual-key pattern may be evaluated:
+- An internal `BIGINT` surrogate primary key for join performance.
+- A separate indexed `uuid` column (`public_id`) used as the external identifier in APIs.
+
+**Tradeoffs**:
+- Reduces index fragmentation on write-heavy tables compared to UUID-as-PK.
+- Doubles the storage footprint of the identifier columns.
+- Adds application complexity: the correct key must be used in every query context.
+- Required ORM configuration to prevent accidental leakage of the integer PK.
+
+**Decision**: This pattern is **not recommended as a default**. Adopt it only when EXPLAIN analysis provides concrete evidence that UUIDv7-as-PK is a measurable performance bottleneck on the specific table in question. The exception must be documented in `Architecture.md` or `Decisions.md`.
+
+---
+
+### Database Engine Support Reference
+
+| Engine | Native UUID Type | UUIDv7 Native Generation | Recommended Storage |
+| :--- | :--- | :--- | :--- |
+| **PostgreSQL 13–16** | `uuid` ✅ | Via `pg_uuidv7` extension | `uuid` column |
+| **PostgreSQL 17+** | `uuid` ✅ | Via `pg_uuidv7` extension | `uuid` column |
+| **MySQL 8.0+** | None (string only) | Application layer | `BINARY(16)` |
+| **MySQL 8.4+** | None (string only) | Application layer | `BINARY(16)` |
+| **MariaDB 10.7+** | `UUID` ✅ | `UUID()` generates v1 — use app layer for v7 | `UUID` column or `BINARY(16)` |
+| **SQLite** | None (text) | Application layer | `TEXT` |
+
+---
+
+### Exception Documentation Requirement
+
+Any deviation from the **UUIDv7 default** must be recorded as an Architecture Decision Record (ADR) in either:
+- **`Architecture.md`** — if the decision applies to the entire project or a major subsystem.
+- **`Decisions.md`** — if the decision is scoped to a specific table, service, or feature boundary.
+
+The exception record must include:
+1. **The table or service name** where the alternative strategy is applied.
+2. **The alternative identifier type chosen** (e.g., `BIGINT AUTO_INCREMENT`, ULID).
+3. **The specific rationale** (e.g., "EXPLAIN analysis shows 40% index fragmentation on `events` table at 500M rows under UUIDv7").
+4. **The mitigation** for any security or distribution risk introduced by the alternative.
 
 ---
 
@@ -324,11 +554,17 @@ Use these matrices to identify the correct database engineering decision based o
 | Low-value transactional data, logs, transient cache indexes | **Hard Delete** | Reclaims physical disk space instantly and keeps indexes thin. |
 | Business-critical documents, invoices, audit trails | **Audit Archive / Status** | Keeps data available for legal compliance while separating it from active queries. |
 
-### Matrix 4: UUID vs. Integer IDs
-| Context | Choice | Rationale |
+### Matrix 4: Primary Key & Identifier Strategy
+| Context | Recommended Strategy | Rationale |
 | :--- | :--- | :--- |
-| Public API models, routing keys, URLs, security boundaries | **UUIDv7 / ULID** | Prevents enumeration attacks while preserving B-Tree index ordering. |
-| Internal primary keys, index joins, parent-child pivots | **Integer (BIGINT)** | Maximizes index scan speeds and reduces disk storage sizes. |
+| **Default — all new projects** | **UUIDv7** | Time-ordered (low B-Tree fragmentation), distributed-safe, non-enumerable, RFC 9562 standard. |
+| Public API models, routing keys, URLs, external references | **UUIDv7** | Prevents IDOR enumeration attacks. Chronological ordering preserved in indexes. |
+| Distributed systems, microservices, event-sourced architectures | **UUIDv7** | No coordination required between writer nodes. Globally unique across services. |
+| Legacy or performance-critical single-writer tables (never externally exposed) | **BIGINT AUTO_INCREMENT** | Highest B-Tree performance; acceptable only when ID is never exposed externally. Document exception. |
+| Pivot / junction tables (e.g., `user_roles`, `category_product`) | **Composite natural key** | The relationship is the entity; no surrogate key needed. |
+| Short public codes, invite tokens, URL slugs | **NanoID / ULID** | Human-friendly, URL-safe. Not suitable as a primary key for high-volume tables. |
+| Systems with existing UUIDv4 (migration path) | **UUIDv4 → UUIDv7** | Migrate incrementally; do not adopt UUIDv4 for new tables. |
+| Dual-key pattern (integer PK + UUID public ID) | **Exception only** | Adds storage and complexity overhead. Requires EXPLAIN evidence and documented ADR. |
 
 ### Matrix 5: JSON Column vs. Separate Table
 | Context | Choice | Rationale |
@@ -374,6 +610,19 @@ AI agents modifying database files in this repository must follow these rules:
 
 ---
 
+## Schema Design Decision Rules
+
+When generating or modifying database schemas, the AI agent must apply these design-level governance rules in addition to the technical rules defined above:
+
+- **Follow current database engineering best practices**: Prefer proven relational modeling principles (normalization to 3NF, explicit constraint enforcement, clear foreign key semantics) over framework-generated scaffolding or ORM conventions that may sacrifice correctness for convenience.
+- **Evaluate all identifier strategies consciously**: Do not default to auto-incrementing integers or random UUIDs without evaluating the project's architecture, security boundaries, and scalability needs. Refer to Matrix 4 and the Primary Keys & Key Strategies rules in Section 2. Document the chosen strategy and its rationale.
+- **Apply indexing with evidence, not assumption**: Do not add indexes speculatively. Index decisions must be grounded in the actual query access patterns for the table. Refer to Section 5 (Indexing Strategy).
+- **Enforce constraints at the database level**: Do not rely solely on application-layer validation. Nullability, uniqueness, referential integrity, and data type correctness must be enforced with SQL constraints as the authoritative boundary.
+- **Consider performance, security, maintainability, and future growth**: Before finalising a schema design, evaluate the impact on write throughput, query planning, multi-tenancy isolation (if applicable), and how the schema will evolve as the dataset scales.
+- **Document significant schema decisions**: Any non-obvious schema choice — including identifier strategy, denormalization, use of JSON columns, custom partitioning, or deviation from 3NF — must be recorded in the project's `Architecture.md` or `Decisions.md` file with a clear rationale and the trade-offs accepted.
+
+---
+
 ## 17. Database Engineering Review Checklist
 
 Use this checklist during code review to evaluate database schema changes and query updates.
@@ -381,7 +630,9 @@ Use this checklist during code review to evaluate database schema changes and qu
 ### Schema Design
 - [ ] Are all foreign keys explicitly constrained with correct cascading delete policies?
 - [ ] Are all column structures configured as `NOT NULL` by default?
-- [ ] Are UUIDs used for external facing identifiers (APIs and URLs) instead of auto-incrementing integers?
+- [ ] Does the primary key strategy follow the defaults in **Section 2A**? (UUIDv7 for new tables)
+- [ ] If a non-default identifier strategy is used (e.g., `BIGINT AUTO_INCREMENT`), is the decision documented in `Architecture.md` or `Decisions.md`?
+- [ ] Are auto-increment integer IDs never exposed in external API responses, URLs, or client-facing surfaces?
 
 ### Queries & Performance
 - [ ] Have you run an `EXPLAIN` query plan to analyze new queries?
