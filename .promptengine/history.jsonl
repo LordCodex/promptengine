@@ -9,3 +9,10 @@
 {"command":"promptengine version","status":"completed","started_at":"2026-08-03T20:16:20.854436Z","ended_at":"2026-08-03T20:16:20.880565Z","duration":"26.129ms","metadata":{"phase":"lifecycle"}}
 {"command":"promptengine version","status":"completed","started_at":"2026-08-03T20:20:17.014519Z","ended_at":"2026-08-03T20:20:17.047132Z","duration":"32.613ms","metadata":{"phase":"lifecycle"}}
 {"command":"promptengine scan","status":"completed","started_at":"2026-08-03T20:20:28.824051Z","ended_at":"2026-08-03T20:20:28.850013Z","duration":"25.962ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine context","status":"completed","started_at":"2026-08-03T21:24:24.194894Z","ended_at":"2026-08-03T21:24:25.201372Z","duration":"1.006478s","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine context","status":"completed","started_at":"2026-08-03T21:25:33.737034Z","ended_at":"2026-08-03T21:25:35.132919Z","duration":"1.395885s","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine context","status":"completed","started_at":"2026-08-03T21:26:23.344611Z","ended_at":"2026-08-03T21:26:24.558998Z","duration":"1.214387s","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine context","status":"completed","started_at":"2026-08-03T21:26:59.937877Z","ended_at":"2026-08-03T21:27:01.272235Z","duration":"1.334358s","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine context","status":"completed","started_at":"2026-08-03T21:28:39.30018Z","ended_at":"2026-08-03T21:28:40.531667Z","duration":"1.231487s","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine version","status":"completed","started_at":"2026-08-03T21:36:28.244676Z","ended_at":"2026-08-03T21:36:28.297455Z","duration":"52.779ms","metadata":{"phase":"lifecycle"}}
+{"command":"promptengine version","status":"completed","started_at":"2026-08-03T21:37:17.399371Z","ended_at":"2026-08-03T21:37:17.449965Z","duration":"50.594ms","metadata":{"phase":"lifecycle"}}

@@ -24,7 +24,7 @@ builds:
       - -s -w
       - -X github.com/LordCodex/promptengine/internal/version.Version={{.Version}}
       - -X github.com/LordCodex/promptengine/internal/version.Commit={{.Commit}}
-      - -X github.com/LordCodex/promptengine/internal/version.Date={{.Date}}
+      - -X github.com/LordCodex/promptengine/internal/version.BuildDate={{.Date}}
 
 archives:
   - id: default

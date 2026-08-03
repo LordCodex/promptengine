@@ -29,12 +29,13 @@ func TestContextEngine_FeatureSelectionUsesManifestAndDiscovery(t *testing.T) {
 	}
 
 	assertSelected(t, pkg, "docs/Architecture.md")
-	assertSelected(t, pkg, "docs/Database.md")
-	assertSelected(t, pkg, "docs/API.md")
+	assertNotSelected(t, pkg, "docs/Database.md")
+	assertNotSelected(t, pkg, "docs/API.md")
 	assertSelected(t, pkg, "app/Services/PaymentService.php")
+	assertSelected(t, pkg, "docs/BusinessRules.md")
 	assertSelected(t, pkg, "standards/feature.md")
-	if len(pkg.Items) == 0 || pkg.Items[0].Path != "app/Services/PaymentService.php" {
-		t.Fatalf("expected affected file to rank first, got %#v", pkg.Items)
+	if len(pkg.Items) == 0 || !strings.Contains(pkg.Items[0].Path, "PaymentService") {
+		t.Fatalf("expected payment-related file to rank first, got %#v", pkg.Items)
 	}
 }
 
@@ -56,6 +57,7 @@ func TestContextEngine_BugFixSelection(t *testing.T) {
 	assertSelected(t, pkg, "docs/Troubleshooting.md")
 	assertSelected(t, pkg, "app/Services/PaymentService.php")
 	assertSelected(t, pkg, "tests/Services/PaymentService.php")
+	assertNotSelected(t, pkg, "docs/Roadmap.md")
 }
 
 func TestContextEngine_RefactorSelection(t *testing.T) {
@@ -117,6 +119,104 @@ func TestContextEngine_MissingDocumentation(t *testing.T) {
 	}
 	if packageHas(pkg, "docs/API.md") {
 		t.Fatal("missing documentation should not be selected")
+	}
+}
+
+func TestContextEngine_DatabaseDocumentationOnlyWhenAffected(t *testing.T) {
+	fs, pm := fixtureProject()
+	engine := NewEngine(fs)
+
+	uiPkg, err := engine.Build(stdcontext.Background(), ContextRequest{
+		TaskType:   TaskAddFeature,
+		Project:    pm,
+		UserIntent: "Add a payment button to the checkout UI",
+		Budget:     BudgetSmall,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	assertNotSelected(t, uiPkg, "docs/Database.md")
+
+	dbPkg, err := engine.Build(stdcontext.Background(), ContextRequest{
+		TaskType:      TaskAddFeature,
+		Project:       pm,
+		UserIntent:    "Add refund persistence and payment transaction migration",
+		AffectedFiles: []string{"database/migrations/create_transactions.php"},
+		Budget:        BudgetSmall,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	assertSelected(t, dbPkg, "docs/Database.md")
+}
+
+func TestContextEngine_BackendTaskExcludesUnrelatedFrontendFiles(t *testing.T) {
+	fs := filesystem.NewMockFileSystem()
+	fs.WriteFile("app/Services/PaymentService.php", []byte("refund service"), 0644)
+	fs.WriteFile("resources/js/components/Navbar.vue", []byte("navigation ui"), 0644)
+	pm := discovery.NewProjectModel(".")
+	pm.Frameworks = []string{"Laravel", "Vue"}
+	pm.Repository.Files = []string{"app/Services/PaymentService.php", "resources/js/components/Navbar.vue"}
+	pm.SyncLegacyFields()
+
+	pkg, err := NewEngine(fs).Build(stdcontext.Background(), ContextRequest{
+		TaskType:      TaskAddFeature,
+		Project:       pm,
+		UserIntent:    "Add refund handling in the payment service",
+		AffectedFiles: []string{"app/Services/PaymentService.php"},
+		Budget:        BudgetSmall,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	assertSelected(t, pkg, "app/Services/PaymentService.php")
+	assertNotSelected(t, pkg, "resources/js/components/Navbar.vue")
+}
+
+func TestContextEngine_UITaskExcludesDeploymentDocumentation(t *testing.T) {
+	fs, pm := fixtureProject()
+	fs.WriteFile("docs/Deployment.md", []byte("deployment details"), 0644)
+	pm.Docs["Deployment"] = discovery.DocSpec{Name: "Deployment", Path: "docs/Deployment.md", Exists: true}
+	pm.SyncLegacyFields()
+
+	pkg, err := NewEngine(fs).Build(stdcontext.Background(), ContextRequest{
+		TaskType:   TaskAddFeature,
+		Project:    pm,
+		UserIntent: "Update checkout screen layout and button styling",
+		Budget:     BudgetSmall,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	assertNotSelected(t, pkg, "docs/Deployment.md")
+}
+
+func TestContextEngine_LowRelevanceFilesAreExplainedAsExcluded(t *testing.T) {
+	fs := filesystem.NewMockFileSystem()
+	fs.WriteFile("internal/domain/payments/service.go", []byte("refund implementation"), 0644)
+	fs.WriteFile("docs/Roadmap.md", []byte("future roadmap"), 0644)
+	pm := discovery.NewProjectModel(".")
+	pm.Languages = []string{"Go"}
+	pm.Repository.Files = []string{"internal/domain/payments/service.go", "docs/Roadmap.md"}
+	pm.SyncLegacyFields()
+
+	pkg, err := NewEngine(fs).Build(stdcontext.Background(), ContextRequest{
+		TaskType:   TaskBugFix,
+		Project:    pm,
+		UserIntent: "Fix refund calculation in payment service",
+		Budget:     BudgetSmall,
+		Explain:    true,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	assertSelected(t, pkg, "internal/domain/payments/service.go")
+	assertNotSelected(t, pkg, "docs/Roadmap.md")
+	if pkg.EstimatedTokens == 0 {
+		t.Fatal("expected estimated token usage")
+	}
+	if !excludedHas(pkg, "docs/Roadmap.md") {
+		t.Fatalf("expected Roadmap.md to be explained as excluded, got %#v", pkg.ExcludedItems)
 	}
 }
 
@@ -313,8 +413,24 @@ func assertSelected(t *testing.T, pkg *ContextPackage, path string) {
 	}
 }
 
+func assertNotSelected(t *testing.T, pkg *ContextPackage, path string) {
+	t.Helper()
+	if packageHas(pkg, path) {
+		t.Fatalf("expected %s to be excluded; items=%#v", path, pkg.Items)
+	}
+}
+
 func packageHas(pkg *ContextPackage, path string) bool {
 	for _, item := range pkg.Items {
+		if item.Path == path {
+			return true
+		}
+	}
+	return false
+}
+
+func excludedHas(pkg *ContextPackage, path string) bool {
+	for _, item := range pkg.ExcludedItems {
 		if item.Path == path {
 			return true
 		}

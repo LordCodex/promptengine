@@ -2,7 +2,7 @@
   "name": "promptengine-vscode",
   "displayName": "PromptEngine",
   "description": "Use PromptEngine project standards, context, workflows, and AI handoff packages from VS Code.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "promptengine",
   "engines": {
     "vscode": "^1.85.0"

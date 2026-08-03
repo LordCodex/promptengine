@@ -55,7 +55,7 @@ func fingerprint(fs filesystem.FileSystem, paths []string, salt string) string {
 }
 
 func cacheKey(req ContextRequest) string {
-	return strings.Join([]string{string(req.TaskType), req.WorkflowType, req.UserIntent, req.RequestedOperation, strings.Join(req.AffectedFiles, ",")}, "|")
+	return strings.Join([]string{string(req.TaskType), req.WorkflowType, req.UserIntent, req.RequestedOperation, strings.Join(req.AffectedFiles, ","), fmt.Sprintf("%.2f", req.MinRelevanceScore), fmt.Sprintf("%t", req.Explain)}, "|")
 }
 
 func clonePackage(pkg *ContextPackage) *ContextPackage {
@@ -64,6 +64,7 @@ func clonePackage(pkg *ContextPackage) *ContextPackage {
 	}
 	cp := *pkg
 	cp.Items = append([]ContextItem(nil), pkg.Items...)
+	cp.ExcludedItems = append([]ContextItem(nil), pkg.ExcludedItems...)
 	cp.Documents = append([]DocumentItem(nil), pkg.Documents...)
 	cp.SelectedFiles = append([]string(nil), pkg.SelectedFiles...)
 	cp.SelectedDocs = append([]string(nil), pkg.SelectedDocs...)

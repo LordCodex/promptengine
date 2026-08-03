@@ -192,22 +192,29 @@ func newScanCommand(app *App) *cobra.Command {
 func newContextCommand(app *App) *cobra.Command {
 	var task, workflow, intent, budget string
 	var maxBytes int
+	var minScore float64
+	var explain bool
 	cmd := &cobra.Command{
 		Use:   "context",
 		Short: "Build an optimized context package",
 		RunE: app.EnforceLifecycle(func(lc *LifecycleContext, args []string) error {
 			pkg, err := app.Context.Build(lc.Ctx, contextengine.ContextRequest{
-				TaskType:     contextengine.TaskType(task),
-				WorkflowType: workflow,
-				Project:      lc.Model,
-				UserIntent:   intent,
-				MaxBytes:     maxBytes,
-				Budget:       contextengine.BudgetType(budget),
+				TaskType:          contextengine.TaskType(task),
+				WorkflowType:      workflow,
+				Project:           lc.Model,
+				UserIntent:        intent,
+				MaxBytes:          maxBytes,
+				MinRelevanceScore: minScore,
+				Explain:           explain,
+				Budget:            contextengine.BudgetType(budget),
 			})
 			if err != nil {
 				return appErr("build context package", err, "Reduce context limits or verify discovery output.")
 			}
 			return renderCLI(app, lc, pkg, func() string {
+				if explain {
+					return renderContextExplain(pkg)
+				}
 				return "Selected Context:\n" + strings.Join(prefixLines(append(pkg.SelectedFiles, pkg.SelectedDocs...), "  "), "\n") + "\n\nReason:\n" + strings.Join(pkg.Reasoning, "\n")
 			})
 		}),
@@ -216,6 +223,8 @@ func newContextCommand(app *App) *cobra.Command {
 	cmd.Flags().StringVar(&workflow, "workflow", "", "workflow type")
 	cmd.Flags().StringVar(&intent, "intent", "", "user intent")
 	cmd.Flags().StringVar(&budget, "budget", string(contextengine.BudgetMedium), "context budget")
+	cmd.Flags().Float64Var(&minScore, "min-score", 45, "minimum relevance score for conditional context")
+	cmd.Flags().BoolVar(&explain, "explain", false, "show selected and excluded context decisions")
 	addContextLimitFlags(cmd, &maxBytes)
 	cmd.AddCommand(newContextExportCommand(app))
 	return cmd
@@ -1013,6 +1022,37 @@ func prefixLines(items []string, prefix string) []string {
 		out[i] = prefix + item
 	}
 	return out
+}
+
+func renderContextExplain(pkg *contextengine.ContextPackage) string {
+	var b strings.Builder
+	b.WriteString("Selected Context:\n")
+	if len(pkg.Items) == 0 {
+		b.WriteString("  none\n")
+	}
+	for _, item := range pkg.Items {
+		b.WriteString(fmt.Sprintf("  %s [%s] score=%.1f\n", item.Path, item.InclusionLevel, item.RelevanceScore))
+		b.WriteString("    Reason: ")
+		b.WriteString(item.Reason)
+		b.WriteByte('\n')
+	}
+	b.WriteString("\nExcluded Context:\n")
+	if len(pkg.ExcludedItems) == 0 {
+		b.WriteString("  none\n")
+	}
+	for _, item := range pkg.ExcludedItems {
+		b.WriteString(fmt.Sprintf("  %s score=%.1f\n", item.Path, item.RelevanceScore))
+		b.WriteString("    Reason: ")
+		b.WriteString(item.ExclusionReason)
+		b.WriteByte('\n')
+	}
+	b.WriteString("\nEstimated token usage: ")
+	b.WriteString(fmt.Sprintf("%d", pkg.EstimatedTokens))
+	b.WriteByte('\n')
+	b.WriteString("Context bytes: ")
+	b.WriteString(fmt.Sprintf("%d/%d", pkg.Summary.FinalSize, pkg.Summary.BudgetLimit))
+	b.WriteByte('\n')
+	return b.String()
 }
 
 func expandAgentProfiles(values []string) []string {

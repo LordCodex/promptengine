@@ -32,9 +32,16 @@ func (c *PromptCompiler) Compile(input CompileInput) (Request, error) {
 	}
 	var contextBuilder strings.Builder
 	if input.ContextPackage != nil {
-		contextBuilder.WriteString("Selected context:\n")
+		contextBuilder.WriteString("Directly relevant project context:\n")
 		for _, item := range input.ContextPackage.Items {
 			contextBuilder.WriteString(fmt.Sprintf("\n--- %s: %s ---\n", item.Type, item.Path))
+			contextBuilder.WriteString("Reason: ")
+			contextBuilder.WriteString(item.Reason)
+			contextBuilder.WriteString("\n")
+			if item.Type == ctxengine.ContextStandard || item.Type == ctxengine.ContextManifestEntry || item.Type == ctxengine.ContextWorkflow {
+				contextBuilder.WriteString("Reference only; follow the relevant rule from this selected standard or workflow.\n")
+				continue
+			}
 			if item.Summary != "" {
 				contextBuilder.WriteString(item.Summary)
 			} else {
@@ -48,10 +55,10 @@ func (c *PromptCompiler) Compile(input CompileInput) (Request, error) {
 		contextBuilder.WriteString(strings.Join(input.WorkflowRequirements, "\n- "))
 	}
 	if len(input.Standards) > 0 {
-		contextBuilder.WriteString("\nStandards:\n- ")
+		contextBuilder.WriteString("\nApplicable standard references:\n- ")
 		contextBuilder.WriteString(strings.Join(input.Standards, "\n- "))
 	}
-	if input.Manifest != nil {
+	if input.Manifest != nil && input.Manifest.Metadata.Name != "" {
 		contextBuilder.WriteString("\nManifest project: ")
 		contextBuilder.WriteString(input.Manifest.Metadata.Name)
 	}
