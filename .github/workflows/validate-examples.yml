@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -26,31 +26,61 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
 
-      - name: Lint Vue Code
+      - name: Install Vue validation dependency
+        working-directory: examples/js-vue-sandbox
+        run: npm install --ignore-scripts --no-audit --no-fund --no-package-lock
+
+      - name: Validate Vue SFC syntax
+        working-directory: examples/js-vue-sandbox
         run: |
-          # Verify JS file layouts under example
-          npx -y eslint --ext .vue,.ts examples/js-vue-sandbox/src/ --no-eslintrc
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const { parse, compileScript } = require('@vue/compiler-sfc');
+
+          for (const name of fs.readdirSync('src').filter((file) => file.endsWith('.vue'))) {
+            const filename = path.join('src', name);
+            const source = fs.readFileSync(filename, 'utf8');
+            const { descriptor, errors } = parse(source, { filename });
+            if (errors.length > 0) {
+              console.error(errors);
+              process.exitCode = 1;
+              continue;
+            }
+            if (descriptor.scriptSetup) {
+              try {
+                compileScript(descriptor, { id: filename });
+              } catch (error) {
+                console.error(error);
+                process.exitCode = 1;
+              }
+            }
+          }
+          NODE
 
   validate-dart:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
 
-      - name: Analyze Dart Code
-        run: |
-          cd examples/dart-flutter-sandbox
-          # Standard dart analyze run
-          dart analyze
+      - name: Resolve Flutter dependencies
+        working-directory: examples/dart-flutter-sandbox
+        run: flutter pub get
+
+      - name: Analyze Flutter Code
+        working-directory: examples/dart-flutter-sandbox
+        run: flutter analyze

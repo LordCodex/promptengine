@@ -53,7 +53,7 @@ func (l *Loader) Discover(startDir string) (string, bool) {
 	for {
 		candidate := filepath.Join(dir, DefaultFilename)
 		if l.fs.Exists(candidate) {
-			return candidate, true
+			return filepath.ToSlash(candidate), true
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
