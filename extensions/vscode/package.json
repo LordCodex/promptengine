@@ -1,7 +1,7 @@
 {
   "name": "promptengine-vscode",
   "displayName": "PromptEngine",
-  "description": "Use PromptEngine project standards, context, workflows, and AI handoff packages from VS Code.",
+  "description": "Use PromptEngine project standards, context, workflows, and review-first AI handoff packages from VS Code.",
   "version": "1.0.0",
   "publisher": "promptengine",
   "engines": {
@@ -14,6 +14,7 @@
     "onCommand:promptengine.analyzeProject",
     "onCommand:promptengine.generateContext",
     "onCommand:promptengine.generatePrompt",
+    "onCommand:promptengine.sendReviewedPrompt",
     "onCommand:promptengine.runWorkflow",
     "onCommand:promptengine.checkHealth",
     "onCommand:promptengine.syncDocumentation",
@@ -33,7 +34,11 @@
       },
       {
         "command": "promptengine.generatePrompt",
-        "title": "PromptEngine: Generate AI Prompt"
+        "title": "PromptEngine: Generate AI Prompt for Review"
+      },
+      {
+        "command": "promptengine.sendReviewedPrompt",
+        "title": "PromptEngine: Send Reviewed Prompt to AI"
       },
       {
         "command": "promptengine.runWorkflow",
@@ -73,7 +78,7 @@
           "type": "string",
           "default": "codex",
           "enum": ["claude", "codex", "chatgpt", "cursor", "windsurf", "generic"],
-          "description": "Preferred external AI client handoff format."
+          "description": "Preferred external AI client used only when you explicitly send a reviewed prompt."
         },
         "promptengine.outputFormat": {
           "type": "string",
@@ -100,6 +105,9 @@
           "command": "promptengine.generatePrompt"
         },
         {
+          "command": "promptengine.sendReviewedPrompt"
+        },
+        {
           "command": "promptengine.runWorkflow"
         },
         {
@@ -116,6 +124,10 @@
         },
         {
           "command": "promptengine.exportCurrentFileContext"
+        },
+        {
+          "command": "promptengine.sendReviewedPrompt",
+          "when": "editorTextFocus"
         }
       ]
     }
