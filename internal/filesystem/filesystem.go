@@ -4,6 +4,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	pathpkg "path"
 	"path/filepath"
 	"strings"
 )
@@ -116,18 +117,23 @@ func (fs *OSFileSystem) AppendFile(path string, data []byte, perm os.FileMode) e
 	return err
 }
 
-func (fs *OSFileSystem) safePath(path string) (string, error) {
+func (fs *OSFileSystem) safePath(target string) (string, error) {
 	base := fs.BaseDir
 	if base == "" {
 		base = "."
 	}
-	if !fs.IsSafePath(base, path) {
+	cleanBase, err := filepath.Abs(filepath.Clean(base))
+	if err != nil {
+		return "", err
+	}
+	resolved := filepath.Clean(target)
+	if !filepath.IsAbs(resolved) {
+		resolved = filepath.Join(cleanBase, resolved)
+	}
+	if !fs.IsSafePath(cleanBase, resolved) {
 		return "", os.ErrPermission
 	}
-	if filepath.IsAbs(path) {
-		return filepath.Clean(path), nil
-	}
-	return filepath.Clean(path), nil
+	return resolved, nil
 }
 
 // IsSafePath checks target file bounds to prevent traversal attacks
@@ -165,7 +171,8 @@ func resolveExistingPath(path string) (string, error) {
 	return filepath.Join(resolvedParent, filepath.Base(path)), nil
 }
 
-// MockFileSystem implements FileSystem in memory for unit testing
+// MockFileSystem implements FileSystem in memory for unit testing. Paths are
+// stored in slash form so fixtures behave identically on Windows, macOS, and Linux.
 type MockFileSystem struct {
 	Files map[string][]byte
 	Dirs  map[string]bool
@@ -178,7 +185,17 @@ func NewMockFileSystem() *MockFileSystem {
 	}
 }
 
+func normalizeMockPath(value string) string {
+	value = strings.ReplaceAll(value, "\\", "/")
+	clean := pathpkg.Clean(value)
+	if clean == "" {
+		return "."
+	}
+	return clean
+}
+
 func (fs *MockFileSystem) Exists(path string) bool {
+	path = normalizeMockPath(path)
 	if _, ok := fs.Files[path]; ok {
 		return true
 	}
@@ -187,7 +204,7 @@ func (fs *MockFileSystem) Exists(path string) bool {
 	}
 	prefix := path + "/"
 	for k := range fs.Files {
-		if strings.HasPrefix(k, prefix) {
+		if strings.HasPrefix(normalizeMockPath(k), prefix) {
 			return true
 		}
 	}
@@ -195,11 +212,11 @@ func (fs *MockFileSystem) Exists(path string) bool {
 }
 
 func (fs *MockFileSystem) IsDir(path string) bool {
-	return fs.Dirs[path]
+	return fs.Dirs[normalizeMockPath(path)]
 }
 
 func (fs *MockFileSystem) ReadFile(path string) ([]byte, error) {
-	data, ok := fs.Files[path]
+	data, ok := fs.Files[normalizeMockPath(path)]
 	if !ok {
 		return nil, io.EOF
 	}
@@ -207,11 +224,12 @@ func (fs *MockFileSystem) ReadFile(path string) ([]byte, error) {
 }
 
 func (fs *MockFileSystem) WriteFile(path string, data []byte, perm os.FileMode) error {
+	path = normalizeMockPath(path)
 	fs.Files[path] = data
-	dir := filepath.Dir(path)
+	dir := pathpkg.Dir(path)
 	for dir != "." && dir != "/" && dir != "" {
 		fs.Dirs[dir] = true
-		parent := filepath.Dir(dir)
+		parent := pathpkg.Dir(dir)
 		if parent == dir {
 			break
 		}
@@ -222,11 +240,12 @@ func (fs *MockFileSystem) WriteFile(path string, data []byte, perm os.FileMode) 
 }
 
 func (fs *MockFileSystem) MkdirAll(path string, perm os.FileMode) error {
+	path = normalizeMockPath(path)
 	fs.Dirs[path] = true
 	dir := path
 	for dir != "." && dir != "/" && dir != "" {
 		fs.Dirs[dir] = true
-		parent := filepath.Dir(dir)
+		parent := pathpkg.Dir(dir)
 		if parent == dir {
 			break
 		}
@@ -237,18 +256,17 @@ func (fs *MockFileSystem) MkdirAll(path string, perm os.FileMode) error {
 }
 
 func (fs *MockFileSystem) ReadDir(path string) ([]os.DirEntry, error) {
-	clean := filepath.Clean(path)
-	if clean == "" {
-		clean = "."
-	}
+	clean := normalizeMockPath(path)
 	if !fs.Exists(clean) && clean != "." {
 		return nil, io.EOF
 	}
 	seen := map[string]mockDirEntry{}
 	add := func(candidate string, isDir bool) {
-		parent := filepath.Dir(candidate)
-		if parent == "." && clean == "." || parent == clean {
-			seen[filepath.Base(candidate)] = mockDirEntry{name: filepath.Base(candidate), dir: isDir}
+		candidate = normalizeMockPath(candidate)
+		parent := pathpkg.Dir(candidate)
+		if (parent == "." && clean == ".") || parent == clean {
+			name := pathpkg.Base(candidate)
+			seen[name] = mockDirEntry{name: name, dir: isDir}
 			return
 		}
 		if clean == "." && !strings.Contains(candidate, "/") {
@@ -256,13 +274,13 @@ func (fs *MockFileSystem) ReadDir(path string) ([]os.DirEntry, error) {
 		}
 	}
 	for file := range fs.Files {
-		add(filepath.Clean(file), false)
+		add(file, false)
 	}
 	for dir := range fs.Dirs {
-		if dir == clean {
+		if normalizeMockPath(dir) == clean {
 			continue
 		}
-		add(filepath.Clean(dir), true)
+		add(dir, true)
 	}
 	out := make([]os.DirEntry, 0, len(seen))
 	for _, entry := range seen {
@@ -272,20 +290,23 @@ func (fs *MockFileSystem) ReadDir(path string) ([]os.DirEntry, error) {
 }
 
 func (fs *MockFileSystem) Remove(path string) error {
+	path = normalizeMockPath(path)
 	delete(fs.Files, path)
 	delete(fs.Dirs, path)
 	return nil
 }
 
 func (fs *MockFileSystem) RemoveAll(path string) error {
-	clean := filepath.Clean(path)
+	clean := normalizeMockPath(path)
 	for file := range fs.Files {
-		if file == clean || strings.HasPrefix(file, clean+"/") {
+		normalized := normalizeMockPath(file)
+		if normalized == clean || strings.HasPrefix(normalized, clean+"/") {
 			delete(fs.Files, file)
 		}
 	}
 	for dir := range fs.Dirs {
-		if dir == clean || strings.HasPrefix(dir, clean+"/") {
+		normalized := normalizeMockPath(dir)
+		if normalized == clean || strings.HasPrefix(normalized, clean+"/") {
 			delete(fs.Dirs, dir)
 		}
 	}
@@ -293,13 +314,16 @@ func (fs *MockFileSystem) RemoveAll(path string) error {
 }
 
 func (fs *MockFileSystem) IsSafePath(base, target string) bool {
-	cleanBase := filepath.Clean(base)
-	cleanTarget := filepath.Clean(target)
-	rel, err := filepath.Rel(cleanBase, cleanTarget)
+	cleanBase := normalizeMockPath(base)
+	cleanTarget := normalizeMockPath(target)
+	if strings.HasPrefix(cleanTarget, "/") || (len(cleanTarget) >= 2 && cleanTarget[1] == ':') {
+		return cleanTarget == cleanBase || strings.HasPrefix(cleanTarget, strings.TrimSuffix(cleanBase, "/")+"/")
+	}
+	rel, err := pathpkg.Rel(cleanBase, cleanTarget)
 	if err != nil {
 		return false
 	}
-	return rel == "." || (rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)))
+	return rel == "." || (rel != ".." && !strings.HasPrefix(rel, "../"))
 }
 
 type mockDirEntry struct {
