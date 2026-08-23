@@ -281,10 +281,18 @@ func detectedTechnologyTerms(pm *discovery.ProjectModel) []string {
 
 func intentKeywords(intent string) []string {
 	aliases := map[string][]string{"dogfood": {"app", "context", "quality", "docs", "prompt"}, "production": {"app", "quality", "docs", "release"}, "hardening": {"quality", "security", "errors", "validation"}, "prompt": {"prompt", "ai", "context"}, "context": {"context", "discovery"}, "workflow": {"workflow"}, "docs": {"docs", "documentation"}, "refund": {"payment", "transaction"}, "withdrawal": {"payment", "wallet", "payout"}, "endpoint": {"api", "route", "controller"}}
+	structural := map[string]bool{
+		"app": true, "application": true, "src": true, "source": true,
+		"service": true, "services": true, "controller": true, "controllers": true,
+		"model": true, "models": true, "route": true, "routes": true,
+		"test": true, "tests": true, "file": true, "files": true,
+		"internal": true, "package": true, "packages": true,
+		"php": true, "typescript": true, "javascript": true, "golang": true,
+	}
 	seen := map[string]bool{}
 	var out []string
 	for _, token := range strings.FieldsFunc(strings.ToLower(intent), func(r rune) bool { return (r < 'a' || r > 'z') && (r < '0' || r > '9') }) {
-		if len(token) < 4 {
+		if len(token) < 4 || structural[token] {
 			continue
 		}
 		if !seen[token] {
