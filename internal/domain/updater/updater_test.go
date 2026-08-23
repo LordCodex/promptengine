@@ -5,11 +5,11 @@ import "testing"
 func TestUpdateEngine_DryRun(t *testing.T) {
 	engine := NewUpdateEngine()
 	req := UpdateRequest{
-		Target: TargetPlugin,
-		ID:     "laravel-pack",
+		Target:  TargetPlugin,
+		ID:      "laravel-pack",
 		FromVer: "1.0.0",
-		ToVer:  "2.0.0",
-		DryRun: true,
+		ToVer:   "2.0.0",
+		DryRun:  true,
 	}
 	report, err := engine.Apply(req, nil)
 	if err != nil {

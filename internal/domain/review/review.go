@@ -13,18 +13,18 @@ type Finding = quality.Finding
 type ReviewType string
 
 const (
-	ReviewArchitecture    ReviewType = "architecture"
+	ReviewArchitecture     ReviewType = "architecture"
 	ReviewCodeOrganization ReviewType = "code-organization"
-	ReviewDocumentation   ReviewType = "documentation"
-	ReviewSecurity        ReviewType = "security"
-	ReviewPerformance     ReviewType = "performance"
-	ReviewTesting         ReviewType = "testing"
-	ReviewMaintainability ReviewType = "maintainability"
-	ReviewScalability     ReviewType = "scalability"
-	ReviewDeployment      ReviewType = "deployment"
-	ReviewObservability   ReviewType = "observability"
-	ReviewCompliance      ReviewType = "promptengine-compliance"
-	ReviewOrgStandards    ReviewType = "org-standards"
+	ReviewDocumentation    ReviewType = "documentation"
+	ReviewSecurity         ReviewType = "security"
+	ReviewPerformance      ReviewType = "performance"
+	ReviewTesting          ReviewType = "testing"
+	ReviewMaintainability  ReviewType = "maintainability"
+	ReviewScalability      ReviewType = "scalability"
+	ReviewDeployment       ReviewType = "deployment"
+	ReviewObservability    ReviewType = "observability"
+	ReviewCompliance       ReviewType = "promptengine-compliance"
+	ReviewOrgStandards     ReviewType = "org-standards"
 	ReviewTechBestPractice ReviewType = "tech-best-practice"
 )
 
@@ -151,9 +151,11 @@ func RegisterDefaultReviewers(reg *Registry) {
 // documentationReviewer checks documentation completeness
 type documentationReviewer struct{}
 
-func (r *documentationReviewer) Type() ReviewType    { return ReviewDocumentation }
-func (r *documentationReviewer) Description() string { return "Checks project documentation completeness" }
-func (r *documentationReviewer) Rules() []Rule       { return []Rule{&docsExistRule{}} }
+func (r *documentationReviewer) Type() ReviewType { return ReviewDocumentation }
+func (r *documentationReviewer) Description() string {
+	return "Checks project documentation completeness"
+}
+func (r *documentationReviewer) Rules() []Rule { return []Rule{&docsExistRule{}} }
 
 type docsExistRule struct{}
 

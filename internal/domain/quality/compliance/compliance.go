@@ -12,13 +12,13 @@ import (
 type ProfileType string
 
 const (
-	ProfilePromptEngine   ProfileType = "promptengine"
-	ProfileOrganization   ProfileType = "organization"
-	ProfileTechnology     ProfileType = "technology"
-	ProfileSecurity       ProfileType = "security"
-	ProfileDocumentation  ProfileType = "documentation"
-	ProfileNaming         ProfileType = "naming"
-	ProfileArchitecture   ProfileType = "architecture"
+	ProfilePromptEngine  ProfileType = "promptengine"
+	ProfileOrganization  ProfileType = "organization"
+	ProfileTechnology    ProfileType = "technology"
+	ProfileSecurity      ProfileType = "security"
+	ProfileDocumentation ProfileType = "documentation"
+	ProfileNaming        ProfileType = "naming"
+	ProfileArchitecture  ProfileType = "architecture"
 )
 
 // ComplianceRule is a single check within a compliance profile

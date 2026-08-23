@@ -41,34 +41,51 @@ type PlaybookManifest struct {
 	TaskMappings         map[string]TaskMapping `json:"task_mappings"`
 }
 
-type Loader struct { fs filesystem.FileSystem }
+type Loader struct{ fs filesystem.FileSystem }
+
 func NewLoader(fs filesystem.FileSystem) *Loader { return &Loader{fs: fs} }
 
 func (l *Loader) Discover(startDir string) (string, bool) {
-	if startDir == "" { startDir = "." }
+	if startDir == "" {
+		startDir = "."
+	}
 	dir := filepath.Clean(startDir)
 	for {
 		candidate := filepath.Join(dir, DefaultFilename)
-		if l.fs.Exists(candidate) { return candidate, true }
+		if l.fs.Exists(candidate) {
+			return candidate, true
+		}
 		parent := filepath.Dir(dir)
-		if parent == dir { return "", false }
+		if parent == dir {
+			return "", false
+		}
 		dir = parent
 	}
 }
 
 func (l *Loader) Load(path string) (*Manifest, error) {
-	if path == "" { path = DefaultFilename }
+	if path == "" {
+		path = DefaultFilename
+	}
 	data, err := l.fs.ReadFile(path)
-	if err != nil { return nil, fmt.Errorf("load manifest %q: %w", path, err) }
+	if err != nil {
+		return nil, fmt.Errorf("load manifest %q: %w", path, err)
+	}
 	var m Manifest
-	if err := decodeManifest(path, data, &m); err != nil { return nil, err }
+	if err := decodeManifest(path, data, &m); err != nil {
+		return nil, err
+	}
 	if m.Metadata.SchemaVersion == "" {
 		var legacy PlaybookManifest
-		if err := json.Unmarshal(data, &legacy); err == nil { m = convertLegacyManifest(legacy) }
+		if err := json.Unmarshal(data, &legacy); err == nil {
+			m = convertLegacyManifest(legacy)
+		}
 	}
 	if m.Metadata.GeneratedAt.IsZero() && m.Metadata.GeneratedAtRaw != "" {
 		parsed, err := time.Parse(time.RFC3339, m.Metadata.GeneratedAtRaw)
-		if err != nil { return nil, fmt.Errorf("manifest metadata generated_at is invalid: %w", err) }
+		if err != nil {
+			return nil, fmt.Errorf("manifest metadata generated_at is invalid: %w", err)
+		}
 		m.Metadata.GeneratedAt = parsed
 	}
 	return &m, nil
@@ -79,13 +96,17 @@ func convertLegacyManifest(old PlaybookManifest) Manifest {
 	seen := map[string]bool{}
 	add := func(category PlaybookCategory, books []Playbook) {
 		for _, book := range books {
-			if book.ID == "" || book.Path == "" || seen[book.ID] { continue }
+			if book.ID == "" || book.Path == "" || seen[book.ID] {
+				continue
+			}
 			seen[book.ID] = true
 			m.Playbooks = append(m.Playbooks, PlaybookDefinition{ID: book.ID, Name: strings.ReplaceAll(book.ID, "_", " "), Category: category, Location: book.Path, Priority: 50})
 		}
 	}
 	add(CategoryCore, old.CorePlaybooks)
-	for domain, books := range old.DomainPlaybooks { add(domainCategory(domain), books) }
+	for domain, books := range old.DomainPlaybooks {
+		add(domainCategory(domain), books)
+	}
 	add(CategoryProject, old.ProjectPlaybooks)
 	add(CategoryBridge, old.BridgePlaybooks)
 	add(CategoryChecklist, old.Checklists)
@@ -98,7 +119,9 @@ func convertLegacyManifest(old PlaybookManifest) Manifest {
 	add(CategoryCLI, old.CliCommandSpecs)
 	for stack, books := range old.TechnologyStacks {
 		var related []string
-		for _, book := range books { related = append(related, book.ID) }
+		for _, book := range books {
+			related = append(related, book.ID)
+		}
 		add(CategoryStacks, books)
 		m.Technologies = append(m.Technologies, TechnologyDefinition{ID: stack, Stack: stack, RelatedPlaybooks: related})
 	}
@@ -112,16 +135,22 @@ func convertLegacyManifest(old PlaybookManifest) Manifest {
 
 func domainCategory(domain string) PlaybookCategory {
 	switch strings.ToLower(domain) {
-	case "security": return CategorySecurity
-	case "performance": return CategoryPerformance
-	case "ui_ux", "accessibility", "seo": return CategoryDesign
-	default: return CategoryCore
+	case "security":
+		return CategorySecurity
+	case "performance":
+		return CategoryPerformance
+	case "ui_ux", "accessibility", "seo":
+		return CategoryDesign
+	default:
+		return CategoryCore
 	}
 }
 
 func (l *Loader) LoadDiscovered(startDir string) (string, *Manifest, error) {
 	path, ok := l.Discover(startDir)
-	if !ok { return "", nil, fmt.Errorf("manifest %q was not found from %q", DefaultFilename, startDir) }
+	if !ok {
+		return "", nil, fmt.Errorf("manifest %q was not found from %q", DefaultFilename, startDir)
+	}
 	m, err := l.Load(path)
 	return path, m, err
 }
@@ -129,9 +158,13 @@ func (l *Loader) LoadDiscovered(startDir string) (string, *Manifest, error) {
 func decodeManifest(path string, data []byte, m *Manifest) error {
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".yaml", ".yml":
-		if err := yaml.Unmarshal(data, m); err != nil { return fmt.Errorf("parse manifest %q as YAML: %w", path, err) }
+		if err := yaml.Unmarshal(data, m); err != nil {
+			return fmt.Errorf("parse manifest %q as YAML: %w", path, err)
+		}
 	default:
-		if err := json.Unmarshal(data, m); err != nil { return fmt.Errorf("parse manifest %q as JSON: %w", path, err) }
+		if err := json.Unmarshal(data, m); err != nil {
+			return fmt.Errorf("parse manifest %q as JSON: %w", path, err)
+		}
 	}
 	return nil
 }
@@ -140,8 +173,12 @@ func decodeManifest(path string, data []byte, m *Manifest) error {
 func Load(path string) (*PlaybookManifest, error) {
 	fs := &filesystem.OSFileSystem{}
 	data, err := fs.ReadFile(path)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	var m PlaybookManifest
-	if err := json.Unmarshal(data, &m); err != nil { return nil, err }
+	if err := json.Unmarshal(data, &m); err != nil {
+		return nil, err
+	}
 	return &m, nil
 }

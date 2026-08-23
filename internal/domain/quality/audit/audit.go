@@ -12,16 +12,16 @@ import (
 type AuditArea string
 
 const (
-	AreaProjectStructure    AuditArea = "project-structure"
+	AreaProjectStructure     AuditArea = "project-structure"
 	AreaEngineeringStandards AuditArea = "engineering-standards"
 	AreaPromptEngineAdoption AuditArea = "promptengine-adoption"
 	AreaMissingDocumentation AuditArea = "missing-documentation"
-	AreaMissingDecisions    AuditArea = "missing-decisions"
-	AreaDeprecatedTech      AuditArea = "deprecated-technology"
-	AreaDependencyRisk      AuditArea = "dependency-risk"
-	AreaArchitectureDrift   AuditArea = "architecture-drift"
-	AreaConfigDrift         AuditArea = "config-drift"
-	AreaDocumentationDrift  AuditArea = "documentation-drift"
+	AreaMissingDecisions     AuditArea = "missing-decisions"
+	AreaDeprecatedTech       AuditArea = "deprecated-technology"
+	AreaDependencyRisk       AuditArea = "dependency-risk"
+	AreaArchitectureDrift    AuditArea = "architecture-drift"
+	AreaConfigDrift          AuditArea = "config-drift"
+	AreaDocumentationDrift   AuditArea = "documentation-drift"
 )
 
 // AuditRule defines a single audit check
@@ -161,9 +161,11 @@ func (e *AuditEngine) RegisterDefaults() {
 
 type projectStructureRule struct{}
 
-func (r *projectStructureRule) ID() string          { return "project-structure" }
-func (r *projectStructureRule) Area() AuditArea     { return AreaProjectStructure }
-func (r *projectStructureRule) Description() string { return "Checks standard project directories exist" }
+func (r *projectStructureRule) ID() string      { return "project-structure" }
+func (r *projectStructureRule) Area() AuditArea { return AreaProjectStructure }
+func (r *projectStructureRule) Description() string {
+	return "Checks standard project directories exist"
+}
 func (r *projectStructureRule) Run(fs filesystem.FileSystem) ([]quality.Finding, error) {
 	var findings []quality.Finding
 	dirs := []string{"docs", ".promptengine"}
@@ -184,9 +186,11 @@ func (r *projectStructureRule) Run(fs filesystem.FileSystem) ([]quality.Finding,
 
 type promptEngineAdoptionRule struct{}
 
-func (r *promptEngineAdoptionRule) ID() string          { return "promptengine-adoption" }
-func (r *promptEngineAdoptionRule) Area() AuditArea     { return AreaPromptEngineAdoption }
-func (r *promptEngineAdoptionRule) Description() string { return "Measures PromptEngine adoption level" }
+func (r *promptEngineAdoptionRule) ID() string      { return "promptengine-adoption" }
+func (r *promptEngineAdoptionRule) Area() AuditArea { return AreaPromptEngineAdoption }
+func (r *promptEngineAdoptionRule) Description() string {
+	return "Measures PromptEngine adoption level"
+}
 func (r *promptEngineAdoptionRule) Run(fs filesystem.FileSystem) ([]quality.Finding, error) {
 	if !fs.Exists("playbook-manifest.json") {
 		return []quality.Finding{{
@@ -248,9 +252,11 @@ func (r *missingDecisionsRule) Run(fs filesystem.FileSystem) ([]quality.Finding,
 
 type architectureDriftRule struct{}
 
-func (r *architectureDriftRule) ID() string          { return "architecture-drift" }
-func (r *architectureDriftRule) Area() AuditArea     { return AreaArchitectureDrift }
-func (r *architectureDriftRule) Description() string { return "Detects architecture documentation drift" }
+func (r *architectureDriftRule) ID() string      { return "architecture-drift" }
+func (r *architectureDriftRule) Area() AuditArea { return AreaArchitectureDrift }
+func (r *architectureDriftRule) Description() string {
+	return "Detects architecture documentation drift"
+}
 func (r *architectureDriftRule) Run(fs filesystem.FileSystem) ([]quality.Finding, error) {
 	// Full implementation integrates with Discovery Engine diff.
 	return nil, nil

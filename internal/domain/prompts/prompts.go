@@ -10,21 +10,21 @@ import (
 type PromptWorkflow string
 
 const (
-	WorkflowNewProject    PromptWorkflow = "new-project"
-	WorkflowExisting      PromptWorkflow = "existing-project"
-	WorkflowMigration     PromptWorkflow = "migration"
-	WorkflowFeature       PromptWorkflow = "feature-development"
-	WorkflowBugFix        PromptWorkflow = "bug-fix"
-	WorkflowRefactor      PromptWorkflow = "refactoring"
-	WorkflowArchReview    PromptWorkflow = "architecture-review"
+	WorkflowNewProject     PromptWorkflow = "new-project"
+	WorkflowExisting       PromptWorkflow = "existing-project"
+	WorkflowMigration      PromptWorkflow = "migration"
+	WorkflowFeature        PromptWorkflow = "feature-development"
+	WorkflowBugFix         PromptWorkflow = "bug-fix"
+	WorkflowRefactor       PromptWorkflow = "refactoring"
+	WorkflowArchReview     PromptWorkflow = "architecture-review"
 	WorkflowSecurityReview PromptWorkflow = "security-review"
-	WorkflowPerfReview    PromptWorkflow = "performance-review"
-	WorkflowDeployment    PromptWorkflow = "deployment"
-	WorkflowDocReview     PromptWorkflow = "documentation-review"
-	WorkflowAudit         PromptWorkflow = "project-audit"
-	WorkflowBootstrap     PromptWorkflow = "ai-session-bootstrap"
+	WorkflowPerfReview     PromptWorkflow = "performance-review"
+	WorkflowDeployment     PromptWorkflow = "deployment"
+	WorkflowDocReview      PromptWorkflow = "documentation-review"
+	WorkflowAudit          PromptWorkflow = "project-audit"
+	WorkflowBootstrap      PromptWorkflow = "ai-session-bootstrap"
 	WorkflowContextRefresh PromptWorkflow = "context-refresh"
-	WorkflowImprovement   PromptWorkflow = "prompt-improvement"
+	WorkflowImprovement    PromptWorkflow = "prompt-improvement"
 )
 
 // PromptSource identifies where a prompt originates
@@ -42,14 +42,14 @@ const (
 
 // PromptDef is the full definition of a reusable prompt
 type PromptDef struct {
-	ID             string
-	Workflow       PromptWorkflow
-	Source         PromptSource
-	Purpose        string
-	RequiredContext []string // context item keys that must be populated
-	Variables      []string // variable names used in Template
-	Template       string   // prompt body with {variable} placeholders
-	ProviderHints  map[string]string // provider-id -> formatting hint
+	ID              string
+	Workflow        PromptWorkflow
+	Source          PromptSource
+	Purpose         string
+	RequiredContext []string          // context item keys that must be populated
+	Variables       []string          // variable names used in Template
+	Template        string            // prompt body with {variable} placeholders
+	ProviderHints   map[string]string // provider-id -> formatting hint
 }
 
 // Prompt is the original struct kept for backward compatibility
@@ -64,8 +64,8 @@ type ContextPackage map[string]string
 
 // PromptRegistry is the multi-source registry of all prompt definitions
 type PromptRegistry struct {
-	mu    sync.RWMutex
-	defs  map[string]*PromptDef
+	mu   sync.RWMutex
+	defs map[string]*PromptDef
 }
 
 func NewPromptRegistry() *PromptRegistry {

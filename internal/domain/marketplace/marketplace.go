@@ -40,8 +40,8 @@ type InstallRequest struct {
 
 // SearchFilter narrows marketplace search results
 type SearchFilter struct {
-	Kind    PackageKind
-	Query   string
+	Kind       PackageKind
+	Query      string
 	MaxResults int
 }
 
