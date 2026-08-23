@@ -1,0 +1,8 @@
+{
+  "name": "promptengine-js-vue-sandbox",
+  "private": true,
+  "version": "0.0.0",
+  "devDependencies": {
+    "@vue/compiler-sfc": "3.5.18"
+  }
+}
