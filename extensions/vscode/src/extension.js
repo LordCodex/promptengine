@@ -1,5 +1,6 @@
 const vscode = require("vscode");
 const { PromptEngineClient, summarizeResult } = require("./promptengineClient");
+const { handoffPrompt, readGeneratedPrompt } = require("./aiHandoff");
 
 function activate(context) {
   const register = (command, handler) => {
@@ -12,16 +13,29 @@ function activate(context) {
 
   register("promptengine.generateContext", async () => {
     const intent = await prompt("Describe the task for context generation");
-    await showResult((await client().generateContext("feature", intent || "")).stdout);
+    if (intent === undefined) {
+      return;
+    }
+    await showResult((await client().generateContext("feature", intent)).stdout);
   });
 
   register("promptengine.generatePrompt", async () => {
     const request = await prompt("Describe the implementation request");
-    await showResult((await client().generatePrompt("feature", request || "")).stdout);
+    if (request === undefined || !request.trim()) {
+      return;
+    }
+
+    const config = readConfig();
+    const result = await client(config).generatePrompt("feature", request);
+    const promptText = await readGeneratedPrompt(vscode, config.workspaceRoot, result.stdout);
+    await handoffPrompt(vscode, promptText, config.preferredAIClient);
   });
 
   register("promptengine.runWorkflow", async () => {
     const id = await prompt("Workflow id", "feature-implementation");
+    if (id === undefined) {
+      return;
+    }
     await showResult((await client().runWorkflow(id || "feature-implementation")).stdout);
   });
 
@@ -47,8 +61,8 @@ function activate(context) {
 
 function deactivate() {}
 
-function client() {
-  return new PromptEngineClient(readConfig());
+function client(config = readConfig()) {
+  return new PromptEngineClient(config);
 }
 
 function readConfig() {
