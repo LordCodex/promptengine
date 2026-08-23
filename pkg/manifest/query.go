@@ -5,59 +5,84 @@ import (
 	"strings"
 )
 
-type QueryEngine struct {
-	engine *Engine
-}
+type QueryEngine struct{ engine *Engine }
 
-func NewQueryEngine(e *Engine) *QueryEngine {
-	return &QueryEngine{engine: e}
-}
+func NewQueryEngine(e *Engine) *QueryEngine { return &QueryEngine{engine: e} }
 
 func (q *QueryEngine) StandardsByTechnology(name string) []PlaybookDefinition {
 	m := q.engine.ActiveManifest()
 	needle := strings.ToLower(name)
-	playbookIDs := map[string]bool{}
+	ids := map[string]bool{}
 	for _, tech := range m.Technologies {
 		if techMatches(tech, needle) {
 			for _, id := range tech.RelatedPlaybooks {
-				playbookIDs[id] = true
+				ids[id] = true
+			}
+			for _, id := range tech.RelatedStandards {
+				ids[id] = true
 			}
 		}
 	}
+	return playbooksByIDs(m, ids)
+}
+
+func (q *QueryEngine) PlaybooksByTask(taskType string) []PlaybookDefinition {
+	workflow, ok := q.workflowForTask(taskType)
+	if !ok {
+		return nil
+	}
+	ids := map[string]bool{}
+	for _, id := range workflow.RequiredPlaybooks {
+		ids[id] = true
+	}
+	return playbooksByIDs(q.engine.ActiveManifest(), ids)
+}
+
+func (q *QueryEngine) OptionalPlaybooksByTask(taskType string) []PlaybookDefinition {
+	workflow, ok := q.workflowForTask(taskType)
+	if !ok {
+		return nil
+	}
+	ids := map[string]bool{}
+	for _, id := range workflow.OptionalPlaybooks {
+		ids[id] = true
+	}
+	return playbooksByIDs(q.engine.ActiveManifest(), ids)
+}
+
+func (q *QueryEngine) PlaybooksByCategory(category PlaybookCategory) []PlaybookDefinition {
 	var out []PlaybookDefinition
-	for _, playbook := range m.Playbooks {
-		if playbookIDs[playbook.ID] {
+	for _, playbook := range q.engine.ActiveManifest().Playbooks {
+		if playbook.Category == category {
 			out = append(out, playbook)
 		}
 	}
 	return out
 }
 
-func (q *QueryEngine) PlaybooksByTask(taskType string) []PlaybookDefinition {
-	m := q.engine.ActiveManifest()
-	workflowID := ""
-	for _, rel := range m.TaskRelationships {
-		if strings.EqualFold(rel.TaskType, taskType) {
-			workflowID = rel.RequiredWorkflow
-			break
-		}
+// MatchingKnowledge returns non-required library resources whose identity or
+// path matches concrete task terms. It is deliberately conservative: these are
+// candidates for context ranking, never unconditional context.
+func (q *QueryEngine) MatchingKnowledge(intent string, categories ...PlaybookCategory) []PlaybookDefinition {
+	allowed := map[PlaybookCategory]bool{}
+	for _, category := range categories {
+		allowed[category] = true
 	}
-	if workflowID == "" {
-		workflowID = normalizeTask(taskType)
-	}
-
-	workflow, ok := findWorkflow(m, workflowID)
-	if !ok {
+	terms := knowledgeTerms(intent)
+	if len(terms) == 0 {
 		return nil
 	}
-	byID := map[string]PlaybookDefinition{}
-	for _, playbook := range m.Playbooks {
-		byID[playbook.ID] = playbook
-	}
-	out := make([]PlaybookDefinition, 0, len(workflow.RequiredPlaybooks))
-	for _, id := range workflow.RequiredPlaybooks {
-		if playbook, ok := byID[id]; ok {
-			out = append(out, playbook)
+	var out []PlaybookDefinition
+	for _, playbook := range q.engine.ActiveManifest().Playbooks {
+		if len(allowed) > 0 && !allowed[playbook.Category] {
+			continue
+		}
+		haystack := strings.ToLower(playbook.ID + " " + playbook.Name + " " + playbook.Location + " " + playbook.Description)
+		for _, term := range terms {
+			if strings.Contains(haystack, term) {
+				out = append(out, playbook)
+				break
+			}
 		}
 	}
 	return out
@@ -102,6 +127,31 @@ func (q *QueryEngine) WorkflowRequirements(workflowID string) (WorkflowDefinitio
 	return workflow, q.PlaybooksByTask(workflow.ID), q.PromptsByWorkflow(workflow.ID), nil
 }
 
+func (q *QueryEngine) workflowForTask(taskType string) (WorkflowDefinition, bool) {
+	m := q.engine.ActiveManifest()
+	workflowID := ""
+	for _, rel := range m.TaskRelationships {
+		if strings.EqualFold(normalizeTask(rel.TaskType), normalizeTask(taskType)) {
+			workflowID = rel.RequiredWorkflow
+			break
+		}
+	}
+	if workflowID == "" {
+		workflowID = normalizeTask(taskType)
+	}
+	return findWorkflow(m, workflowID)
+}
+
+func playbooksByIDs(m *Manifest, ids map[string]bool) []PlaybookDefinition {
+	var out []PlaybookDefinition
+	for _, playbook := range m.Playbooks {
+		if ids[playbook.ID] {
+			out = append(out, playbook)
+		}
+	}
+	return out
+}
+
 func findWorkflow(m *Manifest, id string) (WorkflowDefinition, bool) {
 	for _, workflow := range m.Workflows {
 		if strings.EqualFold(workflow.ID, id) || normalizeTask(workflow.ID) == normalizeTask(id) {
@@ -112,8 +162,7 @@ func findWorkflow(m *Manifest, id string) (WorkflowDefinition, bool) {
 }
 
 func techMatches(tech TechnologyDefinition, needle string) bool {
-	values := []string{tech.ID, tech.Language, tech.Framework, tech.Stack}
-	for _, value := range values {
+	for _, value := range []string{tech.ID, tech.Language, tech.Framework, tech.Stack} {
 		if strings.EqualFold(value, needle) || strings.Contains(strings.ToLower(value), needle) {
 			return true
 		}
@@ -126,6 +175,20 @@ func normalizeTask(task string) string {
 	return strings.ReplaceAll(normalized, "-", "_")
 }
 
+func knowledgeTerms(value string) []string {
+	stop := map[string]bool{"with": true, "from": true, "into": true, "this": true, "that": true, "have": true, "using": true, "feature": true, "project": true, "change": true, "update": true, "implement": true}
+	seen := map[string]bool{}
+	var out []string
+	for _, term := range strings.FieldsFunc(strings.ToLower(value), func(r rune) bool { return (r < 'a' || r > 'z') && (r < '0' || r > '9') }) {
+		if len(term) < 4 || stop[term] || seen[term] {
+			continue
+		}
+		seen[term] = true
+		out = append(out, term)
+	}
+	return out
+}
+
 type CompatibilityReport struct {
 	IsCompatible bool
 	Reason       string
@@ -135,24 +198,19 @@ func (q *QueryEngine) VerifyCompatibility(cliVersion string) CompatibilityReport
 	q.engine.mu.RLock()
 	hasActiveSources := len(q.engine.sources) > 0
 	q.engine.mu.RUnlock()
-
 	m := q.engine.ActiveManifest()
 	if hasActiveSources && m.Metadata.SchemaVersion != "" {
 		if m.Metadata.SchemaVersion != SupportedSchemaVersion {
-			return CompatibilityReport{IsCompatible: false, Reason: fmt.Sprintf("unsupported manifest schema version %s", m.Metadata.SchemaVersion)}
+			return CompatibilityReport{false, fmt.Sprintf("unsupported manifest schema version %s", m.Metadata.SchemaVersion)}
 		}
-		return CompatibilityReport{IsCompatible: true, Reason: "Compatible"}
+		return CompatibilityReport{true, "Compatible"}
 	}
-
 	legacy := q.engine.GetMergedManifest()
 	if legacy.Compatibility.MinCLIVersion != "" && strings.Compare(cliVersion, legacy.Compatibility.MinCLIVersion) < 0 {
-		return CompatibilityReport{
-			IsCompatible: false,
-			Reason:       fmt.Sprintf("CLI version %s is below required minimum %s", cliVersion, legacy.Compatibility.MinCLIVersion),
-		}
+		return CompatibilityReport{false, fmt.Sprintf("CLI version %s is below required minimum %s", cliVersion, legacy.Compatibility.MinCLIVersion)}
 	}
 	if legacy.SchemaVersion == "" {
-		return CompatibilityReport{IsCompatible: false, Reason: "manifest schema version is missing"}
+		return CompatibilityReport{false, "manifest schema version is missing"}
 	}
-	return CompatibilityReport{IsCompatible: true, Reason: "Compatible"}
+	return CompatibilityReport{true, "Compatible"}
 }

@@ -11,7 +11,6 @@ type ValidationIssue struct {
 	Field   string `json:"field" yaml:"field"`
 	Message string `json:"message" yaml:"message"`
 }
-
 type ValidationError struct {
 	Issues []ValidationIssue `json:"issues" yaml:"issues"`
 }
@@ -25,10 +24,7 @@ func (e *ValidationError) Error() string {
 
 func Validate(m *Manifest, fs filesystem.FileSystem) error {
 	var issues []ValidationIssue
-	add := func(field, msg string) {
-		issues = append(issues, ValidationIssue{Field: field, Message: msg})
-	}
-
+	add := func(field, msg string) { issues = append(issues, ValidationIssue{Field: field, Message: msg}) }
 	if m == nil {
 		add("manifest", "manifest is nil")
 		return &ValidationError{Issues: issues}
@@ -86,6 +82,11 @@ func Validate(m *Manifest, fs filesystem.FileSystem) error {
 		for _, id := range w.RequiredPlaybooks {
 			if _, ok := playbooks[id]; !ok {
 				add(field+".required_playbooks", fmt.Sprintf("missing playbook reference %q", id))
+			}
+		}
+		for _, id := range w.OptionalPlaybooks {
+			if _, ok := playbooks[id]; !ok {
+				add(field+".optional_playbooks", fmt.Sprintf("missing playbook reference %q", id))
 			}
 		}
 	}
@@ -150,7 +151,6 @@ func Validate(m *Manifest, fs filesystem.FileSystem) error {
 			}
 		}
 	}
-
 	for i, mapping := range m.CommandMappings {
 		if mapping.Command == "" {
 			add(fmt.Sprintf("command_mappings[%d].command", i), "command is required")
@@ -161,7 +161,6 @@ func Validate(m *Manifest, fs filesystem.FileSystem) error {
 			add(fmt.Sprintf("command_mappings[%d].workflow", i), fmt.Sprintf("missing workflow reference %q", mapping.Workflow))
 		}
 	}
-
 	for i, rel := range m.TaskRelationships {
 		if rel.TaskType == "" {
 			add(fmt.Sprintf("task_relationships[%d].task_type", i), "task type is required")
@@ -172,7 +171,6 @@ func Validate(m *Manifest, fs filesystem.FileSystem) error {
 			}
 		}
 	}
-
 	if len(issues) > 0 {
 		return &ValidationError{Issues: issues}
 	}
@@ -181,13 +179,12 @@ func Validate(m *Manifest, fs filesystem.FileSystem) error {
 
 func validCategory(c PlaybookCategory) bool {
 	switch c {
-	case CategoryCore, CategoryStacks, CategorySecurity, CategoryPerformance, CategoryDesign, CategoryWorkflows, CategoryProject:
+	case CategoryCore, CategoryStacks, CategorySecurity, CategoryPerformance, CategoryDesign, CategoryWorkflows, CategoryProject, CategoryBridge, CategoryChecklist, CategoryDecisionGuide, CategoryGuide, CategoryPrompt, CategoryAI, CategoryCLI:
 		return true
 	default:
 		return false
 	}
 }
-
 func findTemplate(m *Manifest, name string) (TemplateDefinition, bool) {
 	for _, tmpl := range m.Templates {
 		if strings.EqualFold(tmpl.Name, name) {
@@ -196,7 +193,6 @@ func findTemplate(m *Manifest, name string) (TemplateDefinition, bool) {
 	}
 	return TemplateDefinition{}, false
 }
-
 func firstNonEmpty(values ...string) string {
 	for _, value := range values {
 		if value != "" {

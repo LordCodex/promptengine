@@ -41,13 +41,9 @@ type PlaybookManifest struct {
 	TaskMappings         map[string]TaskMapping `json:"task_mappings"`
 }
 
-type Loader struct {
-	fs filesystem.FileSystem
-}
+type Loader struct{ fs filesystem.FileSystem }
 
-func NewLoader(fs filesystem.FileSystem) *Loader {
-	return &Loader{fs: fs}
-}
+func NewLoader(fs filesystem.FileSystem) *Loader { return &Loader{fs: fs} }
 
 func (l *Loader) Discover(startDir string) (string, bool) {
 	if startDir == "" {
@@ -75,7 +71,6 @@ func (l *Loader) Load(path string) (*Manifest, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load manifest %q: %w", path, err)
 	}
-
 	var m Manifest
 	if err := decodeManifest(path, data, &m); err != nil {
 		return nil, err
@@ -97,31 +92,15 @@ func (l *Loader) Load(path string) (*Manifest, error) {
 }
 
 func convertLegacyManifest(old PlaybookManifest) Manifest {
-	m := Manifest{
-		Metadata: ProjectMetadata{
-			Name:          "PromptEngine",
-			Version:       "1.0.0",
-			SchemaVersion: SupportedSchemaVersion,
-			GeneratedAt:   time.Now().UTC(),
-		},
-	}
-	seenPlaybooks := map[string]bool{}
+	m := Manifest{Metadata: ProjectMetadata{Name: "PromptEngine", Version: "1.0.0", SchemaVersion: SupportedSchemaVersion, GeneratedAt: time.Now().UTC()}}
+	seen := map[string]bool{}
 	add := func(category PlaybookCategory, books []Playbook) {
 		for _, book := range books {
-			if book.ID == "" || book.Path == "" {
+			if book.ID == "" || book.Path == "" || seen[book.ID] {
 				continue
 			}
-			if seenPlaybooks[book.ID] {
-				continue
-			}
-			seenPlaybooks[book.ID] = true
-			m.Playbooks = append(m.Playbooks, PlaybookDefinition{
-				ID:       book.ID,
-				Name:     strings.ReplaceAll(book.ID, "-", " "),
-				Category: category,
-				Location: book.Path,
-				Priority: 50,
-			})
+			seen[book.ID] = true
+			m.Playbooks = append(m.Playbooks, PlaybookDefinition{ID: book.ID, Name: strings.ReplaceAll(book.ID, "_", " "), Category: category, Location: book.Path, Priority: 50})
 		}
 	}
 	add(CategoryCore, old.CorePlaybooks)
@@ -129,37 +108,27 @@ func convertLegacyManifest(old PlaybookManifest) Manifest {
 		add(domainCategory(domain), books)
 	}
 	add(CategoryProject, old.ProjectPlaybooks)
-	add(CategoryCore, old.BridgePlaybooks)
+	add(CategoryBridge, old.BridgePlaybooks)
+	add(CategoryChecklist, old.Checklists)
 	add(CategoryWorkflows, old.Workflows)
-	add(CategoryProject, old.Checklists)
-	add(CategoryProject, old.Guides)
-	add(CategoryProject, old.DecisionGuides)
-	add(CategoryProject, old.AIBootstrap)
-	add(CategoryProject, old.CliFoundation)
-	add(CategoryProject, old.CliCommandSpecs)
+	add(CategoryDecisionGuide, old.DecisionGuides)
+	add(CategoryGuide, old.Guides)
+	add(CategoryAI, old.AIBootstrap)
+	add(CategoryPrompt, old.PromptsLibrary)
+	add(CategoryCLI, old.CliFoundation)
+	add(CategoryCLI, old.CliCommandSpecs)
 	for stack, books := range old.TechnologyStacks {
 		var related []string
 		for _, book := range books {
 			related = append(related, book.ID)
 		}
 		add(CategoryStacks, books)
-		m.Technologies = append(m.Technologies, TechnologyDefinition{
-			ID:               stack,
-			Stack:            stack,
-			RelatedPlaybooks: related,
-		})
+		m.Technologies = append(m.Technologies, TechnologyDefinition{ID: stack, Stack: stack, RelatedPlaybooks: related})
 	}
 	for task, mapping := range old.TaskMappings {
 		workflowID := normalizeTask(task)
-		m.Workflows = append(m.Workflows, WorkflowDefinition{
-			ID:                workflowID,
-			Steps:             []string{"prepare", "execute", "review"},
-			RequiredPlaybooks: mapping.RequiredPlaybookIDs,
-		})
-		m.TaskRelationships = append(m.TaskRelationships, TaskRelationship{
-			TaskType:         task,
-			RequiredWorkflow: workflowID,
-		})
+		m.Workflows = append(m.Workflows, WorkflowDefinition{ID: workflowID, Steps: []string{"prepare", "execute", "review"}, RequiredPlaybooks: mapping.RequiredPlaybookIDs, OptionalPlaybooks: mapping.OptionalPlaybookIDs})
+		m.TaskRelationships = append(m.TaskRelationships, TaskRelationship{TaskType: task, RequiredWorkflow: workflowID})
 	}
 	return m
 }

@@ -15,11 +15,11 @@ const (
 
 // UpdateRequest declares what to update and to which version
 type UpdateRequest struct {
-	Target    UpdateTarget
-	ID        string // component ID (plugin ID, etc.)
-	FromVer   string
-	ToVer     string
-	DryRun    bool
+	Target  UpdateTarget
+	ID      string // component ID (plugin ID, etc.)
+	FromVer string
+	ToVer   string
+	DryRun  bool
 }
 
 // CompatibilityIssue describes a blocking or advisory conflict found before updating
@@ -30,10 +30,10 @@ type CompatibilityIssue struct {
 
 // UpdateReport is the result of a dry-run or actual update
 type UpdateReport struct {
-	Request  UpdateRequest
-	Issues   []CompatibilityIssue
-	CanUpdate bool
-	Applied  bool
+	Request           UpdateRequest
+	Issues            []CompatibilityIssue
+	CanUpdate         bool
+	Applied           bool
 	RollbackAvailable bool
 }
 
@@ -54,7 +54,7 @@ type Snapshot struct {
 
 // UpdateEngine orchestrates safe component updates
 type UpdateEngine struct {
-	snapshots map[string]*Snapshot
+	snapshots  map[string]*Snapshot
 	strategies []MigrationStrategy
 }
 

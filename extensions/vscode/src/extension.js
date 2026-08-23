@@ -1,5 +1,6 @@
 const vscode = require("vscode");
 const { PromptEngineClient, summarizeResult } = require("./promptengineClient");
+const { handoffPrompt, readGeneratedPrompt } = require("./aiHandoff");
 
 function activate(context) {
   const register = (command, handler) => {
@@ -12,16 +13,39 @@ function activate(context) {
 
   register("promptengine.generateContext", async () => {
     const intent = await prompt("Describe the task for context generation");
-    await showResult((await client().generateContext("feature", intent || "")).stdout);
+    if (intent === undefined) {
+      return;
+    }
+    await showResult((await client().generateContext("feature", intent)).stdout);
   });
 
   register("promptengine.generatePrompt", async () => {
     const request = await prompt("Describe the implementation request");
-    await showResult((await client().generatePrompt("feature", request || "")).stdout);
+    if (request === undefined || !request.trim()) {
+      return;
+    }
+
+    const config = readConfig();
+    const result = await client(config).generatePrompt("feature", request);
+    const promptText = await readGeneratedPrompt(vscode, config.workspaceRoot, result.stdout);
+    await openPromptForReview(promptText);
+  });
+
+  register("promptengine.sendReviewedPrompt", async () => {
+    const text = reviewedPromptText();
+    if (!text.trim()) {
+      throw new Error("Open or select a reviewed PromptEngine prompt before sending it to an AI client.");
+    }
+
+    const config = readConfig();
+    await handoffPrompt(vscode, text, config.preferredAIClient);
   });
 
   register("promptengine.runWorkflow", async () => {
     const id = await prompt("Workflow id", "feature-implementation");
+    if (id === undefined) {
+      return;
+    }
     await showResult((await client().runWorkflow(id || "feature-implementation")).stdout);
   });
 
@@ -47,8 +71,8 @@ function activate(context) {
 
 function deactivate() {}
 
-function client() {
-  return new PromptEngineClient(readConfig());
+function client(config = readConfig()) {
+  return new PromptEngineClient(config);
 }
 
 function readConfig() {
@@ -79,12 +103,29 @@ function selectedText() {
   return editor.document.getText(editor.selection);
 }
 
+function reviewedPromptText() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return "";
+  }
+  const selected = editor.document.getText(editor.selection);
+  return selected.trim() ? selected : editor.document.getText();
+}
+
 function activeFilePath() {
   return vscode.window.activeTextEditor?.document.uri.fsPath || "";
 }
 
 function prompt(placeHolder, value = "") {
   return vscode.window.showInputBox({ placeHolder, value });
+}
+
+async function openPromptForReview(promptText) {
+  const doc = await vscode.workspace.openTextDocument({ content: promptText, language: "markdown" });
+  await vscode.window.showTextDocument(doc, { preview: false });
+  vscode.window.showInformationMessage(
+    "PromptEngine prompt is ready for review. Edit it as needed, then run 'PromptEngine: Send Reviewed Prompt to AI' when you are satisfied."
+  );
 }
 
 async function showResult(stdout) {
@@ -103,4 +144,4 @@ async function runWithErrors(handler) {
   }
 }
 
-module.exports = { activate, deactivate };
+module.exports = { activate, deactivate, reviewedPromptText };

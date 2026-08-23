@@ -14,6 +14,8 @@ import (
 	"github.com/LordCodex/promptengine/pkg/manifest"
 )
 
+const defaultMinimumRelevance = 60.0
+
 type Engine struct {
 	fs       filesystem.FileSystem
 	manifest *manifest.QueryEngine
@@ -27,14 +29,10 @@ type EngineOption func(*Engine)
 func WithManifestQuery(q *manifest.QueryEngine) EngineOption {
 	return func(e *Engine) { e.manifest = q }
 }
-
 func WithEventBus(events *eventbus.EventBus) EngineOption {
 	return func(e *Engine) { e.events = events }
 }
-
-func WithCache(cache *Cache) EngineOption {
-	return func(e *Engine) { e.cache = cache }
-}
+func WithCache(cache *Cache) EngineOption { return func(e *Engine) { e.cache = cache } }
 
 func NewEngine(fs filesystem.FileSystem, opts ...EngineOption) *Engine {
 	e := &Engine{fs: fs, rules: NewRuleSet(), cache: NewCache()}
@@ -57,7 +55,6 @@ func (e *Engine) Build(ctx context.Context, req ContextRequest) (*ContextPackage
 	if limit <= 0 {
 		limit = GetBudgetLimit(req.Budget)
 	}
-
 	candidates := e.gatherCandidates(req)
 	paths := make([]string, 0, len(candidates))
 	for _, item := range candidates {
@@ -70,7 +67,6 @@ func (e *Engine) Build(ctx context.Context, req ContextRequest) (*ContextPackage
 	if cached, ok := e.cache.Get(key, fp); ok {
 		return cached, nil
 	}
-
 	ranked := e.rankCandidates(candidates, req)
 	pkg := NewContextPackage(string(req.TaskType), req.Budget)
 	pkg.WorkflowType = req.WorkflowType
@@ -78,7 +74,7 @@ func (e *Engine) Build(ctx context.Context, req ContextRequest) (*ContextPackage
 		pkg.ProjectMetadata["root"] = req.Project.RootDir
 		pkg.ProjectMetadata["detected_type"] = req.Project.Project.DetectedType
 	}
-	e.optimize(pkg, ranked, limit)
+	e.optimize(pkg, ranked, limit, minimumRelevance(req))
 	pkg.SystemPrompt = e.renderSystemPrompt(pkg)
 	e.cache.Set(key, fp, pkg)
 	e.publish(eventbus.ContextBuilt, "context built", pkg)
@@ -92,10 +88,7 @@ func (e *Engine) GenerateContext(ctx context.Context, task TaskType, pm *discove
 func (e *Engine) gatherCandidates(req ContextRequest) []ContextItem {
 	var items []ContextItem
 	addPath := func(path string, typ ContextSourceType, score float64, reason string) {
-		if path == "" {
-			return
-		}
-		if security.IsSensitivePath(path) {
+		if path == "" || security.IsSensitivePath(path) {
 			return
 		}
 		data, err := e.fs.ReadFile(path)
@@ -110,31 +103,68 @@ func (e *Engine) gatherCandidates(req ContextRequest) []ContextItem {
 	}
 
 	for _, path := range e.rules.RequiredDocuments(req) {
-		addPath(path, ContextDocumentation, 70, "Task rule requires this documentation.")
+		addPath(path, ContextDocumentation, 100, "Project-level instructions are required for this task.")
 	}
+	for _, path := range e.rules.CandidateDocuments(req) {
+		addPath(path, ContextDocumentation, 40, "Conditional project documentation candidate.")
+	}
+
 	if req.Project != nil {
-		for _, doc := range req.Project.Docs {
-			if doc.Exists {
-				addPath(doc.Path, ContextDocumentation, 55, "Discovery found project documentation.")
-			}
-		}
-		if req.Project.PromptEngine.AgentsMDPresent {
-			addPath("AGENTS.md", ContextDocumentation, 95, "Project constitution guides all work.")
-		}
 		for _, rel := range e.rules.TechnologyPaths(req.Project) {
-			items = append(items, e.itemsUnderPath(req.Project, rel, 52, "Discovery identified technology-specific project structure.")...)
+			items = append(items, e.itemsUnderPath(req.Project, rel, 35, "Technology-specific project file candidate; include only when task-relevant.")...)
 		}
 	}
 	for _, path := range e.rules.AffectedRelationships(req, req.Project) {
-		addPath(path, ContextFile, 90, "Affected file or closely related test/source file.")
+		addPath(path, ContextFile, 95, "Affected file or closely related test/source file.")
 	}
+
 	if e.manifest != nil {
-		for _, playbook := range e.manifest.PlaybooksByTask(string(req.TaskType)) {
-			addPath(playbook.Location, ContextStandard, 80, "Manifest maps this task to a required playbook.")
-			items = append(items, ContextItem{Path: playbook.ID, Type: ContextManifestEntry, RelevanceScore: 50, Reason: "Manifest playbook entry selected."})
+		// The primary task is preserved, while deterministic domain inference can
+		// activate more specific standards (for example API + payment rules for a
+		// generic feature request) without an AI classification call.
+		for _, taskType := range inferredTaskTypes(req) {
+			for _, playbook := range e.manifest.PlaybooksByTask(taskType) {
+				addPath(playbook.Location, ContextStandard, 90, "PromptEngine manifest requires this playbook for task domain: "+taskType+".")
+				items = append(items, ContextItem{Path: playbook.ID, Type: ContextManifestEntry, RelevanceScore: 70, Reason: "Required PromptEngine playbook mapping for task domain: " + taskType + "."})
+			}
+
+			// Optional mappings are deliberately below the inclusion threshold. They
+			// enter the package only when task intent or another ranking signal makes
+			// them materially relevant.
+			for _, playbook := range e.manifest.OptionalPlaybooksByTask(taskType) {
+				addPath(playbook.Location, ContextStandard, 45, "Optional PromptEngine playbook candidate for task domain: "+taskType+".")
+			}
 		}
+
+		if req.Project != nil {
+			seenTech := map[string]bool{}
+			for _, tech := range append(append([]string{}, req.Project.Frameworks...), req.Project.Languages...) {
+				key := strings.ToLower(strings.TrimSpace(tech))
+				if key == "" || seenTech[key] {
+					continue
+				}
+				seenTech[key] = true
+				for _, playbook := range e.manifest.StandardsByTechnology(tech) {
+					score := 45.0
+					lower := strings.ToLower(playbook.Location + " " + playbook.ID)
+					if strings.Contains(lower, "engineering-standard") || strings.Contains(lower, "conventions") {
+						score = 65
+					}
+					addPath(playbook.Location, ContextStandard, score, "Standard belongs to a detected project technology and is ranked against the task.")
+				}
+			}
+		}
+
+		knowledgeIntent := string(req.TaskType) + " " + req.WorkflowType + " " + req.UserIntent + " " + req.RequestedOperation
+		for _, playbook := range e.manifest.MatchingKnowledge(knowledgeIntent,
+			manifest.CategoryBridge, manifest.CategoryChecklist, manifest.CategoryDecisionGuide,
+			manifest.CategoryGuide, manifest.CategoryPrompt, manifest.CategorySecurity,
+			manifest.CategoryPerformance, manifest.CategoryDesign) {
+			addPath(playbook.Location, ContextStandard, 45, "PromptEngine knowledge resource matches the requested work and must still pass relevance scoring.")
+		}
+
 		for _, prompt := range e.manifest.PromptsByWorkflow(firstNonEmpty(req.WorkflowType, string(req.TaskType))) {
-			items = append(items, ContextItem{Path: prompt.PromptTemplate, Type: ContextWorkflow, RelevanceScore: 45, Reason: "Manifest prompt mapping informs required context."})
+			addPath(prompt.PromptTemplate, ContextWorkflow, 45, "Prompt workflow template candidate.")
 		}
 	}
 	return items
@@ -144,21 +174,22 @@ func (e *Engine) itemsUnderPath(pm *discovery.ProjectModel, prefix string, score
 	var out []ContextItem
 	cleanPrefix := strings.Trim(filepath.ToSlash(prefix), "/")
 	for _, file := range pm.Repository.Files {
-		if file == cleanPrefix || strings.HasPrefix(file, cleanPrefix+"/") {
-			if security.IsSensitivePath(file) {
-				continue
-			}
-			data, err := e.fs.ReadFile(file)
-			if err != nil {
-				continue
-			}
-			content, redacted := security.RedactSecrets(string(data))
-			itemReason := reason
-			if redacted {
-				itemReason += " Sensitive values redacted."
-			}
-			out = append(out, ContextItem{Path: file, Type: ContextFile, RelevanceScore: score, Reason: itemReason, Size: len(content), Content: content})
+		if file != cleanPrefix && !strings.HasPrefix(file, cleanPrefix+"/") {
+			continue
 		}
+		if security.IsSensitivePath(file) {
+			continue
+		}
+		data, err := e.fs.ReadFile(file)
+		if err != nil {
+			continue
+		}
+		content, redacted := security.RedactSecrets(string(data))
+		itemReason := reason
+		if redacted {
+			itemReason += " Sensitive values redacted."
+		}
+		out = append(out, ContextItem{Path: file, Type: ContextFile, RelevanceScore: score, Reason: itemReason, Size: len(content), Content: content})
 	}
 	return out
 }
@@ -166,25 +197,44 @@ func (e *Engine) itemsUnderPath(pm *discovery.ProjectModel, prefix string, score
 func (e *Engine) rankCandidates(items []ContextItem, req ContextRequest) []ContextItem {
 	intent := strings.ToLower(req.UserIntent + " " + req.RequestedOperation + " " + strings.Join(req.AffectedFiles, " "))
 	keywords := intentKeywords(intent)
+	techTerms := detectedTechnologyTerms(req.Project)
 	for i := range items {
 		item := &items[i]
 		lowerPath := strings.ToLower(item.Path)
 		for _, keyword := range keywords {
 			if strings.Contains(lowerPath, keyword) {
-				item.RelevanceScore += 10
+				item.RelevanceScore += 25
 				item.Reason += " Task keyword matches path."
 			}
 		}
 		for _, affected := range req.AffectedFiles {
 			if item.Path == affected {
-				item.RelevanceScore += 12
+				item.RelevanceScore += 15
 				item.Reason += " Exact affected file requested."
 				break
 			}
 		}
-		if strings.Contains(intent, filepath.Base(lowerPath)) {
+		if base := strings.ToLower(filepath.Base(item.Path)); base != "" && strings.Contains(intent, base) {
 			item.RelevanceScore += 20
 			item.Reason += " Path matches task intent."
+		}
+		if item.Type == ContextDocumentation {
+			if boost := e.rules.DocumentRelevance(item.Path, req); boost > 0 {
+				item.RelevanceScore += boost
+				item.Reason += " Document is directly relevant to the requested task."
+			}
+		}
+		if item.Type == ContextStandard {
+			matches := 0
+			for _, tech := range techTerms {
+				if strings.Contains(lowerPath, tech) {
+					matches++
+				}
+			}
+			if matches > 0 {
+				item.RelevanceScore += float64(matches * 10)
+				item.Reason += " Standard matches detected project technology."
+			}
 		}
 		switch normalizeTask(req.TaskType) {
 		case normalizeTask(TaskBugFix), "bug_fix":
@@ -192,15 +242,10 @@ func (e *Engine) rankCandidates(items []ContextItem, req ContextRequest) []Conte
 				item.RelevanceScore += 20
 				item.Reason += " Bug fixes prioritize tests and troubleshooting."
 			}
-		case normalizeTask(TaskAddFeature), "feature", "new_feature":
-			if strings.Contains(lowerPath, "architecture") || strings.Contains(lowerPath, "database") || strings.Contains(lowerPath, "api") {
-				item.RelevanceScore += 18
-				item.Reason += " Feature work needs architecture, API, and data context."
-			}
-		case normalizeTask(TaskRefactor):
-			if item.Type == ContextFile || strings.Contains(lowerPath, "architecture") {
-				item.RelevanceScore += 14
-				item.Reason += " Refactors prioritize implementation and architecture boundaries."
+		case normalizeTask(TaskRefactor), "refactoring":
+			if item.Type == ContextFile && directlyRelatedToIntent(lowerPath, keywords) {
+				item.RelevanceScore += 10
+				item.Reason += " Refactor target is directly related to task intent."
 			}
 		}
 	}
@@ -213,22 +258,41 @@ func (e *Engine) rankCandidates(items []ContextItem, req ContextRequest) []Conte
 	return items
 }
 
-func intentKeywords(intent string) []string {
-	aliases := map[string][]string{
-		"dogfood":    {"app", "context", "quality", "docs", "prompt"},
-		"production": {"app", "quality", "docs", "release"},
-		"hardening":  {"quality", "security", "errors", "validation"},
-		"prompt":     {"prompt", "ai", "context"},
-		"context":    {"context", "discovery"},
-		"workflow":   {"workflow"},
-		"docs":       {"docs", "documentation"},
+func detectedTechnologyTerms(pm *discovery.ProjectModel) []string {
+	if pm == nil {
+		return nil
 	}
 	seen := map[string]bool{}
 	var out []string
-	for _, token := range strings.FieldsFunc(strings.ToLower(intent), func(r rune) bool {
-		return (r < 'a' || r > 'z') && (r < '0' || r > '9')
-	}) {
-		if len(token) < 4 {
+	for _, value := range append(append([]string{}, pm.Frameworks...), pm.Languages...) {
+		value = strings.ToLower(strings.TrimSpace(value))
+		if value == "" {
+			continue
+		}
+		for _, token := range strings.FieldsFunc(value, func(r rune) bool { return r < 'a' || r > 'z' }) {
+			if len(token) >= 3 && !seen[token] {
+				seen[token] = true
+				out = append(out, token)
+			}
+		}
+	}
+	return out
+}
+
+func intentKeywords(intent string) []string {
+	aliases := map[string][]string{"dogfood": {"app", "context", "quality", "docs", "prompt"}, "production": {"app", "quality", "docs", "release"}, "hardening": {"quality", "security", "errors", "validation"}, "prompt": {"prompt", "ai", "context"}, "context": {"context", "discovery"}, "workflow": {"workflow"}, "docs": {"docs", "documentation"}, "refund": {"payment", "transaction"}, "withdrawal": {"payment", "wallet", "payout"}, "endpoint": {"api", "route", "controller"}}
+	structural := map[string]bool{
+		"app": true, "application": true, "src": true, "source": true,
+		"service": true, "services": true, "controller": true, "controllers": true,
+		"model": true, "models": true, "route": true, "routes": true,
+		"test": true, "tests": true, "file": true, "files": true,
+		"internal": true, "package": true, "packages": true,
+		"php": true, "typescript": true, "javascript": true, "golang": true,
+	}
+	seen := map[string]bool{}
+	var out []string
+	for _, token := range strings.FieldsFunc(strings.ToLower(intent), func(r rune) bool { return (r < 'a' || r > 'z') && (r < '0' || r > '9') }) {
+		if len(token) < 4 || structural[token] {
 			continue
 		}
 		if !seen[token] {
@@ -245,7 +309,16 @@ func intentKeywords(intent string) []string {
 	return out
 }
 
-func (e *Engine) optimize(pkg *ContextPackage, candidates []ContextItem, limit int) {
+func directlyRelatedToIntent(path string, keywords []string) bool {
+	for _, keyword := range keywords {
+		if strings.Contains(path, keyword) {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *Engine) optimize(pkg *ContextPackage, candidates []ContextItem, limit int, minimumScore float64) {
 	seen := map[string]bool{}
 	size := 0
 	pkg.Summary.InitialCount = len(candidates)
@@ -257,6 +330,11 @@ func (e *Engine) optimize(pkg *ContextPackage, candidates []ContextItem, limit i
 		}
 		seen[item.Path] = true
 		pkg.Summary.InitialSize += item.Size
+		if item.RelevanceScore < minimumScore {
+			pkg.Explanations[item.Path] = fmt.Sprintf("EXCLUDED: relevance score %.1f below threshold %.1f", item.RelevanceScore, minimumScore)
+			pkg.Summary.DroppedFiles = append(pkg.Summary.DroppedFiles, item.Path)
+			continue
+		}
 		if item.Size > limit/2 && limit != GetBudgetLimit(BudgetUnlimited) {
 			item.Summary = summarize(item.Content, 800)
 			item.Content = item.Summary
@@ -301,34 +379,41 @@ func (e *Engine) renderSystemPrompt(pkg *ContextPackage) string {
 	if len(pkg.Reasoning) > 0 {
 		b.WriteString(pkg.Reasoning[0])
 	} else {
-		b.WriteString("Context selected from task, manifest, and discovery signals.")
+		b.WriteString("Context selected from task, manifest, standards library, and discovery signals.")
 	}
 	b.WriteString("\n")
 	return b.String()
 }
 
 func (e *Engine) cacheSalt(req ContextRequest) string {
-	parts := []string{string(req.TaskType), req.WorkflowType, req.UserIntent, req.RequestedOperation}
+	parts := []string{string(req.TaskType), req.WorkflowType, req.UserIntent, req.RequestedOperation, fmt.Sprintf("min-relevance=%.1f", minimumRelevance(req))}
 	if req.Project != nil {
 		parts = append(parts, req.Project.RootDir, strings.Join(req.Project.Languages, ","), strings.Join(req.Project.Frameworks, ","))
 	}
 	return strings.Join(parts, "|")
 }
-
 func (e *Engine) publish(t eventbus.EventType, msg string, payload any) {
-	if e.events == nil {
-		return
+	if e.events != nil {
+		e.events.Publish(eventbus.Event{Type: t, Message: msg, Payload: payload})
 	}
-	e.events.Publish(eventbus.Event{Type: t, Message: msg, Payload: payload})
 }
-
 func summarize(content string, max int) string {
 	if len(content) <= max {
 		return content
 	}
 	return content[:max] + "\n\n[truncated summary: large file shortened for context budget]"
 }
-
+func minimumRelevance(req ContextRequest) float64 {
+	if req.Metadata != nil {
+		if value := strings.TrimSpace(req.Metadata["minimum_relevance"]); value != "" {
+			var parsed float64
+			if _, err := fmt.Sscanf(value, "%f", &parsed); err == nil && parsed >= 0 {
+				return parsed
+			}
+		}
+	}
+	return defaultMinimumRelevance
+}
 func firstNonEmpty(values ...string) string {
 	for _, value := range values {
 		if value != "" {

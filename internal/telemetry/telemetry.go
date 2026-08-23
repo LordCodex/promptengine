@@ -60,7 +60,7 @@ func (t *Telemetry) Track(event Event) {
 			return
 		}
 		req.Header.Set("Content-Type", "application/json")
-		
+
 		client := &http.Client{Timeout: 2 * time.Second}
 		resp, err := client.Do(req)
 		if err == nil {

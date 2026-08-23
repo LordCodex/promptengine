@@ -42,12 +42,12 @@ func TestPromptRegistry_ByWorkflow(t *testing.T) {
 func TestPromptBuilder_Build_WithContext(t *testing.T) {
 	reg := NewPromptRegistry()
 	_ = reg.Register(&PromptDef{
-		ID:             "feature-dev",
-		Workflow:       WorkflowFeature,
-		Source:         PromptSourceCore,
-		Purpose:        "Feature development",
+		ID:              "feature-dev",
+		Workflow:        WorkflowFeature,
+		Source:          PromptSourceCore,
+		Purpose:         "Feature development",
 		RequiredContext: []string{"project_name"},
-		Template:       "Build a feature for {project_name} using {stack}.",
+		Template:        "Build a feature for {project_name} using {stack}.",
 	})
 
 	builder := NewPromptBuilder(reg)
@@ -66,11 +66,11 @@ func TestPromptBuilder_Build_WithContext(t *testing.T) {
 func TestPromptBuilder_Build_MissingRequiredContext(t *testing.T) {
 	reg := NewPromptRegistry()
 	_ = reg.Register(&PromptDef{
-		ID:             "guarded-prompt",
-		Workflow:       WorkflowFeature,
-		Source:         PromptSourceCore,
+		ID:              "guarded-prompt",
+		Workflow:        WorkflowFeature,
+		Source:          PromptSourceCore,
 		RequiredContext: []string{"project_name", "stack"},
-		Template:       "...",
+		Template:        "...",
 	})
 	builder := NewPromptBuilder(reg)
 	if _, err := builder.Build("guarded-prompt", ContextPackage{}, ""); err == nil {

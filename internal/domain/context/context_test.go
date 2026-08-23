@@ -28,14 +28,59 @@ func TestContextEngine_FeatureSelectionUsesManifestAndDiscovery(t *testing.T) {
 		t.Fatalf("expected no error, got %v", err)
 	}
 
-	assertSelected(t, pkg, "docs/Architecture.md")
-	assertSelected(t, pkg, "docs/Database.md")
-	assertSelected(t, pkg, "docs/API.md")
+	assertSelected(t, pkg, "AGENTS.md")
+	assertSelected(t, pkg, "docs/BusinessRules.md")
 	assertSelected(t, pkg, "app/Services/PaymentService.php")
 	assertSelected(t, pkg, "standards/feature.md")
+	assertNotSelected(t, pkg, "docs/Architecture.md")
+	assertNotSelected(t, pkg, "docs/Database.md")
+	assertNotSelected(t, pkg, "docs/API.md")
 	if len(pkg.Items) == 0 || pkg.Items[0].Path != "app/Services/PaymentService.php" {
 		t.Fatalf("expected affected file to rank first, got %#v", pkg.Items)
 	}
+}
+
+func TestContextEngine_FeatureIncludesDatabaseAndAPIOnlyWhenTaskRequiresThem(t *testing.T) {
+	fs, pm := fixtureProject()
+	engine := NewEngine(fs)
+
+	pkg, err := engine.Build(stdcontext.Background(), ContextRequest{
+		TaskType:           TaskAddFeature,
+		Project:            pm,
+		UserIntent:         "Add payment webhook endpoint and persist provider transaction data with a migration",
+		RequestedOperation: "API and database change",
+		Budget:             BudgetSmall,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	assertSelected(t, pkg, "docs/Database.md")
+	assertSelected(t, pkg, "docs/API.md")
+	assertNotSelected(t, pkg, "docs/Architecture.md")
+}
+
+func TestContextEngine_FeatureDoesNotFloodUnrelatedTechnologyFiles(t *testing.T) {
+	fs, pm := fixtureProject()
+	fs.WriteFile("app/Services/EmailService.php", []byte("email service"), 0644)
+	fs.WriteFile("app/Services/InventoryService.php", []byte("inventory service"), 0644)
+	pm.Repository.Files = append(pm.Repository.Files, "app/Services/EmailService.php", "app/Services/InventoryService.php")
+	engine := NewEngine(fs)
+
+	pkg, err := engine.Build(stdcontext.Background(), ContextRequest{
+		TaskType:      TaskAddFeature,
+		Project:       pm,
+		UserIntent:    "Improve payment processing",
+		AffectedFiles: []string{"app/Services/PaymentService.php"},
+		Budget:        BudgetLarge,
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	assertSelected(t, pkg, "app/Services/PaymentService.php")
+	assertNotSelected(t, pkg, "app/Services/EmailService.php")
+	assertNotSelected(t, pkg, "app/Services/InventoryService.php")
 }
 
 func TestContextEngine_BugFixSelection(t *testing.T) {
@@ -310,6 +355,13 @@ func assertSelected(t *testing.T, pkg *ContextPackage, path string) {
 	t.Helper()
 	if !packageHas(pkg, path) {
 		t.Fatalf("expected %s to be selected; items=%#v", path, pkg.Items)
+	}
+}
+
+func assertNotSelected(t *testing.T, pkg *ContextPackage, path string) {
+	t.Helper()
+	if packageHas(pkg, path) {
+		t.Fatalf("expected %s to be excluded; items=%#v", path, pkg.Items)
 	}
 }
 

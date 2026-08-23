@@ -11,9 +11,9 @@ import (
 type FixSafety string
 
 const (
-	SafeAuto    FixSafety = "auto"    // safe to apply without confirmation
-	SafeReview  FixSafety = "review"  // requires human review before apply
-	SafeManual  FixSafety = "manual"  // cannot be automated; guidance only
+	SafeAuto   FixSafety = "auto"   // safe to apply without confirmation
+	SafeReview FixSafety = "review" // requires human review before apply
+	SafeManual FixSafety = "manual" // cannot be automated; guidance only
 )
 
 // FixResult describes the outcome of applying a repair action
