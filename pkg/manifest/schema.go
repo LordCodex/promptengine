@@ -26,13 +26,20 @@ type TechnologyDefinition struct {
 type PlaybookCategory string
 
 const (
-	CategoryCore        PlaybookCategory = "core"
-	CategoryStacks      PlaybookCategory = "stacks"
-	CategorySecurity    PlaybookCategory = "security"
-	CategoryPerformance PlaybookCategory = "performance"
-	CategoryDesign      PlaybookCategory = "design"
-	CategoryWorkflows   PlaybookCategory = "workflows"
-	CategoryProject     PlaybookCategory = "project"
+	CategoryCore          PlaybookCategory = "core"
+	CategoryStacks        PlaybookCategory = "stacks"
+	CategorySecurity      PlaybookCategory = "security"
+	CategoryPerformance   PlaybookCategory = "performance"
+	CategoryDesign        PlaybookCategory = "design"
+	CategoryWorkflows     PlaybookCategory = "workflows"
+	CategoryProject       PlaybookCategory = "project"
+	CategoryBridge        PlaybookCategory = "bridge"
+	CategoryChecklist     PlaybookCategory = "checklist"
+	CategoryDecisionGuide PlaybookCategory = "decision-guide"
+	CategoryGuide         PlaybookCategory = "guide"
+	CategoryPrompt        PlaybookCategory = "prompt"
+	CategoryAI            PlaybookCategory = "ai"
+	CategoryCLI           PlaybookCategory = "cli"
 )
 
 type PlaybookDefinition struct {
@@ -49,6 +56,7 @@ type WorkflowDefinition struct {
 	Steps             []string `json:"steps" yaml:"steps"`
 	RequiredContext   []string `json:"required_context,omitempty" yaml:"required_context,omitempty"`
 	RequiredPlaybooks []string `json:"required_playbooks,omitempty" yaml:"required_playbooks,omitempty"`
+	OptionalPlaybooks []string `json:"optional_playbooks,omitempty" yaml:"optional_playbooks,omitempty"`
 	Validators        []string `json:"validators,omitempty" yaml:"validators,omitempty"`
 	Prompts           []string `json:"prompts,omitempty" yaml:"prompts,omitempty"`
 }
