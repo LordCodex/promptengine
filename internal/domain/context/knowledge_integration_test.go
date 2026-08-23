@@ -52,6 +52,8 @@ func TestContextBuildCombinesProjectFilesWithRelevantBundledStandards(t *testing
 
 	assertContextPath(t, pkg.SelectedDocs, "AGENTS.md")
 	assertContextPath(t, pkg.RelevantStandards, "core/05-universal-coding-standards.md")
+	assertContextPath(t, pkg.RelevantStandards, "core/07-api-engineering-standard.md")
+	assertContextPath(t, pkg.RelevantStandards, "core/08-security-engineering-standard.md")
 	assertContextPath(t, pkg.RelevantStandards, "workflows/01-feature-implementation.md")
 	assertContextPath(t, pkg.RelevantStandards, "checklists/01-feature-implementation-checklist.md")
 	assertContextPath(t, pkg.RelevantStandards, "stacks/php-laravel/laravel-engineering-standard.md")
