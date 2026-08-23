@@ -136,17 +136,21 @@ func (fs *OSFileSystem) safePath(target string) (string, error) {
 	return resolved, nil
 }
 
-// IsSafePath checks target file bounds to prevent traversal attacks
+// IsSafePath checks target file bounds to prevent traversal attacks. Relative
+// targets are interpreted relative to base, not the process working directory.
 func (fs *OSFileSystem) IsSafePath(base, target string) bool {
 	cleanBase, err := filepath.Abs(filepath.Clean(base))
 	if err != nil {
 		return false
 	}
-	cleanTarget, err := filepath.Abs(filepath.Clean(target))
-	if err != nil {
+	cleanTarget := filepath.Clean(target)
+	if !filepath.IsAbs(cleanTarget) {
+		cleanTarget = filepath.Join(cleanBase, cleanTarget)
+	} else if cleanTarget, err = filepath.Abs(cleanTarget); err != nil {
 		return false
 	}
-	if resolvedBase, err := filepath.EvalSymlinks(cleanBase); err == nil {
+
+	if resolvedBase, err := resolveExistingPath(cleanBase); err == nil {
 		cleanBase = resolvedBase
 	}
 	if resolvedTarget, err := resolveExistingPath(cleanTarget); err == nil {
@@ -159,16 +163,34 @@ func (fs *OSFileSystem) IsSafePath(base, target string) bool {
 	return true
 }
 
+// resolveExistingPath resolves symlinks through the nearest existing ancestor.
+// This keeps safety checks correct for writes such as .promptengine/profile.yaml
+// where one or more parent directories do not exist yet.
 func resolveExistingPath(path string) (string, error) {
-	if resolved, err := filepath.EvalSymlinks(path); err == nil {
-		return resolved, nil
+	clean := filepath.Clean(path)
+	current := clean
+	var suffix []string
+	for {
+		if _, err := os.Lstat(current); err == nil {
+			resolved, err := filepath.EvalSymlinks(current)
+			if err != nil {
+				return clean, err
+			}
+			for i := len(suffix) - 1; i >= 0; i-- {
+				resolved = filepath.Join(resolved, suffix[i])
+			}
+			return filepath.Clean(resolved), nil
+		} else if !os.IsNotExist(err) {
+			return clean, err
+		}
+
+		parent := filepath.Dir(current)
+		if parent == current {
+			return clean, os.ErrNotExist
+		}
+		suffix = append(suffix, filepath.Base(current))
+		current = parent
 	}
-	parent := filepath.Dir(path)
-	resolvedParent, err := filepath.EvalSymlinks(parent)
-	if err != nil {
-		return path, err
-	}
-	return filepath.Join(resolvedParent, filepath.Base(path)), nil
 }
 
 // MockFileSystem implements FileSystem in memory for unit testing. Paths are
