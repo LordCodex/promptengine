@@ -179,10 +179,7 @@ type MockFileSystem struct {
 }
 
 func NewMockFileSystem() *MockFileSystem {
-	return &MockFileSystem{
-		Files: make(map[string][]byte),
-		Dirs:  make(map[string]bool),
-	}
+	return &MockFileSystem{Files: make(map[string][]byte), Dirs: make(map[string]bool)}
 }
 
 func normalizeMockPath(value string) string {
@@ -211,9 +208,7 @@ func (fs *MockFileSystem) Exists(path string) bool {
 	return false
 }
 
-func (fs *MockFileSystem) IsDir(path string) bool {
-	return fs.Dirs[normalizeMockPath(path)]
-}
+func (fs *MockFileSystem) IsDir(path string) bool { return fs.Dirs[normalizeMockPath(path)] }
 
 func (fs *MockFileSystem) ReadFile(path string) ([]byte, error) {
 	data, ok := fs.Files[normalizeMockPath(path)]
@@ -316,14 +311,14 @@ func (fs *MockFileSystem) RemoveAll(path string) error {
 func (fs *MockFileSystem) IsSafePath(base, target string) bool {
 	cleanBase := normalizeMockPath(base)
 	cleanTarget := normalizeMockPath(target)
-	if strings.HasPrefix(cleanTarget, "/") || (len(cleanTarget) >= 2 && cleanTarget[1] == ':') {
-		return cleanTarget == cleanBase || strings.HasPrefix(cleanTarget, strings.TrimSuffix(cleanBase, "/")+"/")
+	isAbsolute := strings.HasPrefix(cleanTarget, "/") || (len(cleanTarget) >= 2 && cleanTarget[1] == ':')
+	if cleanBase == "." && !isAbsolute {
+		return cleanTarget != ".." && !strings.HasPrefix(cleanTarget, "../")
 	}
-	rel, err := pathpkg.Rel(cleanBase, cleanTarget)
-	if err != nil {
-		return false
+	if cleanTarget == cleanBase {
+		return true
 	}
-	return rel == "." || (rel != ".." && !strings.HasPrefix(rel, "../"))
+	return strings.HasPrefix(cleanTarget, strings.TrimSuffix(cleanBase, "/")+"/")
 }
 
 type mockDirEntry struct {
