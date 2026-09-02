@@ -18,4 +18,5 @@ resolution_policy:
   preserve_project_specific_rules: true
 precedence: [universal-invariants, php-implementation, project-specific-decisions]
 notes:
-  - PromptEngine bundled PHP playbooks remain fallback/source material until their semantic migration is complete.
+  - PHP semantic migration is complete for the currently reviewed PromptEngine material; php-broilerplate is canonical for PHP implementation rules.
+  - Bundled PromptEngine PHP playbooks remain preservation/offline fallback and are not an independent source of authority.

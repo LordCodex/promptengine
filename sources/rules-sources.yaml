@@ -3,11 +3,11 @@ updated_at: 2026-09-02
 
 # PromptEngine is the orchestration layer. These repositories own the canonical
 # engineering rules for their scope. Local PromptEngine playbooks remain valid
-# source material until they are explicitly classified and migrated.
+# preservation/fallback material until a deliberate deprecation removes them.
 sources:
   universal:
     repository: LordCodex/engineering-ai-rules
-    ref: 6edf659ea599e3ee2364f7e372ee65bec64d3529
+    ref: 4cf47616a5437530b8848d8aa834acc9b08b7cd6
     role: authoritative
     owns:
       - universal
@@ -17,20 +17,28 @@ sources:
       - api-design
       - authentication
       - authorization
+      - threat-modeling
+      - collaboration
+      - ci-cd
+      - infrastructure
+      - legacy-modernization
+      - code-review
+      - documentation
     inherits: []
 
   php:
     repository: LordCodex/php-broilerplate
-    ref: f787d330bad13a7c83b64fcbd70b39bc5655e16f
+    ref: ac860c73104ce47ab335e64cd6fe9c9f7f59b697
     role: authoritative
     owns:
       - php
+      - php-language-runtime
     inherits:
       - universal
 
   laravel:
     repository: LordCodex/laravel-ai-rules
-    ref: cd1f1e28ebb846848973b1e585f7437396b589c2
+    ref: 8b03da4ee01879ba8a896811304bf7984ecda1f4
     role: authoritative
     owns:
       - laravel
@@ -42,21 +50,23 @@ sources:
 
   vue:
     repository: LordCodex/vue-ai-rules
-    ref: 9b571206a13cb91288862d5af32603eb4897a6f0
+    ref: d79364cd9fc49aaf7907866ac21aa2e3f93a5790
     role: authoritative
     owns:
       - vue
       - vue-typescript
+      - vue-i18n
     inherits:
       - universal
 
   react:
     repository: LordCodex/react-ai-rules
-    ref: d97e2df16fd5c5f02b4711ba92618308176dc35b
+    ref: 3011fa35389fabfaf4325bff77e4cbee973e4a35
     role: authoritative
     owns:
       - react
       - react-typescript
+      - react-i18n
     inherits:
       - universal
 
@@ -72,6 +82,7 @@ promptengine:
     - cli
     - ai-adapters
     - cross-stack-bridges
+    - unsupported-stack-fallbacks
 
 preservation_policy:
   classifications:
