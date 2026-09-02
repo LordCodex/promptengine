@@ -54,7 +54,7 @@ func (r *Resolver) BuildManifest(technologies []string) (*manifest.Manifest, *Re
 				Name:        sourceID + ":" + rulePath,
 				Category:    authoritativeCategory(sourceID, rulePath),
 				Location:    path.Join(r.cacheRoot(), sourceID, source.Ref, rulePath),
-				Description: "Pinned authoritative rule from " + source.Repository + "@" + source.Ref,
+				Description: authoritativeDescription(source, rulePath),
 				Priority:    100,
 			})
 			playbookIDsBySource[sourceID] = append(playbookIDsBySource[sourceID], id)
@@ -123,6 +123,16 @@ func authoritativePlaybookID(sourceID, rulePath string, required bool) string {
 	return id
 }
 
+func authoritativeDescription(source Source, rulePath string) string {
+	description := "Pinned authoritative rule from " + source.Repository + "@" + source.Ref
+	lower := strings.ToLower(rulePath)
+	switch {
+	case strings.Contains(lower, "i18n"), strings.Contains(lower, "international"):
+		description += "; internationalization i18n localization locale RTL time zone timezone currency formatting"
+	}
+	return description
+}
+
 func authoritativeCategory(sourceID, rulePath string) manifest.PlaybookCategory {
 	lower := strings.ToLower(rulePath)
 	switch {
@@ -132,6 +142,8 @@ func authoritativeCategory(sourceID, rulePath string) manifest.PlaybookCategory 
 		return manifest.CategoryPerformance
 	case strings.Contains(lower, "test"):
 		return manifest.CategoryChecklist
+	case strings.Contains(lower, "i18n"), strings.Contains(lower, "international"):
+		return manifest.CategoryGuide
 	case sourceID == "universal":
 		return manifest.CategoryCore
 	default:
