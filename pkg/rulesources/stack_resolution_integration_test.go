@@ -24,7 +24,7 @@ func TestLaravelInertiaVueResolutionExcludesUnrelatedFrameworkSources(t *testing
 
 	profiles := []Profile{
 		{
-			ID:          "laravel-inertia-vue", Version: 1,
+			ID: "laravel-inertia-vue", Version: 1,
 			Match:       ProfileMatch{RequiredTechnologies: []string{"php", "laravel", "inertia", "vue"}},
 			Inheritance: []string{"universal", "php", "laravel", "vue"},
 			RequiredRuleEntrypoints: map[string][]string{
@@ -79,7 +79,7 @@ func TestResolveLocalizationIntentSelectsI18NWithoutLoadingUnrelatedOptionalRule
 		t.Fatal(err)
 	}
 	profiles := []Profile{{
-		ID:          "vue", Version: 1,
+		ID: "vue", Version: 1,
 		Match:       ProfileMatch{RequiredTechnologies: []string{"vue"}},
 		Inheritance: []string{"universal", "vue"},
 		RequiredRuleEntrypoints: map[string][]string{
