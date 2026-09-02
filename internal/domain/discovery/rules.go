@@ -143,6 +143,35 @@ func packageHas(fs filesystem.FileSystem, root string, deps ...string) bool {
 	return false
 }
 
+func composerHas(fs filesystem.FileSystem, root string, packages ...string) bool {
+	data, err := fs.ReadFile(filepath.Join(root, "composer.json"))
+	if err != nil {
+		return false
+	}
+	var composer struct {
+		Require    map[string]any `json:"require"`
+		RequireDev map[string]any `json:"require-dev"`
+	}
+	if json.Unmarshal(data, &composer) != nil {
+		content := strings.ToLower(string(data))
+		for _, pkg := range packages {
+			if strings.Contains(content, strings.ToLower(pkg)) {
+				return true
+			}
+		}
+		return false
+	}
+	for _, pkg := range packages {
+		if _, ok := composer.Require[pkg]; ok {
+			return true
+		}
+		if _, ok := composer.RequireDev[pkg]; ok {
+			return true
+		}
+	}
+	return false
+}
+
 func defaultRules() []DetectionRule {
 	return []DetectionRule{
 		{ID: "go", Name: "Go", Files: []string{"go.mod"}, Language: "Go", Runtime: "Go", PackageManager: "go mod"},
