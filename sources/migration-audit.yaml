@@ -1,14 +1,35 @@
-version: 1
+version: 2
 updated_at: 2026-09-02
+purpose: >-
+  Record semantic ownership for PromptEngine's historical Markdown library.
+  Migrated documents may remain embedded as offline/preservation fallback or
+  compatibility references, but are no longer independent canonical framework policy.
 policy:
   classifications: [KEEP, ADD, MERGE, UPDATE, REFERENCE, CONFLICT]
   invariant: >-
     Never remove an existing PromptEngine rule merely because an authoritative source
-    covers a similar topic. Unique implementation or integration value must first be
-    migrated to the appropriate owner; exact duplicates may then become references.
+    covers a similar topic. Preserve unique implementation, integration, compatibility,
+    and offline value before retiring duplication.
   public_private_boundary: >-
     Never vendor private authoritative repository content into this public repository.
     PromptEngine may resolve and synchronize it at runtime for an authorized user.
+
+reviewed_authorities:
+  universal:
+    repository: LordCodex/engineering-ai-rules
+    ref: 4cf47616a5437530b8848d8aa834acc9b08b7cd6
+  php:
+    repository: LordCodex/php-broilerplate
+    ref: ac860c73104ce47ab335e64cd6fe9c9f7f59b697
+  laravel:
+    repository: LordCodex/laravel-ai-rules
+    ref: 8b03da4ee01879ba8a896811304bf7984ecda1f4
+  vue:
+    repository: LordCodex/vue-ai-rules
+    ref: d79364cd9fc49aaf7907866ac21aa2e3f93a5790
+  react:
+    repository: LordCodex/react-ai-rules
+    ref: 3011fa35389fabfaf4325bff77e4cbee973e4a35
 
 ownership_groups:
   promptengine_owned:
@@ -18,370 +39,179 @@ ownership_groups:
       - workflows/**
       - prompts/**
       - project/**
-      - checklists/**
-      - decision-guides/**
       - guides/**
+      - decision-guides/**
+      - checklists/**
       - cli/**
-      - architecture/**
-      - legacy/**
-      - environment/**
-    reason: PromptEngine orchestration, workflow, project-bootstrap, adapter, and decision-support knowledge.
+      - sources/**
+    reason: orchestration, task execution, project knowledge, CLI, and source-resolution behavior
 
-  cross_stack_bridges:
-    classification: KEEP
+  universal_core:
+    classification: REFERENCE
+    owner: universal
     patterns:
-      - bridges/**
-    reason: Cross-stack integration belongs to PromptEngine, but bridge documents must reference authoritative framework rules and must not restate stale framework policy.
+      - core/00-*.md
+      - core/01-*.md
+      - core/02-*.md
+      - core/03-*.md
+      - core/04-*.md
+      - core/05-*.md
+      - core/06-*.md
+      - core/07-*.md
+      - core/08-*.md
+      - core/09-*.md
+      - core/10-*.md
+      - core/11-*.md
+      - core/12-*.md
+      - core/13-*.md
+      - core/14-*.md
+      - core/15-*.md
+      - core/16-*.md
+      - core/17-*.md
+      - core/18-*.md
+      - core/19-*.md
+      - core/20-*.md
+      - core/21-*.md
+      - core/22-*.md
+      - core/29-*.md
+      - core/30-*.md
+      - security/**
+    reason: >-
+      Useful universal knowledge has been normalized into engineering-ai-rules. The
+      2026-09-02 migration added framework-neutral threat modeling, collaboration,
+      CI/CD, infrastructure, legacy modernization, code review, and documentation.
+    fallback: keep bundled historical files until a versioned offline-fallback retirement
 
-  design_library:
-    classification: KEEP
+  frontend_cross_cutting:
+    classification: REFERENCE
+    owner: universal_and_frontend_frameworks
     patterns:
-      - design/**
-    reason: Product/design-system guidance is currently PromptEngine-owned because no separate authoritative design repository exists.
+      - core/23-*.md
+      - core/24-*.md
+      - core/25-*.md
+      - core/26-*.md
+      - core/27-*.md
+      - core/28-*.md
+    reason: >-
+      Universal invariants are owned upstream; Vue/React implementation consequences are
+      owned by their framework repositories. Missing i18n/l10n guidance was migrated to
+      Vue and React docs/I18N.md. Flutter consequences remain fallback until a dedicated
+      Flutter authority exists.
 
-files:
-  core/00-engineering-philosophy.md:
-    classification: MERGE
-    owner: universal
-    target: RULES.md
-    disposition: fallback_until_migrated
-  core/01-thinking-and-planning.md:
-    classification: MERGE
-    owner: universal
-    target: [RULES.md, docs/ARCHITECTURE.md]
-    disposition: fallback_until_migrated
-  core/02-architecture-and-simplicity.md:
-    classification: MERGE
-    owner: universal
-    target: docs/ARCHITECTURE.md
-    disposition: fallback_until_migrated
-  core/03-data-and-api-modeling.md:
-    classification: MERGE
-    owner: universal
-    target: [docs/DATABASE.md, docs/API-DESIGN.md]
-    disposition: fallback_until_migrated
-  core/04-testing-philosophy.md:
-    classification: MERGE
-    owner: universal
-    target: docs/TESTING.md
-    disposition: fallback_until_migrated
-  core/05-universal-coding-standards.md:
-    classification: MERGE
-    owner: universal
-    target: RULES.md
-    disposition: fallback_until_migrated
-  core/06-database-engineering-standard.md:
-    classification: MERGE
-    owner: universal
-    target: [docs/DATABASE.md, docs/TRANSACTIONS.md, docs/CONCURRENCY.md]
-    disposition: fallback_until_migrated
-  core/07-api-engineering-standard.md:
-    classification: MERGE
-    owner: universal
-    target: [docs/API-DESIGN.md, docs/NETWORKING.md]
-    disposition: fallback_until_migrated
-  core/08-security-engineering-standard.md:
-    classification: MERGE
-    owner: universal
-    target: [docs/SECURITY.md, docs/AUTHENTICATION.md, docs/AUTHORIZATION.md]
-    disposition: fallback_until_migrated
-  core/09-security-testing-and-threat-modeling.md:
-    classification: ADD
-    owner: universal
-    target: docs/THREAT-MODELING.md
-    disposition: fallback_until_migrated
-  core/10-performance-engineering-standard.md:
-    classification: MERGE
-    owner: universal
-    target: docs/PERFORMANCE.md
-    disposition: fallback_until_migrated
-  core/11-testing-engineering-standard.md:
-    classification: MERGE
-    owner: universal
-    target: docs/TESTING.md
-    disposition: fallback_until_migrated
-  core/12-git-and-collaboration-standard.md:
-    classification: ADD
-    owner: universal
-    target: docs/COLLABORATION.md
-    disposition: fallback_until_migrated
-  core/13-cicd-and-deployment-standard.md:
-    classification: ADD
-    owner: universal
-    target: docs/CI-CD.md
-    disposition: fallback_until_migrated
-    corrections_before_merge:
-      - Do not require one CI provider.
-      - Do not require containers for every deployment.
-      - Do not prohibit all manual production intervention; require controlled, audited break-glass procedures when necessary.
-      - Do not impose a universal ban on down migrations; use data-loss-aware rollback/roll-forward strategy.
-  core/14-infrastructure-and-devops-standard.md:
-    classification: ADD
-    owner: universal
-    target: docs/INFRASTRUCTURE.md
-    disposition: fallback_until_migrated
-    corrections_before_merge:
-      - Do not mandate Ubuntu/Alpine, Nginx, UFW, Supervisor, PM2, Docker Compose, or specific cloud products universally.
-      - Do not treat changing the SSH port as a primary security control.
-      - Do not use arbitrary traffic thresholds to justify Kubernetes.
-      - Choose infrastructure from workload, failure, ownership, compliance, and operational requirements.
-  core/15-mobile-application-engineering-standard.md:
-    classification: KEEP
-    owner: promptengine
-    target: future-dart-flutter-authoritative-source
-    disposition: active_fallback
-    reason: No dedicated authoritative Dart/Flutter repository is registered yet.
-  core/16-legacy-modernization-and-refactoring-standard.md:
-    classification: ADD
-    owner: universal
-    target: docs/LEGACY-MODERNIZATION.md
-    disposition: fallback_until_migrated
-  core/17-refactoring-standards-and-safe-migration-workflow.md:
-    classification: MERGE
-    owner: universal
-    target: docs/LEGACY-MODERNIZATION.md
-    disposition: fallback_until_migrated
-  core/18-code-review-engineering-standard.md:
-    classification: ADD
-    owner: universal
-    target: docs/CODE-REVIEW.md
-    disposition: fallback_until_migrated
-  core/19-documentation-engineering-standard.md:
-    classification: ADD
-    owner: universal
-    target: docs/DOCUMENTATION.md
-    disposition: fallback_until_migrated
-  core/20-ai-agent-engineering-workflow-standard.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active
-    reason: PromptEngine execution/orchestration behavior; universal AI invariants remain inherited.
-  core/21-reusable-ai-prompt-template-library.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active
-  core/22-project-bootstrap-and-developer-onboarding-standard.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active
-  core/23-frontend-architecture-standard.md:
-    classification: MERGE
-    owner: [vue, react]
-    target: framework architecture rules
-    disposition: supplemental_until_migrated
-  core/24-frontend-security-and-privacy-hardening-standard.md:
-    classification: MERGE
-    owner: [vue, react]
-    target: framework security rules
-    disposition: supplemental_until_migrated
-  core/25-frontend-testing-standard.md:
-    classification: MERGE
-    owner: [vue, react]
-    target: framework testing rules
-    disposition: supplemental_until_migrated
-  core/26-frontend-performance-engineering-standard.md:
-    classification: MERGE
-    owner: [vue, react]
-    target: framework performance rules
-    disposition: supplemental_until_migrated
-  core/27-seo-engineering-standard.md:
-    classification: MERGE
-    owner: [vue, react]
-    target: framework SEO rules
-    disposition: supplemental_until_migrated
-  core/28-internationalization-and-localization-standard.md:
-    classification: MERGE
-    owner: [vue, react]
-    target: framework i18n rules
-    disposition: supplemental_until_migrated
-  core/29-observability-and-operational-excellence-standard.md:
-    classification: MERGE
-    owner: universal
-    target: [docs/OBSERVABILITY.md, docs/RELIABILITY.md]
-    disposition: fallback_until_migrated
-  core/30-deployment-cicd-and-production-readiness-standard.md:
-    classification: MERGE
-    owner: universal
-    target: [docs/CI-CD.md, docs/DEPLOYMENT.md, docs/PRODUCTION-READINESS.md]
-    disposition: fallback_until_migrated
-
-  security/01-secure-coding.md:
-    classification: MERGE
-    owner: universal
-    target: docs/SECURITY.md
-    disposition: fallback_until_migrated
-  security/02-auth-and-permissions.md:
-    classification: MERGE
-    owner: universal
-    target: [docs/AUTHENTICATION.md, docs/AUTHORIZATION.md]
-    disposition: fallback_until_migrated
-  security/03-secrets-management.md:
-    classification: MERGE
-    owner: universal
-    target: [docs/SECURITY.md, docs/CONFIGURATION.md]
-    disposition: fallback_until_migrated
-  security/04-api-and-infra-security.md:
-    classification: MERGE
-    owner: universal
-    target: [docs/SECURITY.md, docs/API-DESIGN.md, docs/INFRASTRUCTURE.md]
-    disposition: fallback_until_migrated
-  security/README.md:
-    classification: UPDATE
-    owner: promptengine
-    disposition: keep_as_navigation
-    reason: Convert to PromptEngine navigation that points to authoritative security sources plus PromptEngine threat-model workflow material.
-  security/threat-modeling.md:
-    classification: MERGE
-    owner: universal
-    target: docs/THREAT-MODELING.md
-    disposition: fallback_until_migrated
-
-  stacks/php-laravel/php-conventions.md:
-    classification: MERGE
+  php:
+    classification: REFERENCE
     owner: php
-    target: php authoritative rules
-    disposition: fallback_until_migrated
-  stacks/php-laravel/laravel-engineering-standard.md:
-    classification: MERGE
-    owner: laravel
-    target: [RULES.md, docs/ARCHITECTURE.md]
-    disposition: fallback_until_migrated
-  stacks/php-laravel/laravel-data.md:
-    classification: MERGE
-    owner: laravel
-    target: docs/DATABASE.md
-    disposition: fallback_until_migrated
-  stacks/php-laravel/laravel-logic.md:
-    classification: MERGE
-    owner: laravel
-    target: [RULES.md, docs/ARCHITECTURE.md]
-    disposition: fallback_until_migrated
-  stacks/php-laravel/laravel-routing.md:
-    classification: MERGE
-    owner: laravel
-    target: [RULES.md, docs/API.md, docs/ARCHITECTURE.md]
-    disposition: fallback_until_migrated
-  stacks/php-laravel/laravel-testing.md:
-    classification: MERGE
-    owner: laravel
-    target: docs/TESTING.md
-    disposition: fallback_until_migrated
+    patterns:
+      - stacks/php-laravel/php-conventions.md
+    reason: >-
+      PHP language/runtime knowledge was migrated to php-broilerplate docs/PHP-LANGUAGE.md.
+      Blanket trait bans, DTO-everywhere rules, fixed static-analysis/OPcache settings, and
+      function-name shell bans were normalized into requirement-driven guidance.
 
-  stacks/js-ts-vue-nuxt/js-ts-conventions.md:
-    classification: MERGE
+  laravel:
+    classification: REFERENCE
+    owner: laravel
+    patterns:
+      - stacks/php-laravel/laravel-engineering-standard.md
+      - stacks/php-laravel/laravel-data.md
+      - stacks/php-laravel/laravel-logic.md
+      - stacks/php-laravel/laravel-routing.md
+      - stacks/php-laravel/laravel-testing.md
+    reason: >-
+      Laravel-native structure, Eloquent, routing, testing, queues, security, feature
+      boundaries, components, Livewire, and Inertia are authoritative in laravel-ai-rules.
+      The migration normalized mandatory Redis/cursor pagination/API Resources/DTOs,
+      arbitrary queue thresholds, and unsafe rollback assumptions.
+
+  vue:
+    classification: REFERENCE
     owner: vue
-    target: Vue TypeScript/runtime-boundary rules
-    disposition: fallback_until_migrated
-  stacks/js-ts-vue-nuxt/vue-components.md:
-    classification: MERGE
-    owner: vue
-    target: Vue component rules
-    disposition: fallback_until_migrated
-  stacks/js-ts-vue-nuxt/vue-ts-engineering-standard.md:
-    classification: MERGE
-    owner: vue
-    target: RULES.md
-    disposition: fallback_until_migrated
-  stacks/js-ts-vue-nuxt/nuxt-ssr.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-    reason: Nuxt-specific authoritative repository does not exist yet.
-  stacks/js-ts-vue-nuxt/nuxt-ts-engineering-standard.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-    reason: Nuxt-specific authoritative repository does not exist yet.
+    patterns:
+      - stacks/js-ts-vue-nuxt/js-ts-conventions.md
+      - stacks/js-ts-vue-nuxt/vue-components.md
+      - stacks/js-ts-vue-nuxt/vue-ts-engineering-standard.md
+    reason: >-
+      Vue architecture, components, state, data fetching, security, performance,
+      accessibility, SEO, testing, tooling, and i18n have authoritative Vue ownership.
 
-  stacks/react-next/react-conventions.md:
-    classification: MERGE
-    owner: react
-    target: RULES.md
-    disposition: fallback_until_migrated
-  stacks/react-next/react-components.md:
-    classification: MERGE
-    owner: react
-    target: React component rules
-    disposition: fallback_until_migrated
-  stacks/react-next/react-state-management.md:
-    classification: MERGE
-    owner: react
-    target: React state rules
-    disposition: fallback_until_migrated
-  stacks/react-next/react-testing.md:
-    classification: MERGE
-    owner: react
-    target: React testing rules
-    disposition: fallback_until_migrated
-  stacks/react-next/accessibility.md:
-    classification: MERGE
-    owner: react
-    target: React accessibility rules
-    disposition: fallback_until_migrated
-  stacks/react-next/nextjs-app-router.md:
+  nuxt:
     classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-    reason: Next.js-specific authoritative repository does not exist yet.
-  stacks/react-next/nextjs-api-routes.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-  stacks/react-next/nextjs-performance.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-  stacks/react-next/nextjs-security.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
+    owner: promptengine_fallback
+    patterns:
+      - stacks/js-ts-vue-nuxt/nuxt-ssr.md
+      - stacks/js-ts-vue-nuxt/nuxt-ts-engineering-standard.md
+    reason: no dedicated Nuxt authoritative repository/profile exists yet
 
-  stacks/dart-flutter/dart-conventions.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-    reason: Dedicated Dart/Flutter authoritative repository has not been created yet.
-  stacks/dart-flutter/flutter-dart-engineering-standard.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-  stacks/dart-flutter/flutter-architecture.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-  stacks/dart-flutter/flutter-state.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-  stacks/dart-flutter/flutter-testing.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
-  stacks/dart-flutter/flutter-widgets.md:
-    classification: KEEP
-    owner: promptengine
-    disposition: active_fallback
+  react:
+    classification: REFERENCE
+    owner: react
+    patterns:
+      - stacks/react-next/accessibility.md
+      - stacks/react-next/react-components.md
+      - stacks/react-next/react-conventions.md
+      - stacks/react-next/react-state-management.md
+      - stacks/react-next/react-testing.md
+    reason: >-
+      React architecture, components, state, data fetching, security, performance,
+      accessibility, SEO, testing, tooling, and i18n have authoritative React ownership.
 
-bridges:
-  bridges/laravel-inertia-vue.md:
+  nextjs:
     classification: KEEP
-    owner: promptengine
-    action: update_to_reference_authoritative_laravel_inertia_and_vue_rules
-  bridges/laravel-inertia-vue-engineering-standard.md:
+    owner: promptengine_fallback
+    patterns:
+      - stacks/react-next/nextjs-api-routes.md
+      - stacks/react-next/nextjs-app-router.md
+      - stacks/react-next/nextjs-performance.md
+      - stacks/react-next/nextjs-security.md
+    reason: no dedicated Next.js authoritative repository/profile exists yet
+
+  dart_flutter:
+    classification: KEEP
+    owner: promptengine_fallback
+    patterns:
+      - stacks/dart-flutter/**
+    reason: >-
+      No LordCodex/flutter-ai-rules repository currently exists in the connected GitHub
+      account. Preserve these as active fallback/source material until a dedicated
+      Dart/Flutter authority can be created and reviewed.
+
+  laravel_inertia_vue_bridge:
     classification: UPDATE
     owner: promptengine
-    action: reduce_to_integration_specific_guidance_after_unique_rules_are_migrated
-    known_stale_or_overprescriptive_points:
-      - pinned old framework target versions
-      - mandatory Ziggy
-      - mandatory API Resources for all props
-      - blanket cursor pagination preference
-      - old Inertia lazy-prop examples
-      - broad event/listener prescriptions
-  bridges/laravel-api-flutter.md:
+    patterns:
+      - bridges/laravel-inertia-vue.md
+      - bridges/laravel-inertia-vue-engineering-standard.md
+    reason: >-
+      The concise bridge is now integration-only. The historical engineering-standard
+      file is a compatibility entry that routes to authoritative sources and the concise
+      bridge. Retired prescriptions include mandatory Ziggy/resources/cursor pagination,
+      mandatory Redis/events, arbitrary queue thresholds, fixed old version pins, and
+      stale lazy-prop assumptions.
+
+  other_bridges:
     classification: KEEP
     owner: promptengine
-  bridges/cross-origin-sharing.md:
-    classification: KEEP
-    owner: promptengine
-    note: Must inherit universal rule that CORS is not authentication or authorization.
+    patterns:
+      - bridges/laravel-api-flutter.md
+      - bridges/cross-origin-sharing.md
+    reason: integration-specific guidance remains PromptEngine-owned; re-audit Flutter bridge after Flutter externalization
+
+retirement_policy:
+  current: >-
+    Migrated Markdown remains embedded as explicit offline/preservation fallback unless
+    it creates an active contradiction. Authority comes from the source registry/profile
+    resolver, not from the mere presence of a legacy file.
+  future: >-
+    A later major release may replace fully migrated files with compact reference stubs or
+    remove them only after compatibility, offline behavior, manifest references, release
+    migration notes, and zero remaining unique implementation value are verified.
+
+remaining_externalization:
+  - stack: Nuxt
+    state: no dedicated authority yet
+  - stack: Next.js
+    state: no dedicated authority yet
+  - stack: Dart/Flutter
+    state: >-
+      no dedicated authority yet; current connected GitHub actions cannot create a new
+      repository, so source material remains safely preserved in PromptEngine
