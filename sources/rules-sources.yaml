@@ -7,7 +7,7 @@ updated_at: 2026-09-02
 sources:
   universal:
     repository: LordCodex/engineering-ai-rules
-    ref: 6edf659ea599e3ee2364f7e372ee65bec64d3529
+    ref: 4cf47616a5437530b8848d8aa834acc9b08b7cd6
     role: authoritative
     owns:
       - universal
@@ -17,6 +17,13 @@ sources:
       - api-design
       - authentication
       - authorization
+      - threat-modeling
+      - collaboration
+      - ci-cd
+      - infrastructure
+      - legacy-modernization
+      - code-review
+      - documentation
     inherits: []
 
   php:
