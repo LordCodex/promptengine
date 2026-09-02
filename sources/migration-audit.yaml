@@ -1,0 +1,387 @@
+version: 1
+updated_at: 2026-09-02
+policy:
+  classifications: [KEEP, ADD, MERGE, UPDATE, REFERENCE, CONFLICT]
+  invariant: >-
+    Never remove an existing PromptEngine rule merely because an authoritative source
+    covers a similar topic. Unique implementation or integration value must first be
+    migrated to the appropriate owner; exact duplicates may then become references.
+  public_private_boundary: >-
+    Never vendor private authoritative repository content into this public repository.
+    PromptEngine may resolve and synchronize it at runtime for an authorized user.
+
+ownership_groups:
+  promptengine_owned:
+    classification: KEEP
+    patterns:
+      - ai/**
+      - workflows/**
+      - prompts/**
+      - project/**
+      - checklists/**
+      - decision-guides/**
+      - guides/**
+      - cli/**
+      - architecture/**
+      - legacy/**
+      - environment/**
+    reason: PromptEngine orchestration, workflow, project-bootstrap, adapter, and decision-support knowledge.
+
+  cross_stack_bridges:
+    classification: KEEP
+    patterns:
+      - bridges/**
+    reason: Cross-stack integration belongs to PromptEngine, but bridge documents must reference authoritative framework rules and must not restate stale framework policy.
+
+  design_library:
+    classification: KEEP
+    patterns:
+      - design/**
+    reason: Product/design-system guidance is currently PromptEngine-owned because no separate authoritative design repository exists.
+
+files:
+  core/00-engineering-philosophy.md:
+    classification: MERGE
+    owner: universal
+    target: RULES.md
+    disposition: fallback_until_migrated
+  core/01-thinking-and-planning.md:
+    classification: MERGE
+    owner: universal
+    target: [RULES.md, docs/ARCHITECTURE.md]
+    disposition: fallback_until_migrated
+  core/02-architecture-and-simplicity.md:
+    classification: MERGE
+    owner: universal
+    target: docs/ARCHITECTURE.md
+    disposition: fallback_until_migrated
+  core/03-data-and-api-modeling.md:
+    classification: MERGE
+    owner: universal
+    target: [docs/DATABASE.md, docs/API-DESIGN.md]
+    disposition: fallback_until_migrated
+  core/04-testing-philosophy.md:
+    classification: MERGE
+    owner: universal
+    target: docs/TESTING.md
+    disposition: fallback_until_migrated
+  core/05-universal-coding-standards.md:
+    classification: MERGE
+    owner: universal
+    target: RULES.md
+    disposition: fallback_until_migrated
+  core/06-database-engineering-standard.md:
+    classification: MERGE
+    owner: universal
+    target: [docs/DATABASE.md, docs/TRANSACTIONS.md, docs/CONCURRENCY.md]
+    disposition: fallback_until_migrated
+  core/07-api-engineering-standard.md:
+    classification: MERGE
+    owner: universal
+    target: [docs/API-DESIGN.md, docs/NETWORKING.md]
+    disposition: fallback_until_migrated
+  core/08-security-engineering-standard.md:
+    classification: MERGE
+    owner: universal
+    target: [docs/SECURITY.md, docs/AUTHENTICATION.md, docs/AUTHORIZATION.md]
+    disposition: fallback_until_migrated
+  core/09-security-testing-and-threat-modeling.md:
+    classification: ADD
+    owner: universal
+    target: docs/THREAT-MODELING.md
+    disposition: fallback_until_migrated
+  core/10-performance-engineering-standard.md:
+    classification: MERGE
+    owner: universal
+    target: docs/PERFORMANCE.md
+    disposition: fallback_until_migrated
+  core/11-testing-engineering-standard.md:
+    classification: MERGE
+    owner: universal
+    target: docs/TESTING.md
+    disposition: fallback_until_migrated
+  core/12-git-and-collaboration-standard.md:
+    classification: ADD
+    owner: universal
+    target: docs/COLLABORATION.md
+    disposition: fallback_until_migrated
+  core/13-cicd-and-deployment-standard.md:
+    classification: ADD
+    owner: universal
+    target: docs/CI-CD.md
+    disposition: fallback_until_migrated
+    corrections_before_merge:
+      - Do not require one CI provider.
+      - Do not require containers for every deployment.
+      - Do not prohibit all manual production intervention; require controlled, audited break-glass procedures when necessary.
+      - Do not impose a universal ban on down migrations; use data-loss-aware rollback/roll-forward strategy.
+  core/14-infrastructure-and-devops-standard.md:
+    classification: ADD
+    owner: universal
+    target: docs/INFRASTRUCTURE.md
+    disposition: fallback_until_migrated
+    corrections_before_merge:
+      - Do not mandate Ubuntu/Alpine, Nginx, UFW, Supervisor, PM2, Docker Compose, or specific cloud products universally.
+      - Do not treat changing the SSH port as a primary security control.
+      - Do not use arbitrary traffic thresholds to justify Kubernetes.
+      - Choose infrastructure from workload, failure, ownership, compliance, and operational requirements.
+  core/15-mobile-application-engineering-standard.md:
+    classification: KEEP
+    owner: promptengine
+    target: future-dart-flutter-authoritative-source
+    disposition: active_fallback
+    reason: No dedicated authoritative Dart/Flutter repository is registered yet.
+  core/16-legacy-modernization-and-refactoring-standard.md:
+    classification: ADD
+    owner: universal
+    target: docs/LEGACY-MODERNIZATION.md
+    disposition: fallback_until_migrated
+  core/17-refactoring-standards-and-safe-migration-workflow.md:
+    classification: MERGE
+    owner: universal
+    target: docs/LEGACY-MODERNIZATION.md
+    disposition: fallback_until_migrated
+  core/18-code-review-engineering-standard.md:
+    classification: ADD
+    owner: universal
+    target: docs/CODE-REVIEW.md
+    disposition: fallback_until_migrated
+  core/19-documentation-engineering-standard.md:
+    classification: ADD
+    owner: universal
+    target: docs/DOCUMENTATION.md
+    disposition: fallback_until_migrated
+  core/20-ai-agent-engineering-workflow-standard.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active
+    reason: PromptEngine execution/orchestration behavior; universal AI invariants remain inherited.
+  core/21-reusable-ai-prompt-template-library.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active
+  core/22-project-bootstrap-and-developer-onboarding-standard.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active
+  core/23-frontend-architecture-standard.md:
+    classification: MERGE
+    owner: [vue, react]
+    target: framework architecture rules
+    disposition: supplemental_until_migrated
+  core/24-frontend-security-and-privacy-hardening-standard.md:
+    classification: MERGE
+    owner: [vue, react]
+    target: framework security rules
+    disposition: supplemental_until_migrated
+  core/25-frontend-testing-standard.md:
+    classification: MERGE
+    owner: [vue, react]
+    target: framework testing rules
+    disposition: supplemental_until_migrated
+  core/26-frontend-performance-engineering-standard.md:
+    classification: MERGE
+    owner: [vue, react]
+    target: framework performance rules
+    disposition: supplemental_until_migrated
+  core/27-seo-engineering-standard.md:
+    classification: MERGE
+    owner: [vue, react]
+    target: framework SEO rules
+    disposition: supplemental_until_migrated
+  core/28-internationalization-and-localization-standard.md:
+    classification: MERGE
+    owner: [vue, react]
+    target: framework i18n rules
+    disposition: supplemental_until_migrated
+  core/29-observability-and-operational-excellence-standard.md:
+    classification: MERGE
+    owner: universal
+    target: [docs/OBSERVABILITY.md, docs/RELIABILITY.md]
+    disposition: fallback_until_migrated
+  core/30-deployment-cicd-and-production-readiness-standard.md:
+    classification: MERGE
+    owner: universal
+    target: [docs/CI-CD.md, docs/DEPLOYMENT.md, docs/PRODUCTION-READINESS.md]
+    disposition: fallback_until_migrated
+
+  security/01-secure-coding.md:
+    classification: MERGE
+    owner: universal
+    target: docs/SECURITY.md
+    disposition: fallback_until_migrated
+  security/02-auth-and-permissions.md:
+    classification: MERGE
+    owner: universal
+    target: [docs/AUTHENTICATION.md, docs/AUTHORIZATION.md]
+    disposition: fallback_until_migrated
+  security/03-secrets-management.md:
+    classification: MERGE
+    owner: universal
+    target: [docs/SECURITY.md, docs/CONFIGURATION.md]
+    disposition: fallback_until_migrated
+  security/04-api-and-infra-security.md:
+    classification: MERGE
+    owner: universal
+    target: [docs/SECURITY.md, docs/API-DESIGN.md, docs/INFRASTRUCTURE.md]
+    disposition: fallback_until_migrated
+  security/README.md:
+    classification: UPDATE
+    owner: promptengine
+    disposition: keep_as_navigation
+    reason: Convert to PromptEngine navigation that points to authoritative security sources plus PromptEngine threat-model workflow material.
+  security/threat-modeling.md:
+    classification: MERGE
+    owner: universal
+    target: docs/THREAT-MODELING.md
+    disposition: fallback_until_migrated
+
+  stacks/php-laravel/php-conventions.md:
+    classification: MERGE
+    owner: php
+    target: php authoritative rules
+    disposition: fallback_until_migrated
+  stacks/php-laravel/laravel-engineering-standard.md:
+    classification: MERGE
+    owner: laravel
+    target: [RULES.md, docs/ARCHITECTURE.md]
+    disposition: fallback_until_migrated
+  stacks/php-laravel/laravel-data.md:
+    classification: MERGE
+    owner: laravel
+    target: docs/DATABASE.md
+    disposition: fallback_until_migrated
+  stacks/php-laravel/laravel-logic.md:
+    classification: MERGE
+    owner: laravel
+    target: [RULES.md, docs/ARCHITECTURE.md]
+    disposition: fallback_until_migrated
+  stacks/php-laravel/laravel-routing.md:
+    classification: MERGE
+    owner: laravel
+    target: [RULES.md, docs/API.md, docs/ARCHITECTURE.md]
+    disposition: fallback_until_migrated
+  stacks/php-laravel/laravel-testing.md:
+    classification: MERGE
+    owner: laravel
+    target: docs/TESTING.md
+    disposition: fallback_until_migrated
+
+  stacks/js-ts-vue-nuxt/js-ts-conventions.md:
+    classification: MERGE
+    owner: vue
+    target: Vue TypeScript/runtime-boundary rules
+    disposition: fallback_until_migrated
+  stacks/js-ts-vue-nuxt/vue-components.md:
+    classification: MERGE
+    owner: vue
+    target: Vue component rules
+    disposition: fallback_until_migrated
+  stacks/js-ts-vue-nuxt/vue-ts-engineering-standard.md:
+    classification: MERGE
+    owner: vue
+    target: RULES.md
+    disposition: fallback_until_migrated
+  stacks/js-ts-vue-nuxt/nuxt-ssr.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+    reason: Nuxt-specific authoritative repository does not exist yet.
+  stacks/js-ts-vue-nuxt/nuxt-ts-engineering-standard.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+    reason: Nuxt-specific authoritative repository does not exist yet.
+
+  stacks/react-next/react-conventions.md:
+    classification: MERGE
+    owner: react
+    target: RULES.md
+    disposition: fallback_until_migrated
+  stacks/react-next/react-components.md:
+    classification: MERGE
+    owner: react
+    target: React component rules
+    disposition: fallback_until_migrated
+  stacks/react-next/react-state-management.md:
+    classification: MERGE
+    owner: react
+    target: React state rules
+    disposition: fallback_until_migrated
+  stacks/react-next/react-testing.md:
+    classification: MERGE
+    owner: react
+    target: React testing rules
+    disposition: fallback_until_migrated
+  stacks/react-next/accessibility.md:
+    classification: MERGE
+    owner: react
+    target: React accessibility rules
+    disposition: fallback_until_migrated
+  stacks/react-next/nextjs-app-router.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+    reason: Next.js-specific authoritative repository does not exist yet.
+  stacks/react-next/nextjs-api-routes.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+  stacks/react-next/nextjs-performance.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+  stacks/react-next/nextjs-security.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+
+  stacks/dart-flutter/dart-conventions.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+    reason: Dedicated Dart/Flutter authoritative repository has not been created yet.
+  stacks/dart-flutter/flutter-dart-engineering-standard.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+  stacks/dart-flutter/flutter-architecture.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+  stacks/dart-flutter/flutter-state.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+  stacks/dart-flutter/flutter-testing.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+  stacks/dart-flutter/flutter-widgets.md:
+    classification: KEEP
+    owner: promptengine
+    disposition: active_fallback
+
+bridges:
+  bridges/laravel-inertia-vue.md:
+    classification: KEEP
+    owner: promptengine
+    action: update_to_reference_authoritative_laravel_inertia_and_vue_rules
+  bridges/laravel-inertia-vue-engineering-standard.md:
+    classification: UPDATE
+    owner: promptengine
+    action: reduce_to_integration_specific_guidance_after_unique_rules_are_migrated
+    known_stale_or_overprescriptive_points:
+      - pinned old framework target versions
+      - mandatory Ziggy
+      - mandatory API Resources for all props
+      - blanket cursor pagination preference
+      - old Inertia lazy-prop examples
+      - broad event/listener prescriptions
+  bridges/laravel-api-flutter.md:
+    classification: KEEP
+    owner: promptengine
+  bridges/cross-origin-sharing.md:
+    classification: KEEP
+    owner: promptengine
+    note: Must inherit universal rule that CORS is not authentication or authorization.
