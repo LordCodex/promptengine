@@ -83,6 +83,13 @@ func (a *App) EnforceLifecycle(runner LifecycleRunner) func(cmd *cobra.Command, 
 				return lifecycleErr
 			}
 		}
+		if err := a.activateAuthoritativeRules(projectModel); err != nil {
+			lifecycleErr = err
+			return lifecycleErr
+		}
+		if a.Manifest != nil {
+			activeManifest = a.Manifest.ActiveManifest()
+		}
 
 		a.EventBus.Publish(eventbus.Event{
 			Type:    eventbus.CommandStarted,

@@ -85,6 +85,14 @@ func (s *TechStage) detectComposer(fs filesystem.FileSystem, pm *ProjectModel) {
 		pm.Technology.Frameworks = addUnique(pm.Technology.Frameworks, "Laravel")
 		s.publish(DetectionRule{Name: "Laravel"})
 	}
+	if composerHas(fs, pm.RootDir, "livewire/livewire") {
+		pm.Technology.Frameworks = addUnique(pm.Technology.Frameworks, "Livewire")
+		s.publish(DetectionRule{Name: "Livewire"})
+	}
+	if composerHas(fs, pm.RootDir, "inertiajs/inertia-laravel") {
+		pm.Technology.Frameworks = addUnique(pm.Technology.Frameworks, "Inertia")
+		s.publish(DetectionRule{Name: "Inertia"})
+	}
 }
 
 func (s *TechStage) detectEnvDatabases(fs filesystem.FileSystem, pm *ProjectModel) {

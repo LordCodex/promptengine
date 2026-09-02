@@ -1,0 +1,21 @@
+id: react
+version: 1
+match:
+  required_technologies: [react]
+inheritance: [universal, react]
+presentation:
+  backend_authority: ""
+  integration: ""
+  frontend: react
+required_rule_entrypoints:
+  universal: [RULES.md]
+  react: [RULES.md, docs/ARCHITECTURE.md, docs/SECURITY.md, docs/PERFORMANCE.md]
+resolution_policy:
+  project_rules_last: true
+  select_task_relevant_rules: true
+  concatenate_entire_repositories: false
+  preserve_promptengine_bridges: true
+  preserve_project_specific_rules: true
+precedence: [universal-invariants, react-frontend-implementation, project-specific-decisions]
+notes:
+  - React rules specialize universal engineering invariants for React implementation details.

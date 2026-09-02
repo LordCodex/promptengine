@@ -1,0 +1,21 @@
+id: vue
+version: 1
+match:
+  required_technologies: [vue]
+inheritance: [universal, vue]
+presentation:
+  backend_authority: ""
+  integration: ""
+  frontend: vue
+required_rule_entrypoints:
+  universal: [RULES.md]
+  vue: [RULES.md, docs/ARCHITECTURE.md, docs/SECURITY.md, docs/PERFORMANCE.md]
+resolution_policy:
+  project_rules_last: true
+  select_task_relevant_rules: true
+  concatenate_entire_repositories: false
+  preserve_promptengine_bridges: true
+  preserve_project_specific_rules: true
+precedence: [universal-invariants, vue-frontend-implementation, project-specific-decisions]
+notes:
+  - Vue rules specialize universal engineering invariants for Vue implementation details.

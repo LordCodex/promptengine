@@ -74,6 +74,7 @@ func NewRootCommand(app *App) *cobra.Command {
 			return app.Renderer.Render(app.Out, versionResult{Version: version.String()})
 		}),
 	})
+	cmd.AddCommand(NewRulesCommand(app))
 	cmd.AddCommand(NewProductionCommands(app)...)
 
 	return cmd
