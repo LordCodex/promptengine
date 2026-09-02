@@ -25,6 +25,7 @@ import (
 	"github.com/LordCodex/promptengine/internal/history"
 	"github.com/LordCodex/promptengine/internal/output"
 	"github.com/LordCodex/promptengine/pkg/manifest"
+	"github.com/LordCodex/promptengine/pkg/rulesources"
 )
 
 type Options struct {
@@ -42,6 +43,7 @@ type Container struct {
 	Renderer     output.Renderer
 	EventBus     *eventbus.EventBus
 	Manifest     *manifest.Engine
+	RuleSources  *rulesources.Service
 	Discovery    *discovery.Pipeline
 	Context      *contextengine.Engine
 	Workflow     *workflows.Engine
@@ -104,6 +106,10 @@ func NewContainer(opts Options) (*Container, error) {
 	if err := manifestEngine.Register("promptengine-core", manifest.SourceCore, coreManifest); err != nil {
 		return nil, err
 	}
+	ruleSourceService, err := rulesources.NewService(promptengineassets.StandardsFS, projectFS)
+	if err != nil {
+		return nil, err
+	}
 
 	pluginRegistry := plugins.NewRegistryWithEvents(events)
 	hookRegistry := hooks.NewRegistry(projectFS)
@@ -155,6 +161,7 @@ func NewContainer(opts Options) (*Container, error) {
 		Renderer:     output.NewConfiguredRenderer(format, false, cfg.CLI.Verbose),
 		EventBus:     events,
 		Manifest:     manifestEngine,
+		RuleSources:  ruleSourceService,
 		Discovery:    discovery.NewDefaultPipeline(events, manifestEngine),
 		Context:      contextPlatform,
 		Workflow:     workflowEngine,
