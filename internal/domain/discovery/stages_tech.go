@@ -65,6 +65,7 @@ func (s *TechStage) detectPackageJSON(fs filesystem.FileSystem, pm *ProjectModel
 		"Angular":      {"@angular/core"},
 		"Express":      {"express"},
 		"React Native": {"react-native"},
+		"Inertia":      {"@inertiajs/vue3", "@inertiajs/react", "@inertiajs/svelte"},
 	}
 	for framework, deps := range frameworks {
 		if packageHas(fs, pm.RootDir, deps...) {
