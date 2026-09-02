@@ -1,0 +1,88 @@
+version: 1
+updated_at: 2026-09-02
+
+# PromptEngine is the orchestration layer. These repositories own the canonical
+# engineering rules for their scope. Local PromptEngine playbooks remain valid
+# source material until they are explicitly classified and migrated.
+sources:
+  universal:
+    repository: LordCodex/engineering-ai-rules
+    ref: 6edf659ea599e3ee2364f7e372ee65bec64d3529
+    role: authoritative
+    owns:
+      - universal
+      - architecture
+      - security
+      - reliability
+      - api-design
+      - authentication
+      - authorization
+    inherits: []
+
+  php:
+    repository: LordCodex/php-broilerplate
+    ref: f787d330bad13a7c83b64fcbd70b39bc5655e16f
+    role: authoritative
+    owns:
+      - php
+    inherits:
+      - universal
+
+  laravel:
+    repository: LordCodex/laravel-ai-rules
+    ref: cd1f1e28ebb846848973b1e585f7437396b589c2
+    role: authoritative
+    owns:
+      - laravel
+      - blade
+      - livewire
+      - inertia-laravel
+    inherits:
+      - php
+
+  vue:
+    repository: LordCodex/vue-ai-rules
+    ref: 9b571206a13cb91288862d5af32603eb4897a6f0
+    role: authoritative
+    owns:
+      - vue
+      - vue-typescript
+    inherits:
+      - universal
+
+  react:
+    repository: LordCodex/react-ai-rules
+    ref: d97e2df16fd5c5f02b4711ba92618308176dc35b
+    role: authoritative
+    owns:
+      - react
+      - react-typescript
+    inherits:
+      - universal
+
+promptengine:
+  role: orchestrator
+  owns:
+    - stack-detection
+    - rule-resolution
+    - task-context-selection
+    - workflows
+    - prompts
+    - project-knowledge
+    - cli
+    - ai-adapters
+    - cross-stack-bridges
+
+preservation_policy:
+  classifications:
+    - KEEP
+    - ADD
+    - MERGE
+    - UPDATE
+    - REFERENCE
+    - CONFLICT
+  invariant: >-
+    Never remove an existing PromptEngine rule merely because a similar
+    authoritative rule exists. First compare it semantically. Preserve local
+    implementation value, migrate missing knowledge to the correct owner, and
+    only replace exact duplication with an explicit reference.
