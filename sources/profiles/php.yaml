@@ -1,0 +1,21 @@
+id: php
+version: 1
+match:
+  required_technologies: [php]
+inheritance: [universal, php]
+presentation:
+  backend_authority: php
+  integration: ""
+  frontend: ""
+required_rule_entrypoints:
+  universal: [RULES.md]
+  php: [AGENTS.md]
+resolution_policy:
+  project_rules_last: true
+  select_task_relevant_rules: true
+  concatenate_entire_repositories: false
+  preserve_promptengine_bridges: true
+  preserve_project_specific_rules: true
+precedence: [universal-invariants, php-implementation, project-specific-decisions]
+notes:
+  - PromptEngine bundled PHP playbooks remain fallback/source material until their semantic migration is complete.
