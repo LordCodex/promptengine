@@ -9,11 +9,11 @@ import (
 )
 
 type Registry struct {
-	Version            int                    `yaml:"version"`
-	UpdatedAt          string                 `yaml:"updated_at"`
-	Sources            map[string]Source      `yaml:"sources"`
-	PromptEngine       PromptEngineOwnership  `yaml:"promptengine"`
-	PreservationPolicy PreservationPolicy     `yaml:"preservation_policy"`
+	Version            int                   `yaml:"version"`
+	UpdatedAt          string                `yaml:"updated_at"`
+	Sources            map[string]Source     `yaml:"sources"`
+	PromptEngine       PromptEngineOwnership `yaml:"promptengine"`
+	PreservationPolicy PreservationPolicy    `yaml:"preservation_policy"`
 }
 
 type Source struct {
@@ -35,15 +35,15 @@ type PreservationPolicy struct {
 }
 
 type Profile struct {
-	ID                      string                 `yaml:"id"`
-	Version                 int                    `yaml:"version"`
-	Match                   ProfileMatch           `yaml:"match"`
-	Inheritance             []string               `yaml:"inheritance"`
-	Presentation            ProfilePresentation    `yaml:"presentation"`
-	RequiredRuleEntrypoints map[string][]string    `yaml:"required_rule_entrypoints"`
+	ID                      string                  `yaml:"id"`
+	Version                 int                     `yaml:"version"`
+	Match                   ProfileMatch            `yaml:"match"`
+	Inheritance             []string                `yaml:"inheritance"`
+	Presentation            ProfilePresentation     `yaml:"presentation"`
+	RequiredRuleEntrypoints map[string][]string     `yaml:"required_rule_entrypoints"`
 	ResolutionPolicy        ProfileResolutionPolicy `yaml:"resolution_policy"`
-	Precedence              []string               `yaml:"precedence"`
-	Notes                   []string               `yaml:"notes"`
+	Precedence              []string                `yaml:"precedence"`
+	Notes                   []string                `yaml:"notes"`
 }
 
 type ProfileMatch struct {
