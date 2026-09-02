@@ -23,6 +23,7 @@ import (
 	"github.com/LordCodex/promptengine/internal/history"
 	"github.com/LordCodex/promptengine/internal/output"
 	"github.com/LordCodex/promptengine/pkg/manifest"
+	"github.com/LordCodex/promptengine/pkg/rulesources"
 	"github.com/spf13/cobra"
 )
 
@@ -46,6 +47,7 @@ type App struct {
 	Container    *container.Container
 	Manifest     *manifest.Engine
 	ManifestQ    *manifest.QueryEngine
+	RuleSources  *rulesources.Service
 	Discovery    *discovery.Pipeline
 	Context      *contextengine.Engine
 	Workflow     *workflows.Engine
@@ -93,6 +95,7 @@ func Bootstrap(opts BootstrapOptions) (*App, error) {
 		Container:    c,
 		Manifest:     c.Manifest,
 		ManifestQ:    manifest.NewQueryEngine(c.Manifest),
+		RuleSources:  c.RuleSources,
 		Discovery:    c.Discovery,
 		Context:      c.Context,
 		Workflow:     c.Workflow,
