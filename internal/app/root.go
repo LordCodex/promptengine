@@ -70,8 +70,8 @@ func NewRootCommand(app *App) *cobra.Command {
 			if !app.Config.CLI.JSON {
 				fmt.Fprintln(app.Out, version.String())
 				return nil
-				}
-				return app.Renderer.Render(app.Out, versionResult{Version: version.String()})
+			}
+			return app.Renderer.Render(app.Out, versionResult{Version: version.String()})
 		}),
 	})
 	cmd.AddCommand(NewRulesCommand(app))
