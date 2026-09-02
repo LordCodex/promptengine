@@ -9,5 +9,9 @@ import "embed"
 // Project source files and project-specific documentation are never sourced from
 // this filesystem; they remain in the developer's workspace.
 //
-//go:embed playbook-manifest.json core stacks security performance design project bridges checklists workflows decision-guides ai architecture environment legacy guides prompts cli
+// The sources directory contains PromptEngine's authoritative rule-source registry
+// and stack resolution profiles. It does not duplicate the external repositories;
+// it records ownership, pinned refs, inheritance, and resolution policy.
+//
+//go:embed playbook-manifest.json core stacks security performance design project bridges checklists workflows decision-guides ai architecture environment legacy guides prompts cli sources
 var StandardsFS embed.FS

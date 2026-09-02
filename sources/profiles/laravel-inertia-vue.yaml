@@ -1,0 +1,54 @@
+id: laravel-inertia-vue
+version: 1
+
+match:
+  required_technologies:
+    - php
+    - laravel
+    - inertia
+    - vue
+
+inheritance:
+  - universal
+  - php
+  - laravel
+  - vue
+
+presentation:
+  backend_authority: laravel
+  integration: inertia-laravel
+  frontend: vue
+
+required_rule_entrypoints:
+  universal:
+    - RULES.md
+  php:
+    - AGENTS.md
+  laravel:
+    - RULES.md
+    - docs/INERTIA.md
+    - docs/FEATURE-BOUNDARIES.md
+    - docs/COMPONENTS.md
+  vue:
+    - RULES.md
+
+resolution_policy:
+  project_rules_last: true
+  select_task_relevant_rules: true
+  concatenate_entire_repositories: false
+  preserve_promptengine_bridges: true
+  preserve_project_specific_rules: true
+
+precedence:
+  - universal-invariants
+  - php-implementation
+  - laravel-server-authority
+  - inertia-integration
+  - vue-frontend-implementation
+  - project-specific-decisions
+
+notes:
+  - Laravel remains authoritative for authentication, authorization, validation, transactions, persistence, queues, security, and business invariants.
+  - Inertia rules govern the Laravel-to-Vue page, prop, form, navigation, partial reload, and SSR boundary.
+  - Vue rules govern Vue components, Composition API, reactivity, composables, frontend state, and Vue testing conventions.
+  - Vue or Inertia presentation rules must never weaken Laravel server-side security or data-integrity requirements.
