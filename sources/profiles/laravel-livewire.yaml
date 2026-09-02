@@ -1,0 +1,23 @@
+id: laravel-livewire
+version: 1
+match:
+  required_technologies: [php, laravel, livewire]
+inheritance: [universal, php, laravel]
+presentation:
+  backend_authority: laravel
+  integration: livewire
+  frontend: livewire
+required_rule_entrypoints:
+  universal: [RULES.md]
+  php: [AGENTS.md]
+  laravel: [RULES.md, docs/LIVEWIRE.md, docs/FEATURE-BOUNDARIES.md, docs/COMPONENTS.md]
+resolution_policy:
+  project_rules_last: true
+  select_task_relevant_rules: true
+  concatenate_entire_repositories: false
+  preserve_promptengine_bridges: true
+  preserve_project_specific_rules: true
+precedence: [universal-invariants, php-implementation, laravel-server-authority, livewire-presentation, project-specific-decisions]
+notes:
+  - Laravel remains authoritative for authentication, authorization, validation, transactions, persistence, queues, security, and business invariants.
+  - Livewire public state is browser-influenced input and never replaces server authorization.
